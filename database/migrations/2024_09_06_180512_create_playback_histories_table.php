@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('playback_history', function (Blueprint $table) {
+        Schema::create('playback_histories', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('song_id')->constrained('songs')->onDelete('cascade');
