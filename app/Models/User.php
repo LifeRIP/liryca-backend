@@ -44,4 +44,51 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // Relación con Artist
+    public function artist()
+    {
+        return $this->hasOne(Artist::class, 'userID');
+    }
+
+    // Relación con Post
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'userID');
+    }
+
+    // Relación con Like
+    public function likes()
+    {
+        return $this->hasMany(Like::class, 'userID');
+    }
+
+    // Relación con Follow (seguidores y seguidos)
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'followingID', 'followerID');
+    }
+
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'followerID', 'followingID');
+    }
+
+    // Relación con Playlist
+    public function playlists()
+    {
+        return $this->hasMany(Playlist::class, 'userID');
+    }
+
+    // Relación con PlaybackHistory
+    public function playbackHistory()
+    {
+        return $this->hasMany(PlaybackHistory::class, 'userID');
+    }
+
+    // Relación con Comment
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'userID');
+    }
 }
