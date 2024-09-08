@@ -11,7 +11,7 @@ class Album extends Model
 
     protected $primaryKey = 'id'; // Clave primaria
     public $incrementing = true; // Es un campo autoincremental
-    protected $fillable = ['title', 'artist_id', 'release_date', 'description', 'icon']; // Atributos que pueden ser asignados en masa
+    protected $fillable = ['title', 'artist_id', 'release_date', 'description', 'icon', 'is_active']; // Atributos que pueden ser asignados en masa
 
     /**
      * Relación con el modelo Artist.

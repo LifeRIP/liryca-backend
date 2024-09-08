@@ -11,7 +11,7 @@ class Song extends Model
 
     protected $primaryKey = 'id'; // Clave primaria (autoincremental)
     public $incrementing = true; // Es un campo autoincremental
-    protected $fillable = ['title', 'artist_id', 'album_id', 'time', 'genre', 'url_song']; // Atributos que pueden ser asignados en masa
+    protected $fillable = ['title', 'artist_id', 'album_id', 'time', 'genre', 'url_song', 'is_active']; // Atributos que pueden ser asignados en masa
 
     /**
      * Relación con el modelo Artist.

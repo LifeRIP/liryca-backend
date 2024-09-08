@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->enum('privacy', ['public', 'private', 'shared'])->default('private');
             $table->string('image')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

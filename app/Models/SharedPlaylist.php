@@ -11,7 +11,7 @@ class SharedPlaylist extends Model
 
     protected $primaryKey = 'id'; // Clave primaria (autoincremental)
     public $incrementing = true; // Es un campo autoincremental
-    protected $fillable = ['playlist_id', 'user_id']; // Atributos que pueden ser asignados en masa
+    protected $fillable = ['playlist_id', 'user_id', 'is_active']; // Atributos que pueden ser asignados en masa
 
     /**
      * Relación con el modelo Playlist.

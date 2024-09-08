@@ -19,6 +19,7 @@ return new class extends Migration
             $table->time('time');
             $table->string('genre');
             $table->string('url_song');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

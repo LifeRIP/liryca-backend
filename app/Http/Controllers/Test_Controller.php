@@ -24,7 +24,7 @@ class Test_Controller extends Controller
         // Crear un nuevo usuario
         $user = new User();
         // Insertar uuid
-        $user->id = '8f6eea1e-9011-40ec-8ae4-19916125272b';
+        /*$user->id = '8f6eea1e-9011-40ec-8ae4-19916125272b';
         $user->username = 'John Doe';
         $user->birthday = '1990-01-01';
         $user->country = 'United States';
@@ -34,7 +34,7 @@ class Test_Controller extends Controller
         $user->description = 'Hello, I am John Doe';
         $user->register_date = date('Y-m-d H:i:s');
         $user->statement_of_account = 0;
-        /*
+        */
         $user->id = '8f6eea1e-9011-40ec-8ae4-19916127672b';
         $user->username = 'Valentina';
         $user->birthday = '1995-01-01';
@@ -43,7 +43,7 @@ class Test_Controller extends Controller
         $user->password = Hash::make('1234');
         $user->role = 'user';
         $user->description = 'Hello, I am Valentina';
-        $user->register_date = date('Y-m-d H:i:s');*/
+        $user->register_date = date('Y-m-d H:i:s');
 
         // Guardar el usuario en la base de datos
         $user->save();
@@ -65,7 +65,7 @@ class Test_Controller extends Controller
     {
         $album = new Album();
         $album->title = 'Greatest Hits';
-        $album->artist_id = 3; // Usar un ID existente de la tabla `artists`
+        $album->artist_id = 1; // Usar un ID existente de la tabla `artists`
         $album->release_date = '2024-09-01';
         $album->description = 'A collection of the greatest hits.';
         $album->icon = 'greatest_hits.png';
@@ -78,8 +78,8 @@ class Test_Controller extends Controller
     {
         $song = new Song();
         $song->title = 'Hit Song';
-        $song->artist_id = 3; // Usar un ID existente de la tabla `artists`
-        $song->album_id = 2; // Usar un ID existente de la tabla `albums`
+        $song->artist_id = 1; // Usar un ID existente de la tabla `artists`
+        $song->album_id = 1; // Usar un ID existente de la tabla `albums`
         $song->time = '03:30:00';
         $song->genre = 'Pop';
         $song->url_song = 'https://example.com/hit_song.mp3';
@@ -95,7 +95,7 @@ class Test_Controller extends Controller
         $post->content = 'Check out my new song!';
         $post->publishing_date = now()->toDateString();
         $post->image = 'post_image.png';
-        $post->song_id = 1; // Usar un ID existente de la tabla `songs`
+        $post->song_id = 2; // Usar un ID existente de la tabla `songs`
         $post->save();
 
         return Post::all();
@@ -140,7 +140,7 @@ class Test_Controller extends Controller
     {
         $playlistSong = new  PlaylistSong();
         $playlistSong->playlist_id = 1; // Usar un ID existente de la tabla `playlists`
-        $playlistSong->song_id = 1; // Usar un ID existente de la tabla `songs`
+        $playlistSong->song_id = 2; // Usar un ID existente de la tabla `songs`
         $playlistSong->date_added = now()->toDateString();
         $playlistSong->save();
 
@@ -161,7 +161,7 @@ class Test_Controller extends Controller
     {
         $playbackHistory = new  PlaybackHistory();
         $playbackHistory->user_id = '8f6eea1e-9011-40ec-8ae4-19916127672b'; // Usar un UUID existente de la tabla `users`
-        $playbackHistory->song_id = 1; // Usar un ID existente de la tabla `songs`
+        $playbackHistory->song_id = 2; // Usar un ID existente de la tabla `songs`
         $playbackHistory->play_date = now();
         $playbackHistory->save();
 

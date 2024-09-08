@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('song_id')->constrained('songs')->onDelete('cascade');
             $table->date('date_added');
             $table->primary(['playlist_id', 'song_id']);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

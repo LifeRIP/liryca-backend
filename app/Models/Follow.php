@@ -11,7 +11,7 @@ class Follow extends Model
 
     public $incrementing = false; // No tiene un ID propio, ya que la clave es compuesta
     protected $primaryKey = ['follower_id', 'following_id']; // Clave primaria compuesta
-    protected $fillable = ['follower_id', 'following_id', 'follow_up_date'];
+    protected $fillable = ['follower_id', 'following_id', 'follow_up_date', 'is_active'];
 
     /**
      * Relación con el modelo User para el seguidor.

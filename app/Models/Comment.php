@@ -11,7 +11,7 @@ class Comment extends Model
 
     protected $primaryKey = 'id'; // Clave primaria (autoincremental)
     public $incrementing = true; // Es un campo autoincremental
-    protected $fillable = ['user_id', 'post_id', 'content', 'publication_date']; // Atributos que pueden ser asignados en masa
+    protected $fillable = ['user_id', 'post_id', 'content', 'publication_date', 'is_active']; // Atributos que pueden ser asignados en masa
 
     /**
      * Relación con el modelo User.

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignUuid('following_id')->constrained('users')->onDelete('cascade');
             $table->date('follow_up_date');
             $table->primary(['follower_id', 'following_id']);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

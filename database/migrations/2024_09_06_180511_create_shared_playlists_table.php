@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('playlist_id')->constrained('playlists')->onDelete('cascade');
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

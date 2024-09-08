@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('song_id')->constrained('songs')->onDelete('cascade');
             $table->timestamp('play_date');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

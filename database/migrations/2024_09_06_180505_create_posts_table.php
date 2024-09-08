@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('publishing_date');
             $table->string('image')->nullable();
             $table->foreignId('song_id')->constrained('songs')->onDelete('cascade');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
