@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 // Playlist //
 
-Route::post('/playlist/add', 'App\Http\Controllers\PlaylistController@add_playlist');
-Route::get('/playlist/get', 'App\Http\Controllers\PlaylistController@get_playlists');
-Route::put('/playlist/update', 'App\Http\Controllers\PlaylistController@update_playlist');
-Route::delete('/playlist/delete', 'App\Http\Controllers\PlaylistController@delete_playlist');
+Route::post('/add', 'App\Http\Controllers\PlaylistController@add_playlist');
+Route::get('/get', 'App\Http\Controllers\PlaylistController@get_playlists');
+Route::put('/update', 'App\Http\Controllers\PlaylistController@update_playlist');
+Route::delete('/delete', 'App\Http\Controllers\PlaylistController@delete_playlist');
