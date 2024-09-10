@@ -1,6 +1,6 @@
 APP_NAME=Laravel
 APP_ENV=local
-APP_KEY=
+APP_KEY=base64:9gaaYyyLPNitYxYECki/Kjd7944CVAcKLfTNECJUUHA=
 APP_DEBUG=true
 APP_TIMEZONE=UTC
 APP_URL=http://localhost
@@ -22,7 +22,7 @@ LOG_LEVEL=debug
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=liryca_backend
+DB_DATABASE=lirycadb
 DB_USERNAME=root
 DB_PASSWORD=
 
