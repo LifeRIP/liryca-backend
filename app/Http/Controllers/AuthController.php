@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\support\Facades\auth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use App\Models\User;
 
 
@@ -14,7 +16,6 @@ class AuthController extends Controller
     {
         //validate the register request:
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'birthday' => 'required|date',
             'country' => 'required|string|max:255',
@@ -26,57 +27,45 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        //to create an user on the databse:
-        $user = User::create([
-            'name' => $fields['name'],
-            'username' => $fields['username'],
-            'birthday' => $fields['birthday'],
-            'country' => $fields['country'],
-            'email' => $fields['email'],
-            'password' => bcrypt($fields['password']),
-            'role' => 'user', //deafult role assigned to the user
-            'register_date' => now(), //today
-            'statement_of_account' => true //default value
-
-          
-
-        ]);
+        //to create an user on the databse and generate UUID:
+        $user = new User();
+        $user->id = Str::uuid();
+        $user->username = $request->username;
+        $user->birthday = $request->birthday;
+        $user->country = $request->country;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $user->role = 'user';
+        $user->description = '';
+        $user->register_date = date('Y-m-d H:i:s');
+        $user->statement_of_account = 1;
 
         $user->save();
-        return User::all();
 
-        //to create a user token:
-        $token = $user->createToken('myauthtoken')->plainTextToken;
-
-        //this function will associate the user and his token:
-        $response = [
-            'user' => $user,
-            'token' => $token
-        ];
-
-        //return an http response that includes the array with the user and the token:
-        return response($response, 201);
+        return response()->json(['message' => 'User created successfully'], 201);
     }
 
 
     public function login(Request $request)
     {
         //validate the login request:
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string|min:8',
         ]);
-            //verify if the user exists and if it doesn't, show an error message:
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Invalid login credentials'], 401);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
         }
 
-        $user = Auth::user();
-        $token = $user->createToken('auth_token')->plainTextToken;
+        //to check if the user exists on the database:
+        $user = User::where('email', $request->email)->first();
 
-        return response()->json(['message' => 'Login successful', 'token' => $token], 200);
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+
+        return response()->json(['Logged'], 200);
     }
-    
-
-  
 }
