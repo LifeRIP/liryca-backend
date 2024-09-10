@@ -12,7 +12,10 @@ if (!function_exists('loadRoutesFromVersion')) {
         $path = base_path("routes/api/{$version}");
         if (File::exists($path)) {
             foreach (File::allFiles($path) as $file) {
-                require_once $file->getPathname();
+                $filename = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+                Route::prefix($filename)->group(function () use ($file) {
+                    require_once $file->getPathname();
+                });
             }
         }
     }

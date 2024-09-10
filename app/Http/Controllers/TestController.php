@@ -15,16 +15,20 @@ use App\Models\Comment;
 use App\Models\Like;
 use App\Models\Follow;
 use App\Models\Post;
+use App\Models\FollowedPlaylist;
 
 
-class Test_Controller extends Controller
+class TestController extends Controller
 {
-    public function add_user()
+
+    // Método para probar la creación de registros en la base de datos
+
+    public function test()
     {
         // Crear un nuevo usuario
         $user = new User();
-        // Insertar uuid
-        /*$user->id = '8f6eea1e-9011-40ec-8ae4-19916125272b';
+        // Insertar usuario artista
+        $user->id = '8f6eea1e-9011-40ec-8ae4-19916125272b';
         $user->username = 'John Doe';
         $user->birthday = '1990-01-01';
         $user->country = 'United States';
@@ -34,7 +38,10 @@ class Test_Controller extends Controller
         $user->description = 'Hello, I am John Doe';
         $user->register_date = date('Y-m-d H:i:s');
         $user->statement_of_account = 0;
-        */
+        $user->save();
+
+        // Insertar usuario normal
+        $user = new User();
         $user->id = '8f6eea1e-9011-40ec-8ae4-19916127672b';
         $user->username = 'Valentina';
         $user->birthday = '1995-01-01';
@@ -44,25 +51,17 @@ class Test_Controller extends Controller
         $user->role = 'user';
         $user->description = 'Hello, I am Valentina';
         $user->register_date = date('Y-m-d H:i:s');
-
-        // Guardar el usuario en la base de datos
         $user->save();
-        return User::all();
-    }
 
-    public function add_artist()
-    {
+        // Crear un nuevo artista
         $artist = new Artist();
         $artist->user_id = '8f6eea1e-9011-40ec-8ae4-19916125272b'; // Usar un UUID existente de la tabla `users`
         $artist->verified = true;
         $artist->about = 'I am a passionate musician.';
         $artist->save();
 
-        return Artist::all();
-    }
 
-    public function add_album()
-    {
+        // Crear un nuevo álbum
         $album = new Album();
         $album->title = 'Greatest Hits';
         $album->artist_id = 1; // Usar un ID existente de la tabla `artists`
@@ -71,11 +70,9 @@ class Test_Controller extends Controller
         $album->icon = 'greatest_hits.png';
         $album->save();
 
-        return Album::all();
-    }
 
-    public function add_song()
-    {
+
+        // Crear una nueva canción
         $song = new Song();
         $song->title = 'Hit Song';
         $song->artist_id = 1; // Usar un ID existente de la tabla `artists`
@@ -85,45 +82,37 @@ class Test_Controller extends Controller
         $song->url_song = 'https://example.com/hit_song.mp3';
         $song->save();
 
-        return Song::all();
-    }
 
-    public function add_post()
-    {
+
+        // Crear una nueva publicación
         $post = new Post();
         $post->user_id = '8f6eea1e-9011-40ec-8ae4-19916125272b'; // Usar un UUID existente de la tabla `users`
         $post->content = 'Check out my new song!';
         $post->publishing_date = now()->toDateString();
         $post->image = 'post_image.png';
-        $post->song_id = 2; // Usar un ID existente de la tabla `songs`
+        $post->song_id = 1; // Usar un ID existente de la tabla `songs`
         $post->save();
 
-        return Post::all();
-    }
 
-    public function add_like()
-    {
+
+        // Crear un nuevo like
         $like = new  Like();
         $like->user_id = '8f6eea1e-9011-40ec-8ae4-19916127672b'; // Usar un UUID existente de la tabla `users`
         $like->post_id = 1; // Usar un ID existente de la tabla `posts`
         $like->save();
 
-        return  Like::all();
-    }
 
-    public function add_follow()
-    {
+
+        // Crear un nuevo follow
         $follow = new Follow();
         $follow->follower_id = '8f6eea1e-9011-40ec-8ae4-19916125272b'; // Usar un UUID existente de la tabla `users`
         $follow->following_id = '8f6eea1e-9011-40ec-8ae4-19916127672b'; // Usar otro UUID existente de la tabla `users`
         $follow->follow_up_date = now()->toDateString();
         $follow->save();
 
-        return Follow::all();
-    }
 
-    public function add_playlist()
-    {
+
+        // Crear una nueva lista de reproducción
         $playlist = new Playlist();
         $playlist->name = 'My Favorite Songs';
         $playlist->user_id = '8f6eea1e-9011-40ec-8ae4-19916125272b'; // Usar un UUID existente de la tabla `users`
@@ -133,43 +122,35 @@ class Test_Controller extends Controller
         $playlist->image = 'playlist_image.png';
         $playlist->save();
 
-        return Playlist::all();
-    }
 
-    public function add_playlist_song()
-    {
+
+        // Crear una nueva canción en una lista de reproducción
         $playlistSong = new  PlaylistSong();
         $playlistSong->playlist_id = 1; // Usar un ID existente de la tabla `playlists`
-        $playlistSong->song_id = 2; // Usar un ID existente de la tabla `songs`
+        $playlistSong->song_id = 1; // Usar un ID existente de la tabla `songs`
         $playlistSong->date_added = now()->toDateString();
         $playlistSong->save();
 
-        return  PlaylistSong::all();
-    }
 
-    public function add_shared_playlist()
-    {
+
+        // Crear una lista de reproducción compartida
         $sharedPlaylist = new  SharedPlaylist();
         $sharedPlaylist->playlist_id = 1; // Usar un ID existente de la tabla `playlists`
         $sharedPlaylist->user_id = '8f6eea1e-9011-40ec-8ae4-19916127672b'; // Usar un UUID existente de la tabla `users`
         $sharedPlaylist->save();
 
-        return  SharedPlaylist::all();
-    }
 
-    public function add_playback_history()
-    {
+
+        // Crear un nuevo historial de reproducción
         $playbackHistory = new  PlaybackHistory();
         $playbackHistory->user_id = '8f6eea1e-9011-40ec-8ae4-19916127672b'; // Usar un UUID existente de la tabla `users`
-        $playbackHistory->song_id = 2; // Usar un ID existente de la tabla `songs`
+        $playbackHistory->song_id = 1; // Usar un ID existente de la tabla `songs`
         $playbackHistory->play_date = now();
         $playbackHistory->save();
 
-        return  PlaybackHistory::all();
-    }
 
-    public function add_comment()
-    {
+
+        // Crear un nuevo comentario
         $comment = new  Comment();
         $comment->user_id = '8f6eea1e-9011-40ec-8ae4-19916127672b'; // Usar un UUID existente de la tabla `users`
         $comment->post_id = 1; // Usar un ID existente de la tabla `posts`
@@ -177,6 +158,17 @@ class Test_Controller extends Controller
         $comment->publication_date = now();
         $comment->save();
 
-        return Comment::all();
+
+
+        //Crear un nuevo seguidor a una lista
+        $followedPlaylist = new FollowedPlaylist();
+        $followedPlaylist->user_id = '8f6eea1e-9011-40ec-8ae4-19916127672b'; // Usar un UUID existente de la tabla `users`
+        $followedPlaylist->playlist_id = 1; // Usar un ID existente de la tabla `playlists`
+        $followedPlaylist->follow_date = now();
+        $followedPlaylist->save();
+
+        return response()->json([
+            'message' => 'Test data created successfully' . $user . $artist . $album . $song . $post . $like . $follow . $playlist . $playlistSong . $sharedPlaylist . $playbackHistory . $comment . $followedPlaylist
+        ], 201);
     }
 }
