@@ -11,15 +11,24 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    public $incrementing = false; // No usar ID incremental
+    protected $keyType = 'string'; // Tipo de la clave primaria como string
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'username',
+        'birthday',
+        'country',
         'email',
         'password',
+        'role',
+        'description',
+        'register_date',
+        'statement_of_account',
     ];
 
     /**
@@ -42,6 +51,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'register_date' => 'datetime',
+            'statement_of_account' => 'boolean',
+            'birthday' => 'date',
         ];
     }
 
