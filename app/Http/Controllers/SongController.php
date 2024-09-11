@@ -17,8 +17,18 @@ class SongController extends Controller
      */
     public function index(): JsonResponse
     {
-        $songs = Song::all();
-        return response()->json($songs);
+        try {
+            $songs = Song::all();
+            return response()->json([
+                'success' => true,
+                'data' => $songs
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -76,8 +86,26 @@ class SongController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $song = Song::find($id);
-        return response()->json($song);
+        try {
+            // Verificar si la canción existe
+            $song = Song::find($id);
+            if (!$song) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Song not found'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $song
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
