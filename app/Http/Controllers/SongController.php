@@ -96,6 +96,7 @@ class SongController extends Controller
                 ], 404);
             }
 
+            // Mostrar la canción
             return response()->json([
                 'success' => true,
                 'data' => $song
@@ -125,14 +126,6 @@ class SongController extends Controller
                 'is_active' => 'boolean',
             ]);
 
-            // Comprobar si la validación falla
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 400);
-            }
-
             // Verificar si la canción existe
             $song = Song::find($id);
             if (!$song) {
@@ -140,6 +133,14 @@ class SongController extends Controller
                     'success' => false,
                     'message' => 'Song not found'
                 ], 404);
+            }
+
+            // Comprobar si la validación falla
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 400);
             }
 
             // Actualizar la canción

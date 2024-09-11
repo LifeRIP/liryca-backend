@@ -52,6 +52,7 @@ class PostController extends Controller
                 ], 400);
             }
 
+            // Crear un nuevo post
             $post = Post::create($request->all());
             return response()->json([
                 'success' => true,
@@ -71,6 +72,7 @@ class PostController extends Controller
     public function show(string $id): JsonResponse
     {
         try {
+            // Verificar si el post existe
             $post = Post::find($id);
             if (!$post) {
                 return response()->json([
@@ -78,6 +80,8 @@ class PostController extends Controller
                     'message' => 'Post not found'
                 ], 404);
             }
+
+            // Mostrar el post
             return response()->json([
                 'success' => true,
                 'data' => $post
@@ -88,8 +92,6 @@ class PostController extends Controller
                 'message' => $e->getMessage()
             ], 400);
         }
-        $post = Post::find($id);
-        return response()->json($post);
     }
 
     /**
@@ -108,14 +110,6 @@ class PostController extends Controller
                 'is_active' => 'boolean',
             ]);
 
-            // Comprobar si la validación falla
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 400);
-            }
-
             // Verificar si el post existe
             $post = Post::find($id);
             if (!$post) {
@@ -123,6 +117,14 @@ class PostController extends Controller
                     'success' => false,
                     'message' => 'Post not found'
                 ], 404);
+            }
+
+            // Comprobar si la validación falla
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 400);
             }
 
             // Actualizar el post
@@ -145,6 +147,7 @@ class PostController extends Controller
     public function destroy(string $id): JsonResponse
     {
         try {
+            // Verificar si el post existe
             $post = Post::find($id);
             if (!$post) {
                 return response()->json([
@@ -152,6 +155,8 @@ class PostController extends Controller
                     'message' => 'Post not found'
                 ], 404);
             }
+
+            // Eliminar el post
             $post->delete();
             return response()->json([
                 'success' => true,
