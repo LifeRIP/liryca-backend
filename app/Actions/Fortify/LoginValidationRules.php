@@ -4,7 +4,7 @@ namespace App\Actions\Fortify;
 
 use Illuminate\Validation\Rules\Password;
 
-trait PasswordValidationRules
+trait LoginValidationRules
 {
     /**
      * Get the validation rules used to validate passwords.
@@ -14,5 +14,15 @@ trait PasswordValidationRules
     protected function passwordRules(): array
     {
         return ['required', 'string', Password::default(), 'confirmed'];
+    }
+
+    /**
+     * Get the validation rules that apply to the email field.
+     *
+     * @return array
+     */
+    protected function emailRules()
+    {
+        return ['required', 'string', 'email', 'max:255'];
     }
 }
