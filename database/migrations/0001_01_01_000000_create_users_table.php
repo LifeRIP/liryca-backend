@@ -24,6 +24,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->timestamp('register_date')->useCurrent();
             $table->boolean('statement_of_account')->default(true);
+            $table->string('profile_picture')->nullable();
+            $table->string('profile_banner')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
