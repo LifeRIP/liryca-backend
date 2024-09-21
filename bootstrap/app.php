@@ -12,9 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // TODO: Quitar después de configurar Sanctum
         $middleware->validateCsrfTokens(except: [
-            '/*', // Evitar CSRF en todas las rutas
+            //'/*', // Evitar CSRF en todas las rutas
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
