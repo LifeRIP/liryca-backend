@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('follows', function (Blueprint $table) {
             $table->foreignUuid('follower_id')->constrained('users')->onDelete('cascade');
-            $table->foreignUuid('following_id')->constrained('users')->onDelete('cascade');
-            $table->date('follow_up_date');
-            $table->primary(['follower_id', 'following_id']);
+            $table->foreignUuid('followed_id')->constrained('users')->onDelete('cascade');
+            $table->primary(['follower_id', 'followed_id']);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -30,7 +30,7 @@ class TestController extends Controller
         $user->birthday = '1990-01-01';
         $user->country = 'United States';
         $user->email = 'john.doe@gmail.com';
-        $user->password = Hash::make('1234');
+        $user->password = Hash::make('12345678');
         $user->role = 'artist';
         $user->description = 'Hello, I am John Doe';
         $user->register_date = date('Y-m-d H:i:s');
@@ -94,8 +94,7 @@ class TestController extends Controller
         // Crear un nuevo follow
         $follow = new Follow();
         $follow->follower_id = '8f6eea1e-9011-40ec-8ae4-19916127672b'; // Usar un UUID existente de la tabla `users`
-        $follow->following_id = '264e1f6c-52ec-48ea-bfb1-13100f8b5cf3'; // Usar otro UUID existente de la tabla `users`
-        $follow->follow_up_date = now()->toDateString();
+        $follow->followed_id = '264e1f6c-52ec-48ea-bfb1-13100f8b5cf3'; // Usar otro UUID existente de la tabla `users`
         $follow->save();
 
         // Crear una nueva lista de reproducción
