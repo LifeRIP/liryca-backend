@@ -51,6 +51,9 @@ class AuthController extends Controller
             'statement_of_account' => 1,
         ]);
 
+        // Enviar correo de verificación
+        $user->sendEmailVerificationNotification();
+
         // Crear un token de acceso para el usuario
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -65,7 +68,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        //validate the login request:
+        // Validar la petición de inicio de sesión
         $validator = Validator::make($request->all(), [
             'email' => [
                 'required',
@@ -84,7 +87,7 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        //to check if the user exists on the database:
+        // Autenticar al usuario
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -104,12 +107,40 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Revoke the token that was used to authenticate the current request
+        // Revocar el token de acceso actual del usuario
         $request->user()->currentAccessToken()->delete();
 
-        // Optionally, you can also revoke all tokens for the user
+        // Opcional: Revocar todos los tokens de acceso del usuario
         // $request->user()->tokens()->delete();
 
-        return response()->json(['message' => 'Logged out successfully'], 200);
+        return response()->json(['message' => 'Logged out successfully']);
+    }
+
+    public function sendEmail(Request $request)
+    {
+        // Verificar si el usuario ya verificó su correo electrónico
+        if ($request->user()->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified'], 400);
+        }
+
+        // Enviar correo de verificación
+        $request->user()->sendEmailVerificationNotification();
+
+        return response()->json(['message' => 'Email verification link sent']);
+    }
+
+    public function verifyEmail(Request $request)
+    {
+        // Verificar si el usuario ya verificó su correo electrónico
+        if ($request->user()->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified'], 400);
+        }
+
+        // Verificar el correo electrónico del usuario
+        if ($request->user()->markEmailAsVerified()) {
+            return response()->json(['message' => 'Email verified']);
+        }
+
+        return response()->json(['message' => 'Invalid verification link'], 400);
     }
 }
