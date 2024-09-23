@@ -84,6 +84,11 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
+        //verificar que email y contr no sean nulos:
+        if (is_null($request->email) || is_null($request->password)) {
+                return response()->json(['message' => 'Email and password are required'], 400);
+        }
+
         //to check if the user exists on the database:
         $user = User::where('email', $request->email)->first();
 
@@ -112,4 +117,75 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Logged out successfully'], 200);
     }
+
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+    
+    // Método para manejar la respuesta de Google
+    public function handleGoogleCallback()
+    {
+        $user = Socialite::driver('google')->stateless()->user();
+    
+        // Lógica para manejar el usuario autenticado
+        // Por ejemplo, buscar o crear el usuario en la base de datos
+        $existingUser = User::where('email', $user->getEmail())->first();
+    
+        if ($existingUser) {
+            Auth::login($existingUser);
+        } else {
+            $newUser = User::create([
+                'username' => $user->getName(),
+                'email' => $user->getEmail(),
+                'password' => Hash::make(Str::random(24)), // Generar una contraseña aleatoria
+            ]);
+    
+            Auth::login($newUser);
+        }
+    
+        return redirect('/home'); // Redirigir a la página de inicio o donde desees
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+public function logout(Request $request)
+    {
+        //laravel php method to logout an user:
+
+        if (Auth::check()){ //it doesn't care what type of autentication are you using, the method will validate it.
+
+            Auth::logout();
+
+            $request->session()->invalidate();
+
+
+            return response()->json(['message' => 'Logged out'], 200);
+
+        } else{
+
+            
+            return response()->json(['message' => 'No one is logged'], 400);
+        }
+       
+    }    
+}
+*/
