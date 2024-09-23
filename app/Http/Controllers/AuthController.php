@@ -129,8 +129,7 @@ class AuthController extends Controller
     {
         $user = Socialite::driver('google')->stateless()->user();
     
-        // Lógica para manejar el usuario autenticado
-        // Por ejemplo, buscar o crear el usuario en la base de datos
+        // to check if the user exists on the database:
         $existingUser = User::where('email', $user->getEmail())->first();
     
         if ($existingUser) {
@@ -139,27 +138,16 @@ class AuthController extends Controller
             $newUser = User::create([
                 'username' => $user->getName(),
                 'email' => $user->getEmail(),
-                'password' => Hash::make(Str::random(24)), // Generar una contraseña aleatoria
+                'password' => Hash::make(Str::random(24)), 
             ]);
     
             Auth::login($newUser);
         }
     
-        return redirect('/home'); // Redirigir a la página de inicio o donde desees
+        return redirect('/home'); // Redirect to another page
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
