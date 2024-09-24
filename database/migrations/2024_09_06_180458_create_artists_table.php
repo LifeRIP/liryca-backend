@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
+        Schema::create('artists', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->boolean('verified')->default(false);
+            $table->text('about')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('artists');
     }
 };
