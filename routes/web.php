@@ -11,5 +11,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-require __DIR__.'/googleSSO.php';
+require __DIR__.'/api/v1/googleSSO.php';
 
