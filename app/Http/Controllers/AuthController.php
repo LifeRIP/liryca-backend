@@ -143,4 +143,32 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Invalid verification link'], 400);
     }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    // Método para manejar la respuesta de Google
+    public function handleGoogleCallback()
+    {
+        $user = Socialite::driver('google')->stateless()->user();
+
+        // to check if the user exists on the database:
+        $existingUser = User::where('email', $user->getEmail())->first();
+
+        if ($existingUser) {
+            Auth::login($existingUser);
+        } else {
+            $newUser = User::create([
+                'username' => $user->getName(),
+                'email' => $user->getEmail(),
+                'password' => Hash::make(Str::random(24)),
+            ]);
+
+            Auth::login($newUser);
+        }
+
+        return redirect('/home'); // Redirect to another page
+    }
 }
