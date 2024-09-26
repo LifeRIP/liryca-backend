@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -152,23 +153,20 @@ class AuthController extends Controller
     // Método para manejar la respuesta de Google
     public function handleGoogleCallback()
     {
-        $user = Socialite::driver('google')->stateless()->user();
+        #$user_google = Socialite::driver("google")->stateless()->user(); 
+        $user_google = Socialite::driver("google")->user();
 
-        // to check if the user exists on the database:
-        $existingUser = User::where('email', $user->getEmail())->first();
+        $user = user::updateOrCreate([
+            'google_id' => $user_google->id, //create a new field on users table called "googel_id"
+        ], [
+            'name' => $user_google->name,
+            'email' => $user_google->email,
+            'username' => $user_google->nickname ?? $user_google->name,
+            'birthday' => '2000-01-01', //default values for the fields
+            'country' => 'Unknown', //default values for the fields
+        ]);
 
-        if ($existingUser) {
-            Auth::login($existingUser);
-        } else {
-            $newUser = User::create([
-                'username' => $user->getName(),
-                'email' => $user->getEmail(),
-                'password' => Hash::make(Str::random(24)),
-            ]);
-
-            Auth::login($newUser);
-        }
-
-        return redirect('/home'); // Redirect to another page
+        Auth::login($user, true); //login the user
+        return redirect('/dashboard'); //redirect to another page
     }
 }

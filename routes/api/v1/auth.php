@@ -13,3 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/verification-notification', [AuthController::class, 'sendEmail'])->name('verification.send');
     Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 });
+
+// Rutas para el inicio de sesión con Google
+Route::get('/login-google', [AuthController::class, 'redirectToGoogle']);
+Route::get('/google-callback', [AuthController::class, 'handleGoogleCallback']);
