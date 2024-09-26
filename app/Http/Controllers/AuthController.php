@@ -82,6 +82,7 @@ class AuthController extends Controller
                 'string',
                 Password::default(),
             ],
+            'remember' => ['boolean'],
         ]);
 
         if ($validator->fails()) {
@@ -95,6 +96,11 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
+        // Recordar el inicio de sesión del usuario
+        $remember = $request->remember ?? false;
+
+        Auth::login($user, $remember);
+
         // Crear un token de acceso para el usuario
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -102,7 +108,8 @@ class AuthController extends Controller
             'message' => 'User logged in',
             'user' => $user,
             'token' => $token,
-            'token_type' => 'Bearer'
+            'token_type' => 'Bearer',
+            'remember' => $remember
         ], 201);
     }
 
