@@ -119,7 +119,7 @@ class AuthController extends Controller
     }
 
 
-    public function redirectToGoogle()
+    /*public function redirectToGoogle()
     {
         return Socialite::driver('google')->redirect();
     }
@@ -144,8 +144,13 @@ class AuthController extends Controller
             Auth::login($newUser);
         }
     
+<<<<<<< Updated upstream
         return redirect('/home'); // Redirect to another page
     }
+=======
+        return redirect('/home'); // Redirigir a la página de inicio o donde desees
+    }*/
+>>>>>>> Stashed changes
 
 }
 
