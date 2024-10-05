@@ -38,7 +38,6 @@ class PostController extends Controller
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required|exists:users,id',
                 'content' => 'required|string',
-                'publishing_date' => 'required|date',
                 'image' => 'nullable|string',
                 'song_id' => 'required|exists:songs,id',
                 'is_active' => 'required|boolean',
@@ -104,7 +103,6 @@ class PostController extends Controller
             $validator = Validator::make($request->all(), [
                 'user_id' => 'exists:users,id',
                 'content' => 'string',
-                'publishing_date' => 'date',
                 'image' => 'nullable|string',
                 'song_id' => 'exists:songs,id',
                 'is_active' => 'boolean',

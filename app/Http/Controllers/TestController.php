@@ -69,7 +69,7 @@ class TestController extends Controller
         $song->title = 'Hit Song';
         $song->artist_id = $artist->id; // Usar un ID existente de la tabla `artists`
         $song->album_id = $album->id; // Usar un ID existente de la tabla `albums`
-        $song->time = '03:30:00';
+        $song->time = '00:03:30';
         $song->genre = 'Pop';
         $song->url_song = 'https://example.com/hit_song.mp3';
         $song->save();
@@ -78,7 +78,6 @@ class TestController extends Controller
         $post = new Post();
         $post->user_id = '264e1f6c-52ec-48ea-bfb1-13100f8b5cf3'; // Usar un UUID existente de la tabla `users`
         $post->content = 'Check out my new song!';
-        $post->publishing_date = now()->toDateString();
         $post->image = 'post_image.png';
         $post->song_id = $song->id; // Usar un ID existente de la tabla `songs`
         $post->save();
