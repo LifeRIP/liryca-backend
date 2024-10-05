@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ArtistSeeder::class,
             AlbumSeeder::class,
             SongSeeder::class,
+            PostSeeder::class,
         ]);
     }
 }
