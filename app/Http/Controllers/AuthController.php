@@ -48,8 +48,7 @@ class AuthController extends Controller
             'birthday' => $request->birthday,
             'role' => 'user',
             'description' => '',
-            'register_date' => date('Y-m-d H:i:s'),
-            'statement_of_account' => 1,
+            'is_active' => true,
         ]);
 
         // Enviar correo de verificación

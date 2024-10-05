@@ -31,8 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'google_id',
         'role',
         'description',
-        'register_date',
-        'statement_of_account',
+        'is_active',
     ];
 
     /**
@@ -55,8 +54,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'register_date' => 'datetime',
-            'statement_of_account' => 'boolean',
+            'is_active' => 'boolean',
             'birthday' => 'date',
         ];
     }

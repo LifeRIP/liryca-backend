@@ -83,8 +83,7 @@ class UserController extends Controller
                 'password' => 'string|min:8|confirmed',
                 'role' => 'in:admin,user,artist',
                 'description' => 'nullable|string',
-                'register_date' => 'date',
-                'statement_of_account' => 'boolean',
+                'is_active' => 'boolean',
             ]);
 
             // Verificar si el usuario existe

@@ -33,8 +33,7 @@ class TestController extends Controller
         $user->password = Hash::make('12345678');
         $user->role = 'artist';
         $user->description = 'Hello, I am John Doe';
-        $user->register_date = date('Y-m-d H:i:s');
-        $user->statement_of_account = 0;
+        $user->is_active = 0;
         $user->save();
 
         // Insertar usuario normal
@@ -47,7 +46,6 @@ class TestController extends Controller
         $user->password = Hash::make('1234');
         $user->role = 'user';
         $user->description = 'Hello, I am Valentina';
-        $user->register_date = date('Y-m-d H:i:s');
         $user->save();
 
         // Crear un nuevo artista

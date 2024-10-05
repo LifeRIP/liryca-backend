@@ -23,8 +23,7 @@ return new class extends Migration
             $table->string('google_id')->nullable();
             $table->enum('role', ['admin', 'user', 'artist'])->default('user');
             $table->text('description')->nullable();
-            $table->timestamp('register_date')->useCurrent();
-            $table->boolean('statement_of_account')->default(true);
+            $table->boolean('is_active')->default(true);
             $table->string('profile_picture')->nullable();
             $table->string('profile_banner')->nullable();
             $table->rememberToken();
