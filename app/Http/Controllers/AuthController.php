@@ -46,9 +46,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'country' => $request->country,
             'birthday' => $request->birthday,
-            'role' => 'user',
             'description' => '',
-            'is_active' => true,
         ]);
 
         // Enviar correo de verificación
