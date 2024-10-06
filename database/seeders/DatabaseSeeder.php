@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
             PostSeeder::class,
             LikeSeeder::class,
             FollowSeeder::class,
+            PlaylistSeeder::class,
+            SharedPlaylistSeeder::class,
         ]);
     }
 }
