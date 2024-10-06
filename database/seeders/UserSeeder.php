@@ -40,5 +40,30 @@ class UserSeeder extends Seeder
             'profile_picture' => 'https://i.scdn.co/image/ab676161000051741b5902b400971bc07d3473dd',
             'profile_banner' => 'https://www.infobae.com/resizer/v2/ARBKXYU6NRDZZCFBAUUGBAK4QY.jpg?auth=7dbd6d124f15e1558eb1bc52d6094b6a07fc831848047c1bf1c29d09ea7f550a&smart=true&width=1200&height=675&quality=85',
         ]);
+
+        // Crear un nuevo usuario
+        User::create([
+            'id' => '741944d5-4f2e-4533-af0d-1155ededce3a',
+            'username' => 'Valentina',
+            'birthday' => '2001-01-01',
+            'country' => 'Colombia',
+            'email' => 'valentina@gmail.com',
+            'password' => Hash::make('12345678'),
+            'description' => 'Hello, I am Valentina',
+            'profile_picture' => 'https://i.ibb.co/HCR6qqF/a.png',
+            'profile_banner' => 'https://tinkercademy.com/wp-content/uploads/2017/04/Generic-Banner-07-Web-App-Developer.png',
+        ]);
+
+        // Crear un nuevo administrador
+        User::create([
+            'id' => '9c87a67f-e553-4e5f-8c7b-dcbd8c39c27a',
+            'username' => 'Admin',
+            'birthday' => '1990-01-01',
+            'country' => 'United States',
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('12345678'),
+            'role' => 'admin',
+            'description' => 'Hello, I am Admin',
+        ]);
     }
 }
