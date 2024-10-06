@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Follow;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,6 +22,7 @@ class DatabaseSeeder extends Seeder
             SongSeeder::class,
             PostSeeder::class,
             LikeSeeder::class,
+            FollowSeeder::class,
         ]);
     }
 }
