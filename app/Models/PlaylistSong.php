@@ -11,7 +11,7 @@ class PlaylistSong extends Model
 
     public $incrementing = false; // No tiene un ID propio, ya que la clave es compuesta
     protected $primaryKey = ['playlist_id', 'song_id']; // Clave primaria compuesta
-    protected $fillable = ['playlist_id', 'song_id', 'date_added', 'is_active']; // Atributos que pueden ser asignados en masa
+    protected $fillable = ['playlist_id', 'song_id', 'is_active']; // Atributos que pueden ser asignados en masa
 
     /**
      * Relación con el modelo Playlist.

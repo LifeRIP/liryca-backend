@@ -107,7 +107,6 @@ class TestController extends Controller
         $playlistSong = new PlaylistSong();
         $playlistSong->playlist_id = $playlist->id; // Usar un ID existente de la tabla `playlists`
         $playlistSong->song_id = $song->id; // Usar un ID existente de la tabla `songs`
-        $playlistSong->date_added = now()->toDateString();
         $playlistSong->save();
 
         // Crear una lista de reproducción compartida
