@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Comment;
 use App\Models\Follow;
 use App\Models\PlaylistSong;
 use App\Models\User;
@@ -22,6 +23,7 @@ class DatabaseSeeder extends Seeder
             AlbumSeeder::class,
             SongSeeder::class,
             PostSeeder::class,
+            CommentSeeder::class,
             LikeSeeder::class,
             FollowSeeder::class,
             PlaylistSeeder::class,
