@@ -9,7 +9,7 @@ class FollowedPlaylist extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'playlist_id', 'follow_date'];
+    protected $fillable = ['user_id', 'playlist_id'];
 
     /**
      * Relación con el modelo User.

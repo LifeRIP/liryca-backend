@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->text('content');
-            $table->date('publishing_date');
             $table->string('image')->nullable();
             $table->foreignId('song_id')->constrained('songs')->onDelete('cascade');
             $table->boolean('is_active')->default(true);

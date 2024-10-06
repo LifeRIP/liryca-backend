@@ -11,7 +11,7 @@ class Post extends Model
 
     protected $primaryKey = 'id'; // Clave primaria (autoincremental)
     public $incrementing = true; // Es un campo autoincremental
-    protected $fillable = ['user_id', 'content', 'publishing_date', 'image', 'song_id', 'is_active']; // Atributos que pueden ser asignados en masa
+    protected $fillable = ['user_id', 'content', 'image', 'song_id', 'is_active']; // Atributos que pueden ser asignados en masa
 
     /**
      * Relación con el modelo User.

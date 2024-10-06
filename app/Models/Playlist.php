@@ -11,7 +11,7 @@ class Playlist extends Model
 
     protected $primaryKey = 'id'; // Clave primaria (autoincremental)
     public $incrementing = true; // Es un campo autoincremental
-    protected $fillable = ['name', 'user_id', 'release_date', 'description', 'privacy', 'image', 'is_active']; // Atributos que pueden ser asignados en masa
+    protected $fillable = ['name', 'user_id', 'description', 'privacy', 'image', 'is_active']; // Atributos que pueden ser asignados en masa
 
     /**
      * Relación con el modelo User.
@@ -24,12 +24,11 @@ class Playlist extends Model
 
     /**
      * Relación con el modelo Song.
-     * Una playlist puede tener muchas canciones a través de la tabla pivot SongInPlaylist.
+     * Una playlist puede tener muchas canciones a través de la tabla pivot PlaylistSong.
      */
     public function songs()
     {
-        return $this->belongsToMany(Song::class, 'song_in_playlists', 'playlist_id', 'song_id')
-            ->withPivot('date_added');
+        return $this->belongsToMany(Song::class, 'playlist_songs', 'playlist_id', 'song_id');
     }
 
     /**
