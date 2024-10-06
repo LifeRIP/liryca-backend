@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Follow;
+use App\Models\PlaylistSong;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -24,7 +25,9 @@ class DatabaseSeeder extends Seeder
             LikeSeeder::class,
             FollowSeeder::class,
             PlaylistSeeder::class,
+            PlaylistSongSeeder::class,
             SharedPlaylistSeeder::class,
+            PlaybackHistorySeeder::class,
         ]);
     }
 }
