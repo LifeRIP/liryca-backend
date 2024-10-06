@@ -41,7 +41,6 @@ class PlaylistController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'user_id' => 'required',
-            'release_date' => 'required',
             'description' => 'required',
             'privacy' => 'required',
             'image' => 'required',
@@ -68,7 +67,6 @@ class PlaylistController extends Controller
         $playlist = new Playlist();
         $playlist->name = $request->name;
         $playlist->user_id = $request->user_id;
-        $playlist->release_date = $request->release_date;
         $playlist->description = $request->description;
         $playlist->privacy = $request->privacy;
         $playlist->image = $request->image;

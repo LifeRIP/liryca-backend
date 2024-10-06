@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
-            $table->date('release_date');
             $table->text('description')->nullable();
             $table->enum('privacy', ['public', 'private', 'shared'])->default('private');
             $table->string('image')->nullable();

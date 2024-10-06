@@ -17,8 +17,7 @@ class PlaybackHistoryController extends Controller
     {
         //Validar los datos
         $validator = Validator::make($request->all(), [
-            'song_id' => 'required|exists:songs,id',
-            'play_date' => 'required|date'
+            'song_id' => 'required|exists:songs,id'
         ]);
 
         if ($validator->fails()) {
@@ -29,7 +28,6 @@ class PlaybackHistoryController extends Controller
         $playbackHistory = new PlaybackHistory();
         $playbackHistory->user_id = $request->user()->id;
         $playbackHistory->song_id = $request->song_id;
-        $playbackHistory->play_date = $request->play_date;
         $playbackHistory->save();
 
         return response()->json($playbackHistory, 201);
@@ -42,7 +40,7 @@ class PlaybackHistoryController extends Controller
     {
         //Mostrar historial de reproducciones de la mas reciente a la mas antigua
         $playbackHistory = PlaybackHistory::where('user_id', $request->user()->id)
-            ->orderBy('play_date', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json($playbackHistory, 200);

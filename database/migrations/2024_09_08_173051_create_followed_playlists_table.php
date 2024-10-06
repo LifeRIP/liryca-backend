@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id(); // FollowedPlaylistID (PK)
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade'); // UsuarioID (FK)
             $table->foreignId('playlist_id')->constrained('playlists')->onDelete('cascade'); // PlaylistID (FK)
-            $table->date('follow_date'); // FechaSeguimiento
             $table->boolean('is_active')->default(true); // Activo
             $table->timestamps();
         });
