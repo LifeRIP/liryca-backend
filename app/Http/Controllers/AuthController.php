@@ -196,9 +196,9 @@ class AuthController extends Controller
             $user = User::create([
                 'name' => $user_facebook->name,
                 'email' => $user_facebook->email,
+                'username' => $user_facebook->nickname ?? $user_facebook->name,
                 'password' => bcrypt(Str::random(16)), // a default password on password field
                 'facebook_id' => $user_facebook->id,
-                'username' => $username,
                 'birthday' => '2000-01-01',
                 'country' => 'Unknown',
             ]);
