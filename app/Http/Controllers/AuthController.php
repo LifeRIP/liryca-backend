@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -157,8 +158,9 @@ class AuthController extends Controller
     // Método para manejar la respuesta de Google
     public function handleGoogleCallback()
     {
-        #$user_google = Socialite::driver("google")->stateless()->user(); 
-        $user_google = Socialite::driver("google")->user();
+        $user_google = Socialite::driver("google")->stateless()->user(); 
+        //dd($user_google);
+        //$user_google = Socialite::driver("google")->user();
 
         $user = user::updateOrCreate([
             'google_id' => $user_google->id, //create a new field on users table called "googel_id"
@@ -173,4 +175,55 @@ class AuthController extends Controller
         Auth::login($user, true); //login the user
         return redirect('/dashboard'); //redirect to another page
     }
+
+
+
+    //metodo para redirigir a facebook auth
+    public function redirectToFacebook()
+    {
+        return Socialite::driver('facebook')->redirect();
+    }
+
+    
+
+    public function handleFacebookCallback()
+    {
+        
+        $user_facebook = Socialite::driver("facebook")->stateless()->user();
+
+        $user = User::where('facebook_id', $user_facebook->id)->orWhere('email', $user_facebook->email)->first(); //verifica si el facebook_id o email existen en la base de datos
+
+            $user = User::create([
+                'name' => $user_facebook->name,
+                'email' => $user_facebook->email,
+                'username' => $user_facebook->nickname ?? $user_facebook->name,
+                'password' => bcrypt(Str::random(16)), // a default password on password field
+                'facebook_id' => $user_facebook->id,
+                'birthday' => '2000-01-01',
+                'country' => 'Unknown',
+            ]);
+         
+            $user = user::updateOrCreate([
+                'facebook_id' => $user_facebook->id, //create a new field on users table called "googel_id"
+            ], [
+                //'name' => $user_facebook->name,
+                'email' => $user_facebook->email,
+                'username' => $user_facebook->nickname ?? $user_facebook->name,
+                'birthday' => '2000-01-01', //default values for the fields
+                'country' => 'Unknown', //default values for the fields
+             ]);
+            
+
+        Auth::login($user, true); //login the user
+        return redirect('/dashboard'); //redirect to another page
+        
+    }
+            
+    
+
+    
+
 }
+
+
+
