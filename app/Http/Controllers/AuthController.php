@@ -9,7 +9,9 @@ use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rules\Password as PasswordRule;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
@@ -33,7 +35,7 @@ class AuthController extends Controller
             ],
             'country' => ['required', 'string', 'max:255'],
             'birthday' => ['required', 'date'],
-            'password' => ['required', 'string', Password::default(), 'confirmed'],
+            'password' => ['required', 'string', PasswordRule::default(), 'confirmed'],
         ]);
 
         if ($validator->fails()) {
@@ -78,7 +80,7 @@ class AuthController extends Controller
             'password' => [
                 'required',
                 'string',
-                Password::default(),
+                PasswordRule::default(),
             ],
             'remember' => ['boolean'],
         ]);
@@ -97,7 +99,7 @@ class AuthController extends Controller
         // Recordar el inicio de sesión del usuario
         $remember = $request->remember ?? false;
 
-        Auth::login($user, $remember);
+        Auth::login($user, $remember); #$remember);
 
         // Crear un token de acceso para el usuario
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -149,6 +151,63 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Invalid verification link'], 400);
     }
+
+
+
+    public function sendEmailRecovery(Request $request)
+    {
+        
+        $request->validate(['email' => 'required|email']);
+       
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $status = Password::sendResetLink(
+            request()->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+                ? response()->json(['message' => __($status)], 200)
+                : response()->json(['message' => __($status)], 400);
+    }
+
+    public function recover ($token)
+    {
+       
+    }
+
+    public function savePassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+     
+                $user->save();
+     
+                event(new PasswordReset($user));
+            }
+        );
+     
+        return $status === Password::PASSWORD_RESET
+                    ? response()->json(['message' => 'Password reset successfully'], 200)
+                    //? redirect()->route('dashboard')->with('status', __($status)) redirect to another page, usually main page
+                    : back()->withErrors(['email' => [__($status)]]);
+    }
+
+
+
 
     public function redirectToGoogle()
     {
