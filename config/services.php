@@ -48,4 +48,12 @@ return [
         'redirect' => env('FACEBOOK_REDIRECT_URI') 
     ],
 
+
+    'github' => [
+        'client_id' => env('GITHUB_CLIENT_ID'),
+        'client_secret' => env('GITHUB_CLIENT_SECRET'),
+        'redirect' => env('GITHUB_REDIRECT_URI'),
+],
+
+
 ];
