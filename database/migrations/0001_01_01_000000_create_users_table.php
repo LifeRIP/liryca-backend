@@ -21,8 +21,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->string('passwordToken')->nullable();
-            $table->string('google_id')->nullable();
-            $table->string('facebook_id')->nullable();
+            $table->string('external_id')->nullable();
+            $table->string('external_auth')->nullable();
             $table->enum('role', ['admin', 'user', 'artist'])->default('user');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);

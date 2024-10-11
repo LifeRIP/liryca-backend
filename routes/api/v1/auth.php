@@ -28,6 +28,10 @@ Route::get('/google-callback', [AuthController::class, 'handleGoogleCallback']);
 Route::get('/login-facebook', [AuthController::class, 'redirectToFacebook']);
 Route::get('/facebook-callback', [AuthController::class, 'handleFacebookCallback']);
 
+//rutas para el inicio de sesión con Github
+Route::get('login-github', [AuthController::class, 'redirectToGithub']);
+Route::get('github-callback', [AuthController::class, 'handleGithubCallback']);
+
 
 
 

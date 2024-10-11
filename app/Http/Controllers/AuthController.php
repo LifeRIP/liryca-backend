@@ -220,13 +220,21 @@ class AuthController extends Controller
         $user_google = Socialite::driver("google")->stateless()->user(); 
         //dd($user_google);
         //$user_google = Socialite::driver("google")->user();
+        $user = User::where('external_id', $user_google->id)->orWhere('email', $user_google->email)->first(); 
+        if ($user) {
+           
+            return response()->json(['error' => 'El correo ya esta registrado.'], 400);
+        }
+        
 
         $user = user::updateOrCreate([
-            'google_id' => $user_google->id, //create a new field on users table called "googel_id"
+            'external_id' => $user_google->id, //create a new field on users table called "googel_id"
         ], [
             'name' => $user_google->name,
             'email' => $user_google->email,
             'username' => $user_google->nickname ?? $user_google->name,
+            'external_id' => $user_google->id,
+            'external_auth' => 'google',
             'birthday' => '2000-01-01', //default values for the fields
             'country' => 'Unknown', //default values for the fields
         ]);
@@ -250,20 +258,21 @@ class AuthController extends Controller
         
         $user_facebook = Socialite::driver("facebook")->stateless()->user();
 
-        $user = User::where('facebook_id', $user_facebook->id)->orWhere('email', $user_facebook->email)->first(); //verifica si el facebook_id o email existen en la base de datos
+        $user = User::where('external_id', $user_facebook->id)->orWhere('email', $user_facebook->email)->first(); //verifica si el facebook_id o email existen en la base de datos
 
             $user = User::create([
                 'name' => $user_facebook->name,
                 'email' => $user_facebook->email,
                 'username' => $user_facebook->nickname ?? $user_facebook->name,
                 'password' => bcrypt(Str::random(16)), // a default password on password field
-                'facebook_id' => $user_facebook->id,
+                'external_id' => $user_facebook->id,
+                'external_auth' => 'facebook',
                 'birthday' => '2000-01-01',
                 'country' => 'Unknown',
             ]);
          
             $user = user::updateOrCreate([
-                'facebook_id' => $user_facebook->id, //create a new field on users table called "googel_id"
+                'external_id' => $user_facebook->id, //create a new field on users table called "external_id"
             ], [
                 //'name' => $user_facebook->name,
                 'email' => $user_facebook->email,
@@ -278,9 +287,45 @@ class AuthController extends Controller
         
     }
             
+    //metodo para redirigir a github auth
+    public function redirectToGithub()
+    {
+        return Socialite::driver('github')->redirect();
+    }
     
 
-    
+    public function handleGithubCallback(){
+        $user_github = socialite::driver('github')->stateless()->user();
+
+        $user = User::where('external_id', $user_github->id)->orWhere('email', $user_github->email)->first();
+
+        if (!$user){
+            $user = User::create([
+                'name' => $user_github->name,
+                'email' => $user_github->email,
+                'username' => $user_github->nickname ?? $user_github->name,
+                'password' => bcrypt(Str::random(16)), // a default password on password field
+                'external_id' => $user_github->id,
+                'external_auth' => 'github',
+                'birthday' => '2000-01-01',
+                'country' => 'Unknown',
+            ]);
+
+        }
+            
+        $user = User::updateorCreate([
+            'external_id' => $user_github->id,]
+        , [
+            //'name' => $user_github->name,
+            'email' => $user_github->email,
+            'username' => $user_github->nickname ?? $user_github->name,
+            'birthday' => '2000-01-01',
+            'country' => 'Unknown',
+
+        ]);
+        Auth::login($user, true); //login the user
+        return redirect('/dashboard'); //redirect to another page
+    }
 
 }
 
