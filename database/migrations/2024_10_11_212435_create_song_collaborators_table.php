@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('posts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
-            $table->text('content');
-            $table->string('image')->nullable();
+        // Crear la tabla de colaboradores (featuring)
+        Schema::create('song_collaborators', function (Blueprint $table) {
             $table->foreignId('song_id')->constrained('songs')->onDelete('cascade');
-            $table->boolean('is_active')->default(true);
+            $table->foreignId('artist_id')->constrained('artists')->onDelete('cascade');
+            $table->primary(['song_id', 'artist_id']);  // Clave primaria compuesta para evitar duplicados
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('posts');
+        Schema::dropIfExists('song_collaborators');
     }
 };

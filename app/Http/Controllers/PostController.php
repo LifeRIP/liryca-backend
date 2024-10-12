@@ -38,9 +38,11 @@ class PostController extends Controller
             $validator = Validator::make($request->all(), [
                 'user_id' => 'required|exists:users,id',
                 'content' => 'required|string',
-                'image' => 'nullable|string',
-                'song_id' => 'required|exists:songs,id',
-                'is_active' => 'required|boolean',
+                'song_id' => 'exists:songs,id',
+                'album_id' => 'exists:albums,id',
+                'artist_id' => 'exists:artists,id',
+                'playlist_id' => 'exists:playlists,id',
+                'action_type' => 'required|in:shared,recommended,not_recommended',
             ]);
 
             // Comprobar si la validación falla
@@ -56,7 +58,7 @@ class PostController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $post
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -103,8 +105,11 @@ class PostController extends Controller
             $validator = Validator::make($request->all(), [
                 'user_id' => 'exists:users,id',
                 'content' => 'string',
-                'image' => 'nullable|string',
                 'song_id' => 'exists:songs,id',
+                'album_id' => 'exists:albums,id',
+                'artist_id' => 'exists:artists,id',
+                'playlist_id' => 'exists:playlists,id',
+                'action_type' => 'in:shared,recommended,not_recommended',
                 'is_active' => 'boolean',
             ]);
 

@@ -74,10 +74,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Post::class, 'userID');
     }
 
-    // Relación con Like
-    public function likes()
+    // Relación con los likes de los posts
+    public function postlikes()
     {
-        return $this->hasMany(Like::class, 'userID');
+        return $this->hasMany(PostLike::class, 'userID');
+    }
+
+    // Relación con los likes de los comentarios
+    public function commentLikes()
+    {
+        return $this->hasMany(CommentLike::class);
     }
 
     // Relación con Follow (seguidores y seguidos)
@@ -95,6 +101,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function playlists()
     {
         return $this->hasMany(Playlist::class, 'userID');
+    }
+
+    // Relación con playlistSong
+    public function playlistSongs()
+    {
+        return $this->hasMany(PlaylistSong::class, 'add_by');
     }
 
     // Relación con PlaybackHistory

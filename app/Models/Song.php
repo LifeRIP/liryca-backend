@@ -40,6 +40,12 @@ class Song extends Model
         return $this->hasMany(Post::class, 'song_id');
     }
 
+    // Relación uno a muchos con los artistas colaboradores (featuring)
+    public function songcollaborator()
+    {
+        return $this->hasMany(SongCollaborator::class, 'song_id');
+    }
+
     /**
      * Relación con el modelo PlaybackHistory.
      * Una canción puede aparecer en el historial de reproducción de muchos usuarios.

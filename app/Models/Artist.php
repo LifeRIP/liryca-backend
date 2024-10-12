@@ -39,4 +39,16 @@ class Artist extends Model
     {
         return $this->hasMany(Song::class, 'artistID');
     }
+
+    // Relacion uno a muchos con songs con el artista como colaborador
+    public function songcollaborator()
+    {
+        return $this->hasMany(SongCollaborator::class, 'artist_id');
+    }
+
+    // Relación uno a muchos con los posts de las canciones del artista
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'artist_id');
+    }
 }

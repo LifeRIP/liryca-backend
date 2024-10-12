@@ -21,6 +21,7 @@ class PlaylistSongSeeder extends Seeder
         PlaylistSong::create([
             'playlist_id' => Playlist::where('user_id', '8f6eea1e-9011-40ec-8ae4-19916127672b')->first()->id, // Awesome Mix Vol. 1
             'song_id' => Song::where('artist_id', $artist_id)->first()->id, // Mírame
+            'add_by' => '8f6eea1e-9011-40ec-8ae4-19916127672b', // John Doe
         ]);
     }
 }

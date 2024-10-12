@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Like extends Model
+class PostLike extends Model
 {
     use HasFactory;
 
@@ -22,10 +22,7 @@ class Like extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Relación con el modelo Post.
-     * Un like pertenece a un post.
-     */
+    // Relación con el post
     public function post()
     {
         return $this->belongsTo(Post::class, 'post_id');

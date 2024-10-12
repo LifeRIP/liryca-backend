@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Album;
 use App\Models\Artist;
 use App\Models\Song;
+use App\Models\SongCollaborator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -18,7 +19,17 @@ class SongController extends Controller
     public function index(): JsonResponse
     {
         try {
+            // Obtener todas las canciones con su informacion y el user_id y nombre de los colaboradores
             $songs = Song::all();
+            foreach ($songs as $song) {
+                $collaborators = SongCollaborator::where('song_id', $song->id)
+                    ->join('artists', 'song_collaborators.artist_id', '=', 'artists.id')
+                    ->join('users', 'artists.user_id', '=', 'users.id')
+                    ->select('users.id', 'users.name')
+                    ->get();
+                $song->collaborators = $collaborators;
+            }
+
             return response()->json([
                 'success' => true,
                 'data' => $songs
@@ -46,6 +57,7 @@ class SongController extends Controller
                 'genre' => 'required|string|max:100',
                 'url_song' => 'required|url',
                 'is_active' => 'boolean',
+                'collaborators' => 'array', // Colaboradores
             ]);
 
             // Comprobar si la validación falla
@@ -69,6 +81,17 @@ class SongController extends Controller
 
             // Crear una nueva canción
             $song = Song::create($request->all());
+
+            // Crear los colaboradores de la canción
+            if ($request->collaborators) {
+                foreach ($request->collaborators as $collaborator) {
+                    SongCollaborator::create([
+                        'song_id' => $song->id,
+                        'artist_id' => $collaborator
+                    ]);
+                }
+            }
+
             return response()->json([
                 'success' => true,
                 'data' => $song
@@ -77,7 +100,7 @@ class SongController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
-            ]);
+            ], 400);
         }
     }
 
@@ -95,6 +118,14 @@ class SongController extends Controller
                     'message' => 'Song not found'
                 ], 404);
             }
+
+            // Obtener los colaboradores de la canción
+            $collaborators = SongCollaborator::where('song_id', $song->id)
+                ->join('artists', 'song_collaborators.artist_id', '=', 'artists.id')
+                ->join('users', 'artists.user_id', '=', 'users.id')
+                ->select('users.id', 'users.name')
+                ->get();
+            $song->collaborators = $collaborators;
 
             // Mostrar la canción
             return response()->json([
@@ -124,6 +155,7 @@ class SongController extends Controller
                 'genre' => 'string|max:100',
                 'url_song' => 'url',
                 'is_active' => 'boolean',
+                'collaborators' => 'array', // Colaboradores
             ]);
 
             // Verificar si la canción existe
@@ -145,6 +177,29 @@ class SongController extends Controller
 
             // Actualizar la canción
             $song->update($request->all());
+
+            // Actualizar los colaboradores de la canción
+
+            // Eliminar los colaboradores actuales
+            SongCollaborator::where('song_id', $song->id)->delete();
+
+            // Crear los nuevos colaboradores
+
+            if ($request->collaborators) {
+                foreach ($request->collaborators as $collaborator) {
+                    SongCollaborator::create([
+                        'song_id' => $song->id,
+                        'artist_id' => $collaborator
+                    ]);
+                }
+            }
+
+            $song->collaborators = SongCollaborator::where('song_id', $song->id)
+                ->join('artists', 'song_collaborators.artist_id', '=', 'artists.id')
+                ->join('users', 'artists.user_id', '=', 'users.id')
+                ->select('users.id', 'users.name')
+                ->get();
+
             return response()->json([
                 'success' => true,
                 'data' => $song
@@ -174,6 +229,10 @@ class SongController extends Controller
 
             // Eliminar la canción
             $song->delete();
+
+            // Eliminar los colaboradores de la canción
+            SongCollaborator::where('song_id', $id)->delete();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Song deleted successfully'
