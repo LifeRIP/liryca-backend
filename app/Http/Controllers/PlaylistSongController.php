@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use illuminate\Http\JsonResponse;
 use App\Models\PlaylistSong;
 use App\Models\Playlist;
+use App\Models\SharedPlaylist;
 use App\Models\Song;
 
 
@@ -38,6 +39,8 @@ class PlaylistSongController extends Controller
      */
     public function store(Request $request)
     {
+
+
         // Verificar si la canción ya está en la playlist
         $existingPlaylistSong = PlaylistSong::where('playlist_id', $request->playlist_id)
             ->where('song_id', $request->song_id)
@@ -49,8 +52,25 @@ class PlaylistSongController extends Controller
             ], 400);
         }
 
+        // Verificar si la persona que está añadiendo la canción a la playlist es el dueño de la playlist o un invitado
+        // comprobar si el  $request->user()->id es igual al id del usuario que creo la playlist o si está en la tabla de shared_playlist
+        $playlist = Playlist::find($request->playlist_id);
+        $sharedPlaylist = SharedPlaylist::where('playlist_id', $request->playlist_id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if ($playlist->user_id !== $request->user()->id && !$sharedPlaylist) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
         // Crear una nueva relación entre la playlist y la canción
-        $playlistSong = PlaylistSong::create($request->all());
+        $playlistSong = new PlaylistSong();
+        $playlistSong->playlist_id = $request->playlist_id;
+        $playlistSong->song_id = $request->song_id;
+        $playlistSong->add_by = $request->user()->id;
+        $playlistSong->save();
 
         return response()->json([
             'success' => true,
@@ -100,21 +120,48 @@ class PlaylistSongController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request): JsonResponse
     {
-        // Eliminar la playlist y la canción de la playlist
+        // Eliminar la canción de la playlist
         try {
+            // Validar los datos de la petición
+            $validator = Validator::make($request->all(), [
+                'playlist_id' => 'required',
+                'song_id' => 'required'
+            ]);
 
-            // Buscar la relación entre la playlist y la canción
-            $playlistSong = PlaylistSong::find($id);
+            // Si la validación falla, devolver un mensaje de error
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 400);
+            }
+
+            // Validar que exista la relación entre la playlist y la canción
+            $playlistSong = PlaylistSong::where('playlist_id', $request->playlist_id)
+                ->where('song_id', $request->song_id)
+                ->first();
 
             // Si la relación no existe, devolver un mensaje de error
-
             if (!$playlistSong) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Playlist song not found'
                 ], 404);
+            }
+
+            // Validar que la persona que está eliminando la canción de la playlist sea el dueño de la playlist o la persona que la añadió
+            $playlist = Playlist::find($request->playlist_id);
+            $sharedPlaylist = SharedPlaylist::where('playlist_id', $request->playlist_id)
+                ->where('user_id', $request->user()->id)
+                ->first();
+
+            if ($playlist->user_id !== $request->user()->id && !$sharedPlaylist) {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 401);
             }
 
             // Eliminar la relación
@@ -127,8 +174,9 @@ class PlaylistSongController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
-            ]);
+                'message' => 'An error occurred',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

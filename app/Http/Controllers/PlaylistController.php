@@ -42,7 +42,7 @@ class PlaylistController extends Controller
             'name' => 'required',
             'user_id' => 'required',
             'description' => 'required',
-            'privacy' => 'required',
+            'privacy' => 'required' | 'in:public,private',
             'image' => 'required',
             'is_active' => 'required'
         ]);

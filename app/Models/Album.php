@@ -30,4 +30,10 @@ class Album extends Model
     {
         return $this->hasMany(Song::class, 'albumID');
     }
+
+    // Relación uno a muchos con los posts de las canciones del álbum
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'album_id');
+    }
 }

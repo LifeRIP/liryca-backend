@@ -19,5 +19,12 @@ class ArtistSeeder extends Seeder
             'verified' => true,
             'about' => 'Stiven Mesa Londoño, conocido artísticamente como Blessd, es un cantante, compositor colombiano y modelo En octubre de 2021, firmó con Warner Music Latina y lanzó su primer álbum de estudio llamado "Hecho en Medellín". Una de sus canciones fue inspirada en Octavio Mesa.',
         ]);
+
+        // Crear un nuevo artista
+        Artist::create([
+            'user_id' => '5d5e1b6c-71ec-49ea-bfb1-19100f7d5cf7', // ID del usuario asociado (Peso Pluma)
+            'verified' => true, // Artista verificado
+            'about' => 'Hassan Emilio Kabande Laija, conocido como Peso Pluma, es un cantante y compositor mexicano de corridos tumbados. Se ha convertido en un referente de la música regional mexicana, con éxitos como "Ella Baila Sola" y "PRC".',
+        ]);
     }
 }

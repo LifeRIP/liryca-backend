@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('playlists', function (Blueprint $table) {
+        Schema::create('post_likes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
-            $table->text('description')->nullable();
-            $table->enum('privacy', ['public', 'private', 'shared'])->default('private');
-            $table->string('image')->nullable();
+            $table->foreignId('post_id')->constrained('posts')->onDelete('cascade');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('playlists');
+        Schema::dropIfExists('post_likes');
     }
 };

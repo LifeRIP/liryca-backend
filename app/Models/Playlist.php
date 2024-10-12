@@ -39,4 +39,13 @@ class Playlist extends Model
     {
         return $this->hasMany(SharedPlaylist::class, 'playlist_id');
     }
+
+    /**
+     * Relación con el modelo Post.
+     * Una playlist puede estar asociada a varios post.
+     */
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'playlist_id');
+    }
 }

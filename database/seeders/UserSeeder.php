@@ -65,5 +65,18 @@ class UserSeeder extends Seeder
             'role' => 'admin',
             'description' => 'Hello, I am Admin',
         ]);
+
+        User::create([
+            'id' => '5d5e1b6c-71ec-49ea-bfb1-19100f7d5cf7',
+            'username' => 'Peso Pluma',
+            'birthday' => '1999-06-15', // Fecha de nacimiento
+            'country' => 'México', // País de origen
+            'email' => 'pesopluma@gmail.com',
+            'password' => Hash::make('12345678'), // Hashear la contraseña
+            'role' => 'artist', // Rol del usuario
+            'description' => 'El doble P', // Descripción o biografía
+            'profile_picture' => 'https://i.scdn.co/image/ab67616100005174a597b11d236292d34533fcd2', // URL de la foto de perfil
+            'profile_banner' => 'https://cdn-3.expansion.mx/dims4/default/24b5a44/2147483647/strip/true/crop/1366x768+0+0/resize/1200x675!/quality/90/?url=https%3A%2F%2Fcdn-3.expansion.mx%2Fbe%2F77%2F30f81942433d99e52da8b8d4c28a%2Fpeso-pluma.jpg', // URL del banner de perfil
+        ]);
     }
 }

@@ -30,4 +30,10 @@ class Comment extends Model
     {
         return $this->belongsTo(Post::class, 'post_id');
     }
+
+    // Relación con los likes de los comentarios
+    public function likes()
+    {
+        return $this->hasMany(CommentLike::class);
+    }
 }
