@@ -13,6 +13,8 @@ use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Laravel\Socialite\Facades\Socialite;
+use PragmaRX\Google2FALaravel\Facade as Google2FA;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -205,6 +207,144 @@ class AuthController extends Controller
                     //? redirect()->route('dashboard')->with('status', __($status)) redirect to another page, usually main page
                     : back()->withErrors(['email' => [__($status)]]);
     }
+
+
+
+
+    public function generate2faSecret(Request $request){
+        $user = $request->user();
+
+        
+       
+        if($user->enable_two_factor_auth){
+            return response()->json(['message' => '2FA secret already generate, enable 2fa'], 400);
+        }
+
+        $secretkey = Google2FA::generateSecretKey();
+        
+       /* $user->update([
+            'two_factor_secret' => $secretkey,
+        ]);*/
+        $user->two_factor_secret = $secretkey;
+        //$user->enable_two_factor_auth = true;
+        $user->save();
+
+        
+        $google2FA_url = Google2FA::getQRCodeInline(
+            config('app.name'),
+            $user->email,
+            $secretkey
+        );
+
+        $data = [
+            'secret' => $secretkey,
+            'google2fa_url' => $google2FA_url,
+        ];
+
+        return response()->json(['2fa initialized successfully', $data], 200);
+    }
+
+    public function enable2fa (Request $request){
+        $user = $request->user();
+
+        if($user->enable_two_factor_auth){
+            return response()->json(['message' => '2FA already enabled'], 400);
+        }
+
+       
+        if(! $user->two_factor_secret){
+            return response()->json(['message' => '2FA secret not found'], 400);
+        }
+
+        if(! $request->validateToken()){
+            return response()->json(['message' => 'Invalid verification code, please try again'], 400);
+        }
+
+        /*$request->validate([
+            'token' => 'required|numeric',
+        ]);*/
+
+
+         $user->update([
+            'enable_two_factor_auth' => true,
+        ]);
+
+
+        return response()->json(['message' => '2FA enabled successfully'], 200);
+    }
+
+    public function disable2fa (Request $request){
+        $user = $request->user();
+
+        if(!$user->enable_two_factor_auth){
+            return response()->json(['message' => 'Not enabled'], 400);
+        }
+
+        /*if(! $request->validateToken()){
+            return response()->json(['message' => 'Invalid verification code, please try again'], 400);
+        }*/
+
+        $request->validate([
+            'token' => 'required|numeric',
+        ]);
+
+        $user->update([
+            'two_factor_secret' => null,
+            'enable_two_factor_auth' => false,
+        ]);
+
+        return response()->json(['message' => '2FA disabled successfully'], 200);
+    }
+
+
+    public function validateToken(Request $request): bool
+    {
+        $user = $request->user();
+
+        try {
+            return Google2FA::verifyKey($this->user()->two_fa_secret, $this->token);
+        } catch (Exception $e) {
+            report($e);
+        }
+    
+        abort(HTTP_SERVER_ERROR, 'Unable to verify your two-factor authentication token. Please contact support.');
+    }
+
+
+    public function verify(Request $request)
+    {
+        $user = $request->user(); // Obtén el usuario autenticado
+        
+        // El token enviado desde Postman
+        $token = $request->input('token');
+        
+        // Instancia de Google2FA
+        $google2fa = app('pragmarx.google2fa');
+
+        // Verificamos el token usando la clave secreta del usuario
+        $isValid = $google2fa->verifyKey($user->two_factor_secret, $token);
+        
+        if ($isValid) {
+            return response()->json([
+                'message' => '2FA verification successful',
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Invalid 2FA token, please try again',
+            ], 400);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
