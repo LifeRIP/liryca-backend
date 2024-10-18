@@ -66,7 +66,6 @@ class AuthController extends Controller
         ], 201);
     }
 
-
     public function login(Request $request)
     {
         // Validar la petición de inicio de sesión
@@ -152,13 +151,11 @@ class AuthController extends Controller
         return response()->json(['message' => 'Invalid verification link'], 400);
     }
 
-
-
     public function sendEmailRecovery(Request $request)
     {
-        
+
         $request->validate(['email' => 'required|email']);
-       
+
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
@@ -170,14 +167,11 @@ class AuthController extends Controller
         );
 
         return $status === Password::RESET_LINK_SENT
-                ? response()->json(['message' => __($status)], 200)
-                : response()->json(['message' => __($status)], 400);
+            ? response()->json(['message' => __($status)], 200)
+            : response()->json(['message' => __($status)], 400);
     }
 
-    public function recover ($token)
-    {
-       
-    }
+    public function recover($token) {}
 
     public function savePassword(Request $request)
     {
@@ -193,21 +187,18 @@ class AuthController extends Controller
                 $user->forceFill([
                     'password' => Hash::make($password)
                 ])->setRememberToken(Str::random(60));
-     
+
                 $user->save();
-     
+
                 event(new PasswordReset($user));
             }
         );
-     
+
         return $status === Password::PASSWORD_RESET
-                    ? response()->json(['message' => 'Password reset successfully'], 200)
-                    //? redirect()->route('dashboard')->with('status', __($status)) redirect to another page, usually main page
-                    : back()->withErrors(['email' => [__($status)]]);
+            ? response()->json(['message' => 'Password reset successfully'], 200)
+            //? redirect()->route('dashboard')->with('status', __($status)) redirect to another page, usually main page
+            : back()->withErrors(['email' => [__($status)]]);
     }
-
-
-
 
     public function redirectToGoogle()
     {
@@ -217,15 +208,14 @@ class AuthController extends Controller
     // Método para manejar la respuesta de Google
     public function handleGoogleCallback()
     {
-        $user_google = Socialite::driver("google")->stateless()->user(); 
-        //dd($user_google);
-        //$user_google = Socialite::driver("google")->user();
-        $user = User::where('external_id', $user_google->id)->orWhere('email', $user_google->email)->first(); 
+        $user_google = Socialite::driver("google")->user();
+        //$user_google = Socialite::driver("google")->stateless()->user(); 
+        $user = User::where('external_id', $user_google->id)->orWhere('email', $user_google->email)->first();
         if ($user) {
-           
+
             return response()->json(['error' => 'El correo ya esta registrado.'], 400);
         }
-        
+
 
         $user = user::updateOrCreate([
             'external_id' => $user_google->id, //create a new field on users table called "googel_id"
@@ -243,63 +233,59 @@ class AuthController extends Controller
         return redirect('/dashboard'); //redirect to another page
     }
 
-
-
-    //metodo para redirigir a facebook auth
+    // Método para redirigir a facebook auth
     public function redirectToFacebook()
     {
         return Socialite::driver('facebook')->redirect();
     }
 
-    
-
     public function handleFacebookCallback()
     {
-        
-        $user_facebook = Socialite::driver("facebook")->stateless()->user();
+
+        $user_facebook = Socialite::driver("facebook")->user();
 
         $user = User::where('external_id', $user_facebook->id)->orWhere('email', $user_facebook->email)->first(); //verifica si el facebook_id o email existen en la base de datos
 
-            $user = User::create([
-                'name' => $user_facebook->name,
-                'email' => $user_facebook->email,
-                'username' => $user_facebook->nickname ?? $user_facebook->name,
-                'password' => bcrypt(Str::random(16)), // a default password on password field
-                'external_id' => $user_facebook->id,
-                'external_auth' => 'facebook',
-                'birthday' => '2000-01-01',
-                'country' => 'Unknown',
-            ]);
-         
-            $user = user::updateOrCreate([
-                'external_id' => $user_facebook->id, //create a new field on users table called "external_id"
-            ], [
-                //'name' => $user_facebook->name,
-                'email' => $user_facebook->email,
-                'username' => $user_facebook->nickname ?? $user_facebook->name,
-                'birthday' => '2000-01-01', //default values for the fields
-                'country' => 'Unknown', //default values for the fields
-             ]);
-            
+        $user = User::create([
+            'name' => $user_facebook->name,
+            'email' => $user_facebook->email,
+            'username' => $user_facebook->nickname ?? $user_facebook->name,
+            'password' => bcrypt(Str::random(16)), // a default password on password field
+            'external_id' => $user_facebook->id,
+            'external_auth' => 'facebook',
+            'birthday' => '2000-01-01',
+            'country' => 'Unknown',
+        ]);
+
+        $user = user::updateOrCreate([
+            'external_id' => $user_facebook->id, //create a new field on users table called "external_id"
+        ], [
+            //'name' => $user_facebook->name,
+            'email' => $user_facebook->email,
+            'username' => $user_facebook->nickname ?? $user_facebook->name,
+            'birthday' => '2000-01-01', //default values for the fields
+            'country' => 'Unknown', //default values for the fields
+        ]);
+
 
         Auth::login($user, true); //login the user
         return redirect('/dashboard'); //redirect to another page
-        
+
     }
-            
-    //metodo para redirigir a github auth
+
+    // Método para redirigir a github auth
     public function redirectToGithub()
     {
         return Socialite::driver('github')->redirect();
     }
-    
 
-    public function handleGithubCallback(){
-        $user_github = socialite::driver('github')->stateless()->user();
+    public function handleGithubCallback()
+    {
+        $user_github = socialite::driver('github')->user();
 
         $user = User::where('external_id', $user_github->id)->orWhere('email', $user_github->email)->first();
 
-        if (!$user){
+        if (!$user) {
             $user = User::create([
                 'name' => $user_github->name,
                 'email' => $user_github->email,
@@ -310,24 +296,22 @@ class AuthController extends Controller
                 'birthday' => '2000-01-01',
                 'country' => 'Unknown',
             ]);
-
         }
-            
-        $user = User::updateorCreate([
-            'external_id' => $user_github->id,]
-        , [
-            //'name' => $user_github->name,
-            'email' => $user_github->email,
-            'username' => $user_github->nickname ?? $user_github->name,
-            'birthday' => '2000-01-01',
-            'country' => 'Unknown',
 
-        ]);
+        $user = User::updateorCreate(
+            [
+                'external_id' => $user_github->id,
+            ],
+            [
+                //'name' => $user_github->name,
+                'email' => $user_github->email,
+                'username' => $user_github->nickname ?? $user_github->name,
+                'birthday' => '2000-01-01',
+                'country' => 'Unknown',
+
+            ]
+        );
         Auth::login($user, true); //login the user
         return redirect('/dashboard'); //redirect to another page
     }
-
 }
-
-
-
