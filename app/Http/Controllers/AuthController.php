@@ -314,4 +314,28 @@ class AuthController extends Controller
         Auth::login($user, true); //login the user
         return redirect('/dashboard'); //redirect to another page
     }
+    public function redirectToProvider($provider)
+    {
+        return Socialite::driver($provider)->redirect();
+    }
+
+    public function handleProviderCallback($provider)
+    {
+        $user_provider = Socialite::driver($provider)->user();
+        $user = User::where('external_id', $user_provider->id)->orWhere('email', $user_provider->email)->first();
+        if ($user) {
+            return response()->json(['error' => 'Email already registered.'], 400);
+        }
+        $user = User::create([
+            'username' => $user_provider->nickname ?? $user_provider->name,
+            'email' => $user_provider->email,
+            'password' => Hash::make(Str::random(16)), // a default password on password field
+            'external_id' => $user_provider->id,
+            'external_auth' => $provider,
+            'birthday' => '2000-01-01',
+            'country' => 'Unknown',
+        ]);
+        Auth::login($user, true); //login the user
+        return redirect('/dashboard'); //redirect to another page
+    }
 }

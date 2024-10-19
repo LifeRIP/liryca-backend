@@ -17,21 +17,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/email/verification-notification', [AuthController::class, 'sendEmail'])->name('verification.send');
     Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
-    
 });
 
-// Rutas para el inicio de sesión con Google
-Route::get('/login-google', [AuthController::class, 'redirectToGoogle']);
-Route::get('/google-callback', [AuthController::class, 'handleGoogleCallback']);
-
-//rutas para el inicio de sesión con Facebook
-Route::get('/login-facebook', [AuthController::class, 'redirectToFacebook']);
-Route::get('/facebook-callback', [AuthController::class, 'handleFacebookCallback']);
-
-//rutas para el inicio de sesión con Github
-Route::get('login-github', [AuthController::class, 'redirectToGithub']);
-Route::get('github-callback', [AuthController::class, 'handleGithubCallback']);
-
-
-
-
+Route::middleware(['web'])->group(function () {
+    // Rutas para el inicio de sesión con OAuth (Google, Facebook, Github)
+    Route::get('/redirect/{provider}', [AuthController::class, 'redirectToProvider']);
+    Route::get('/callback/{provider}', [AuthController::class, 'handleProviderCallback']);
+});
