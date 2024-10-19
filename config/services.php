@@ -39,13 +39,13 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => '/api/v1/auth/callback/google',
+        'redirect' => '/api/v1/auth/google/callback',
     ],
 
     'facebook' => [
         'client_id' => env('FACEBOOK_CLIENT_ID'),
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
-        // TODO: Cambiar la URL de redirección por '/api/v1/auth/callback/facebook'
+        // TODO: Cambiar la URL de redirección por '/api/v1/auth/facebook/callback'
         'redirect' => env('FACEBOOK_REDIRECT_URI')
     ],
 
@@ -53,7 +53,7 @@ return [
     'github' => [
         'client_id' => env('GITHUB_CLIENT_ID'),
         'client_secret' => env('GITHUB_CLIENT_SECRET'),
-        // TODO: Cambiar la URL de redirección por '/api/v1/auth/callback/github'
+        // TODO: Cambiar la URL de redirección por '/api/v1/auth/github/callback'
         'redirect' => env('GITHUB_REDIRECT_URI'),
     ],
 

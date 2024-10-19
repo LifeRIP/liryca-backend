@@ -316,26 +316,48 @@ class AuthController extends Controller
     }
     public function redirectToProvider($provider)
     {
+        // Validar el proveedor
+        $validator = Validator::make(['provider' => $provider], [
+            'provider' => ['required', 'string', Rule::in(['google', 'facebook', 'github'])],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
         return Socialite::driver($provider)->redirect();
     }
 
     public function handleProviderCallback($provider)
     {
         $user_provider = Socialite::driver($provider)->user();
-        $user = User::where('external_id', $user_provider->id)->orWhere('email', $user_provider->email)->first();
-        if ($user) {
-            return response()->json(['error' => 'Email already registered.'], 400);
-        }
-        $user = User::create([
-            'username' => $user_provider->nickname ?? $user_provider->name,
-            'email' => $user_provider->email,
-            'password' => Hash::make(Str::random(16)), // a default password on password field
-            'external_id' => $user_provider->id,
-            'external_auth' => $provider,
-            'birthday' => '2000-01-01',
-            'country' => 'Unknown',
-        ]);
-        Auth::login($user, true); //login the user
-        return redirect('/dashboard'); //redirect to another page
+        $user = User::firstOrCreate(
+            [
+                'email' => $user_provider->email
+            ],
+            [
+                'username' => $user_provider->nickname ?? $user_provider->name,
+                'email' => $user_provider->email,
+                'password' => Hash::make(Str::random(16)), // Un valor predeterminado en el campo de contraseña
+                'external_id' => $user_provider->id,
+                'external_auth' => $provider,
+                'birthday' => '2000-01-01',
+                'country' => 'Unknown',
+            ]
+        );
+
+        // Crear un token de acceso para el usuario
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        Auth::login($user, true);
+
+        return response()->json([
+            'message' => 'User logged in',
+            'user' => $user,
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'remember' => true
+        ], 201);
+        //return redirect((config('app.frontend_url') . '/dashboard'));
     }
 }
