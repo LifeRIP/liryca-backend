@@ -6,10 +6,9 @@ use Illuminate\Support\Facades\Route;
 
 // Playlist //
 
-Route::middleware('auth:api')->group(function () {
-    Route::get('playlists', 'PlaylistController@index');
-    Route::get('playlists/{id}', 'PlaylistController@show');
-    Route::post('playlists', 'PlaylistController@store');
-    Route::put('playlists/{id}', 'PlaylistController@update');
-    Route::delete('playlists/{id}', 'PlaylistController@destroy');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('playlistsong', [PlaylistSongController::class, 'index']);
+    Route::get('playlistsong/{id}', [PlaylistSongController::class, 'show']);
+    Route::post('playlistsong', [PlaylistSongController::class, 'store']);
+    Route::delete('playlistsong/{id}', [PlaylistSongController::class, 'destroy']);
 });
