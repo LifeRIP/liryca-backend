@@ -29,3 +29,15 @@ Route::prefix('v1')->group(function () {
 /* Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum'); */
+
+Route::get('/routes', function () {
+    $routes = [];
+    foreach (Route::getRoutes() as $route) {
+        $routes[] = [
+            'uri' => $route->uri,
+            'methods' => $route->methods,
+            'action' => $route->action,
+        ];
+    }
+    return $routes;
+});
