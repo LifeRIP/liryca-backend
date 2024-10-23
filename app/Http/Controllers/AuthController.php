@@ -346,6 +346,11 @@ class AuthController extends Controller
             ]
         );
 
+        // Verificar si el proveedor de OAuth coincide con el proveedor de la solicitud
+        if ($user->external_auth !== $provider) {
+            return response()->json(['message' => 'Provider mismatch'], 400);
+        }
+
         // Crear un token de acceso para el usuario
         $token = $user->createToken('auth_token')->plainTextToken;
 
