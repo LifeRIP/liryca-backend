@@ -53,7 +53,7 @@
             "@php artisan migrate --graceful --ansi"
         ],
         "post-deploy-cmd": [
-          "php artisan route:list"
+          "@php artisan route:list > storage/logs/route_list.log"
         ]
     },
     "extra": {
