@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -12,11 +13,12 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\JsonResponse;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         // Validar la petición de registro
         $validator = Validator::make($request->all(), [
@@ -42,28 +44,34 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        // Crear un nuevo usuario
-        $user = User::create([
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'country' => $request->country,
-            'birthday' => $request->birthday,
-            'description' => '',
-        ]);
+        return transactional(function () use ($request) {
+            // Crear un nuevo usuario
+            $user = User::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'country' => $request->country,
+                'birthday' => $request->birthday,
+                'description' => '',
+            ]);
 
-        // Enviar correo de verificación
-        $user->sendEmailVerificationNotification();
+            // Asignar el rol de usuario
+            $user->assignRole(RoleEnum::USER->value);
 
-        // Crear un token de acceso para el usuario
-        $token = $user->createToken('auth_token')->plainTextToken;
+            // Enviar correo de verificación
+            $user->sendEmailVerificationNotification();
 
-        return response()->json([
-            'message' => 'User registered',
-            'user' => $user,
-            'token' => $token,
-            'token_type' => 'Bearer'
-        ], 201);
+            // Crear un token de acceso para el usuario
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'User registered',
+                'user' => $user,
+                'role' => RoleEnum::USER->value,
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ], 201);
+        });
     }
 
     public function login(Request $request)
@@ -98,7 +106,7 @@ class AuthController extends Controller
         // Recordar el inicio de sesión del usuario
         $remember = $request->remember ?? false;
 
-        Auth::login($user, $remember); #$remember);
+        Auth::login($user, $remember);
 
         // Crear un token de acceso para el usuario
         $token = $user->createToken('auth_token')->plainTextToken;

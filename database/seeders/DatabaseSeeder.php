@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         // Llamar a los seeders
         $this->call([
+            RoleSeeder::class,
             UserSeeder::class,
             ArtistSeeder::class,
             AlbumSeeder::class,

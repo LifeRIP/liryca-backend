@@ -10,11 +10,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Auth\Passwords\CanResetPassword;
-
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasUuids, HasApiTokens, CanResetPassword;
+    use HasFactory, Notifiable, HasUuids, HasApiTokens, CanResetPassword, HasRoles;
 
     public $incrementing = false; // No usar ID incremental
     protected $keyType = 'string'; // Tipo de la clave primaria como string
