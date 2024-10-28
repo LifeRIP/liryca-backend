@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\RoleEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,7 +24,11 @@ return new class extends Migration
             $table->string('passwordToken')->nullable();
             $table->string('external_id')->nullable();
             $table->string('external_auth')->nullable();
-            $table->enum('role', ['admin', 'user', 'artist'])->default('user');
+            $table->enum('role', [
+                RoleEnum::ADMIN->value,
+                RoleEnum::USER->value,
+                RoleEnum::ARTIST->value
+            ])->default(RoleEnum::USER->value);
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->string('profile_picture')->nullable();
