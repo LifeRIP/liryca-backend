@@ -24,6 +24,8 @@ return new class extends Migration
             $table->string('passwordToken')->nullable();
             $table->string('external_id')->nullable();
             $table->string('external_auth')->nullable();
+            $table->string('two_factor_secret')->nullable();
+            $table->boolean('enable_two_factor_auth')->default(false);
             $table->enum('role', [
                 RoleEnum::ADMIN->value,
                 RoleEnum::USER->value,

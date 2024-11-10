@@ -32,6 +32,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'external_id',
         'external_auth',
+        'two_factor_secret',
+        'enable_two_factor_auth',
         'role',
         'description',
         'is_active',
@@ -59,6 +61,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_active' => 'boolean',
             'birthday' => 'date',
+            'two_factor_secret' => 'encrypted',
         ];
     }
 
