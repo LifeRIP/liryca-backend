@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Enums\RoleEnum;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Implicitly grant "Super Admin" role all permissions
+        // This works in the app by using gate-related functions like auth()->user->can() and @can()
+        // But it isn't working then authorize the role in every middleware
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole(RoleEnum::ADMIN) ? true : null;
+        });
     }
 }

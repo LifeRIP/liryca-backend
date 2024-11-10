@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -12,13 +13,14 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\JsonResponse;
 use Laravel\Socialite\Facades\Socialite;
 use PragmaRX\Google2FALaravel\Facade as Google2FA;
 use Carbon\Carbon;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         // Validar la petición de registro
         $validator = Validator::make($request->all(), [
@@ -44,30 +46,35 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        // Crear un nuevo usuario
-        $user = User::create([
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'country' => $request->country,
-            'birthday' => $request->birthday,
-            'description' => '',
-        ]);
+        return transactional(function () use ($request) {
+            // Crear un nuevo usuario
+            $user = User::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'country' => $request->country,
+                'birthday' => $request->birthday,
+                'description' => '',
+            ]);
 
-        // Enviar correo de verificación
-        $user->sendEmailVerificationNotification();
+            // Asignar el rol de usuario
+            $user->assignRole(RoleEnum::USER->value);
 
-        // Crear un token de acceso para el usuario
-        $token = $user->createToken('auth_token')->plainTextToken;
+            // Enviar correo de verificación
+            $user->sendEmailVerificationNotification();
 
-        return response()->json([
-            'message' => 'User registered',
-            'user' => $user,
-            'token' => $token,
-            'token_type' => 'Bearer'
-        ], 201);
+            // Crear un token de acceso para el usuario
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'User registered',
+                'user' => $user,
+                'role' => RoleEnum::USER->value,
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ], 201);
+        });
     }
-
 
     public function login(Request $request)
     {
@@ -101,7 +108,7 @@ class AuthController extends Controller
         // Recordar el inicio de sesión del usuario
         $remember = $request->remember ?? false;
 
-        Auth::login($user, $remember); #$remember);
+        Auth::login($user, $remember);
 
         // Crear un token de acceso para el usuario
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -154,13 +161,11 @@ class AuthController extends Controller
         return response()->json(['message' => 'Invalid verification link'], 400);
     }
 
-
-
     public function sendEmailRecovery(Request $request)
     {
-        
+
         $request->validate(['email' => 'required|email']);
-       
+
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
@@ -172,14 +177,11 @@ class AuthController extends Controller
         );
 
         return $status === Password::RESET_LINK_SENT
-                ? response()->json(['message' => __($status)], 200)
-                : response()->json(['message' => __($status)], 400);
+            ? response()->json(['message' => __($status)], 200)
+            : response()->json(['message' => __($status)], 400);
     }
 
-    public function recover ($token)
-    {
-       
-    }
+    public function recover($token) {}
 
     public function savePassword(Request $request)
     {
@@ -195,21 +197,18 @@ class AuthController extends Controller
                 $user->forceFill([
                     'password' => Hash::make($password)
                 ])->setRememberToken(Str::random(60));
-     
+
                 $user->save();
-     
+
                 event(new PasswordReset($user));
             }
         );
-     
+
         return $status === Password::PASSWORD_RESET
-                    ? response()->json(['message' => 'Password reset successfully'], 200)
-                    //? redirect()->route('dashboard')->with('status', __($status)) redirect to another page, usually main page
-                    : back()->withErrors(['email' => [__($status)]]);
+            ? response()->json(['message' => 'Password reset successfully'], 200)
+            //? redirect()->route('dashboard')->with('status', __($status)) redirect to another page, usually main page
+            : back()->withErrors(['email' => [__($status)]]);
     }
-
-
-
 
     public function generate2faSecret(Request $request){
         $user = $request->user();
@@ -335,20 +334,6 @@ class AuthController extends Controller
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->redirect();
@@ -357,15 +342,14 @@ class AuthController extends Controller
     // Método para manejar la respuesta de Google
     public function handleGoogleCallback()
     {
-        $user_google = Socialite::driver("google")->stateless()->user(); 
-        //dd($user_google);
-        //$user_google = Socialite::driver("google")->user();
-        $user = User::where('external_id', $user_google->id)->orWhere('email', $user_google->email)->first(); 
+        $user_google = Socialite::driver("google")->user();
+        //$user_google = Socialite::driver("google")->stateless()->user(); 
+        $user = User::where('external_id', $user_google->id)->orWhere('email', $user_google->email)->first();
         if ($user) {
-           
+
             return response()->json(['error' => 'El correo ya esta registrado.'], 400);
         }
-        
+
 
         $user = user::updateOrCreate([
             'external_id' => $user_google->id, //create a new field on users table called "googel_id"
@@ -383,63 +367,59 @@ class AuthController extends Controller
         return redirect('/dashboard'); //redirect to another page
     }
 
-
-
-    //metodo para redirigir a facebook auth
+    // Método para redirigir a facebook auth
     public function redirectToFacebook()
     {
         return Socialite::driver('facebook')->redirect();
     }
 
-    
-
     public function handleFacebookCallback()
     {
-        
-        $user_facebook = Socialite::driver("facebook")->stateless()->user();
+
+        $user_facebook = Socialite::driver("facebook")->user();
 
         $user = User::where('external_id', $user_facebook->id)->orWhere('email', $user_facebook->email)->first(); //verifica si el facebook_id o email existen en la base de datos
 
-            $user = User::create([
-                'name' => $user_facebook->name,
-                'email' => $user_facebook->email,
-                'username' => $user_facebook->nickname ?? $user_facebook->name,
-                'password' => bcrypt(Str::random(16)), // a default password on password field
-                'external_id' => $user_facebook->id,
-                'external_auth' => 'facebook',
-                'birthday' => '2000-01-01',
-                'country' => 'Unknown',
-            ]);
-         
-            $user = user::updateOrCreate([
-                'external_id' => $user_facebook->id, //create a new field on users table called "external_id"
-            ], [
-                //'name' => $user_facebook->name,
-                'email' => $user_facebook->email,
-                'username' => $user_facebook->nickname ?? $user_facebook->name,
-                'birthday' => '2000-01-01', //default values for the fields
-                'country' => 'Unknown', //default values for the fields
-             ]);
-            
+        $user = User::create([
+            'name' => $user_facebook->name,
+            'email' => $user_facebook->email,
+            'username' => $user_facebook->nickname ?? $user_facebook->name,
+            'password' => bcrypt(Str::random(16)), // a default password on password field
+            'external_id' => $user_facebook->id,
+            'external_auth' => 'facebook',
+            'birthday' => '2000-01-01',
+            'country' => 'Unknown',
+        ]);
+
+        $user = user::updateOrCreate([
+            'external_id' => $user_facebook->id, //create a new field on users table called "external_id"
+        ], [
+            //'name' => $user_facebook->name,
+            'email' => $user_facebook->email,
+            'username' => $user_facebook->nickname ?? $user_facebook->name,
+            'birthday' => '2000-01-01', //default values for the fields
+            'country' => 'Unknown', //default values for the fields
+        ]);
+
 
         Auth::login($user, true); //login the user
         return redirect('/dashboard'); //redirect to another page
-        
+
     }
-            
-    //metodo para redirigir a github auth
+
+    // Método para redirigir a github auth
     public function redirectToGithub()
     {
         return Socialite::driver('github')->redirect();
     }
-    
 
-    public function handleGithubCallback(){
-        $user_github = socialite::driver('github')->stateless()->user();
+    public function handleGithubCallback()
+    {
+        $user_github = socialite::driver('github')->user();
 
         $user = User::where('external_id', $user_github->id)->orWhere('email', $user_github->email)->first();
 
-        if (!$user){
+        if (!$user) {
             $user = User::create([
                 'name' => $user_github->name,
                 'email' => $user_github->email,
@@ -450,24 +430,73 @@ class AuthController extends Controller
                 'birthday' => '2000-01-01',
                 'country' => 'Unknown',
             ]);
-
         }
-            
-        $user = User::updateorCreate([
-            'external_id' => $user_github->id,]
-        , [
-            //'name' => $user_github->name,
-            'email' => $user_github->email,
-            'username' => $user_github->nickname ?? $user_github->name,
-            'birthday' => '2000-01-01',
-            'country' => 'Unknown',
 
-        ]);
+        $user = User::updateorCreate(
+            [
+                'external_id' => $user_github->id,
+            ],
+            [
+                //'name' => $user_github->name,
+                'email' => $user_github->email,
+                'username' => $user_github->nickname ?? $user_github->name,
+                'birthday' => '2000-01-01',
+                'country' => 'Unknown',
+
+            ]
+        );
         Auth::login($user, true); //login the user
         return redirect('/dashboard'); //redirect to another page
     }
+    public function redirectToProvider($provider)
+    {
+        // Validar el proveedor
+        $validator = Validator::make(['provider' => $provider], [
+            'provider' => ['required', 'string', Rule::in(['google', 'facebook', 'github'])],
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        return Socialite::driver($provider)->redirect();
+    }
+
+    public function handleProviderCallback($provider)
+    {
+        $user_provider = Socialite::driver($provider)->user();
+        $user = User::firstOrCreate(
+            [
+                'email' => $user_provider->email
+            ],
+            [
+                'username' => $user_provider->nickname ?? $user_provider->name,
+                'email' => $user_provider->email,
+                'password' => Hash::make(Str::random(16)), // Un valor predeterminado en el campo de contraseña
+                'external_id' => $user_provider->id,
+                'external_auth' => $provider,
+                'birthday' => '2000-01-01',
+                'country' => 'Unknown',
+            ]
+        );
+
+        // Verificar si el proveedor de OAuth coincide con el proveedor de la solicitud
+        if ($user->external_auth !== $provider) {
+            return response()->json(['message' => 'Provider mismatch'], 400);
+        }
+
+        // Crear un token de acceso para el usuario
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        Auth::login($user, true);
+
+        return response()->json([
+            'message' => 'User logged in',
+            'user' => $user,
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'remember' => true
+        ], 201);
+        //return redirect((config('app.frontend_url') . '/dashboard'));
+    }
 }
-
-
-
