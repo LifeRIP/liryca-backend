@@ -16,7 +16,7 @@ Route::post('/validate-token', [AuthController::class, 'validateToken']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/logout', [AuthController::class, 'logout']);
     Route::post('/email/verification-notification', [AuthController::class, 'sendEmail'])->name('verification.send');
     Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
     Route::get('/generate-2fa-secret', [AuthController::class, 'generate2faSecret'])->name('secret-generate');
