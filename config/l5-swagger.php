@@ -6,6 +6,7 @@ return [
         'default' => [
             'api' => [
                 'title' => 'Liryca API',
+                'schemes' => ['https'],
             ],
 
             'routes' => [
