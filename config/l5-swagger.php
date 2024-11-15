@@ -6,14 +6,13 @@ return [
         'default' => [
             'api' => [
                 'title' => 'Liryca API',
-                'schemes' => ['https'],
             ],
 
             'routes' => [
                 /*
                  * Route for accessing api documentation interface
                  */
-                'api' => 'api/documentation',
+                'api' => 'documentation',
             ],
             'paths' => [
                 /*

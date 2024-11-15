@@ -25,6 +25,10 @@ Route::prefix('v1')->group(function () {
     loadRoutesFromVersion('v1');
 });
 
+Route::get("/stuff", function () {
+    return ["a" => 1];
+});
+
 /* Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum'); */
