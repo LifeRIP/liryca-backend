@@ -314,6 +314,7 @@ return [
          */
         'constants' => [
             'APP_URL' => env('APP_URL', 'http://localhost:8000'),
+            'PROD_URL' => env('PROD_URL', 'http://my-default-host.com'),
         ],
     ],
 ];

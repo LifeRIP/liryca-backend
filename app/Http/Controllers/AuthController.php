@@ -21,6 +21,7 @@ use Carbon\Carbon;
 /**
  * @OA\Info(title="API de autenticación", version="1.0")
  * @OA\Server(url=APP_URL)
+ * @OA\Server(url=PROD_URL)
  */
 class AuthController extends Controller
 {
