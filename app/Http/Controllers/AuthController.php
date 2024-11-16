@@ -45,6 +45,7 @@ class AuthController extends Controller
             'country' => ['required', 'string', 'max:255'],
             'birthday' => ['required', 'date'],
             'password' => ['required', 'string', PasswordRule::default(), 'confirmed'],
+            'role' => ['required', 'string', Rule::in([RoleEnum::USER->value, RoleEnum::ARTIST->value])],
         ]);
 
         if ($validator->fails()) {
@@ -59,11 +60,10 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'country' => $request->country,
                 'birthday' => $request->birthday,
-                'description' => '',
+                'role' => $request->role,
+                'profile_picture' => 'https://firebasestorage.googleapis.com/v0/b/liryca-c9f2e.appspot.com/o/profileIcons%2Fdefault-avatar.png?alt=media&token=09e84995-6605-4b4f-9131-5b99ace4395d',
+                'profile_banner' => 'https://firebasestorage.googleapis.com/v0/b/liryca-c9f2e.appspot.com/o/profileBanner%2FbannerDefault.png?alt=media&token=aa685868-63c2-46fe-b73c-aa91c26d6c19',
             ]);
-
-            // Asignar el rol de usuario
-            $user->assignRole(RoleEnum::USER->value);
 
             // Enviar correo de verificación
             $user->sendEmailVerificationNotification();
@@ -74,7 +74,6 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'User registered',
                 'user' => $user,
-                'role' => RoleEnum::USER->value,
                 'token' => $token,
                 'token_type' => 'Bearer'
             ], 201);

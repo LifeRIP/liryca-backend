@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
             'username' => 'John Doe',
             'birthday' => '1995-01-01',
             'country' => 'United States',
-            'email' => 'john.doe@gmail.com',
+            'email' => 'john.doe@example.com',
             'password' => Hash::make('12345678'),
             'description' => 'Hello, I am John Doe',
             'profile_picture' => 'https://i.pinimg.com/280x280_RS/ec/16/b8/ec16b8e8e09a99a2b8fff167dbf53c11.jpg',
@@ -36,7 +36,7 @@ class UserSeeder extends Seeder
             'username' => 'Blessd',
             'birthday' => '2000-01-27',
             'country' => 'Colombia',
-            'email' => 'blessd@gmail.com',
+            'email' => 'blessd@example.com',
             'password' => Hash::make('12345678'),
             'role' => RoleEnum::ARTIST->value,
             'description' => 'Hecho en Medellín',
@@ -52,7 +52,7 @@ class UserSeeder extends Seeder
             'username' => 'Valentina',
             'birthday' => '2001-01-01',
             'country' => 'Colombia',
-            'email' => 'valentina@gmail.com',
+            'email' => 'valentina@example.com',
             'password' => Hash::make('12345678'),
             'description' => 'Hello, I am Valentina',
             'profile_picture' => 'https://i.ibb.co/HCR6qqF/a.png',
@@ -67,7 +67,7 @@ class UserSeeder extends Seeder
             'username' => 'Admin',
             'birthday' => '1990-01-01',
             'country' => 'United States',
-            'email' => 'admin@gmail.com',
+            'email' => 'admin@example.com',
             'password' => Hash::make('12345678'),
             'role' => RoleEnum::ADMIN->value,
             'description' => 'Hello, I am Admin',
@@ -80,7 +80,7 @@ class UserSeeder extends Seeder
             'username' => 'Peso Pluma',
             'birthday' => '1999-06-15', // Fecha de nacimiento
             'country' => 'México', // País de origen
-            'email' => 'pesopluma@gmail.com',
+            'email' => 'pesopluma@example.com',
             'password' => Hash::make('12345678'), // Hashear la contraseña
             'role' => RoleEnum::ARTIST->value, // Rol de artista
             'description' => 'El doble P', // Descripción o biografía
