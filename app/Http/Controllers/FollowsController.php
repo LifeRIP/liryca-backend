@@ -18,7 +18,7 @@ class FollowsController extends Controller
     {
         //Validar los datos
         $validator = Validator::make($request->all(), [
-            'followed_id' => 'required|uuid|exists:users,id'
+            'following_id' => 'required|uuid|exists:users,id'
         ]);
 
         if ($validator->fails()) {
@@ -27,7 +27,7 @@ class FollowsController extends Controller
 
         //Comprobar si el usuario ya sigue al usuario
         $follow = Follow::where('follower_id', $request->user()->id)
-            ->where('followed_id', $request->followed_id)
+            ->where('following_id', $request->following_id)
             ->first();
 
         if ($follow) {
@@ -37,7 +37,7 @@ class FollowsController extends Controller
         //Crear el nuevo seguidor
         $follow = new Follow();
         $follow->follower_id = $request->user()->id;
-        $follow->followed_id = $request->followed_id;
+        $follow->following_id = $request->following_id;
         $follow->save();
 
         return response()->json(['message' => 'Usuario seguido correctamente'], 201);
@@ -52,26 +52,26 @@ class FollowsController extends Controller
         $follows = Follow::where('follower_id', $request->user()->id)->get();
 
         //Obtener el numero de seguidores
-        $count_followers = Follow::where('followed_id', $request->user()->id)->count();
+        $count_followers = Follow::where('following_id', $request->user()->id)->count();
 
         //Obtener el id, username, icono y banner de los usuarios seguidos
         $users = [];
         foreach ($follows as $follow) {
             $user = User::select('id', 'username', 'profile_picture', 'profile_banner')
-                ->where('id', $follow->followed_id)
+                ->where('id', $follow->following_id)
                 ->first();
             $users[] = $user;
         }
 
         //Obtener los seguidos del usuario autenticado
-        $followed = Follow::where('followed_id', $request->user()->id)->get();
+        $following = Follow::where('following_id', $request->user()->id)->get();
 
         //Obtener el numero de seguidos
-        $count_followed = Follow::where('follower_id', $request->user()->id)->count();
+        $count_following = Follow::where('follower_id', $request->user()->id)->count();
 
         //Obtener el id, username, icono y banner de los seguidores
         $followers = [];
-        foreach ($followed as $follow) {
+        foreach ($following as $follow) {
             $follower = User::select('id', 'username', 'profile_picture', 'profile_banner')
                 ->where('id', $follow->follower_id)
                 ->first();
@@ -81,8 +81,8 @@ class FollowsController extends Controller
         return response()->json([
             'count_followers' => $count_followers,
             'followers' => $followers,
-            'count_followed' => $count_followed,
-            'followed' => $users
+            'count_following' => $count_following,
+            'following' => $users
         ], 200);
     }
 
@@ -93,7 +93,7 @@ class FollowsController extends Controller
     {
         //Validar los datos
         $validator = Validator::make($request->all(), [
-            'followed_id' => 'required|uuid|exists:users,id'
+            'following_id' => 'required|uuid|exists:users,id'
         ]);
 
         if ($validator->fails()) {
@@ -102,7 +102,7 @@ class FollowsController extends Controller
 
         //Comprobar si el usuario sigue al usuario
         $follow = Follow::where('follower_id', $request->user()->id)
-            ->where('followed_id', $request->followed_id);
+            ->where('following_id', $request->following_id);
 
         if (!$follow) {
             return response()->json(['message' => 'No sigues a este usuario'], 400);
