@@ -29,7 +29,6 @@ class AlbumController extends Controller
             // Validar los campos requeridos
             $validator = Validator::make($request->all(), [
                 'title' => 'required',
-                'artist_id' => 'required',
                 'release_date' => 'required',
                 'description' => 'required',
                 'icon' => 'required'
@@ -43,8 +42,13 @@ class AlbumController extends Controller
                 ], 400);
             }
 
-            // Comprobar si el artista existe
-            $artist = Artist::find($request->artist_id);
+            // traer todos los datos del artista con el user_id
+            $artist = Artist::where('user_id', $request->user()->id)->first();
+
+            //print de artist
+
+
+            // Si el artista no existe
             if (!$artist) {
                 return response()->json([
                     'message' => 'Artist not found'
@@ -54,7 +58,7 @@ class AlbumController extends Controller
             // Validar si el artista está verificado 
             if (!$artist->verified) {
                 return response()->json([
-                    'message' => 'Artist is not verified'
+                    'message' => 'Artist not verified'
                 ], 400);
             }
 
@@ -67,7 +71,14 @@ class AlbumController extends Controller
             }
 
             // Crear un nuevo álbum
-            $album = Album::create($request->all());
+            $album = new Album();
+            $album->title = $request->title;
+            $album->release_date = $request->release_date;
+            $album->description = $request->description;
+            $album->icon = $request->icon;
+            $album->artist_id = $artist->id;
+            $album->save();
+
             return response()->json([
                 'success' => true,
                 'data' => $album

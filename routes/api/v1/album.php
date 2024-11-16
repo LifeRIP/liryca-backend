@@ -7,4 +7,6 @@ use App\Http\Controllers\AlbumController;
 
 // Album //
 
-Route::resource('/', AlbumController::class)->parameters(['' => 'album']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::resource('/', AlbumController::class)->parameters(['' => 'album']);
+});
