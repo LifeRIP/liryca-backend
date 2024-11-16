@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
             'profile_banner' => 'https://www.infobae.com/resizer/v2/ARBKXYU6NRDZZCFBAUUGBAK4QY.jpg?auth=7dbd6d124f15e1558eb1bc52d6094b6a07fc831848047c1bf1c29d09ea7f550a&smart=true&width=1200&height=675&quality=85',
         ]);
 
-        $user->assignRole(RoleEnum::USER->value);
+        $user->assignRole(RoleEnum::ARTIST->value);
 
         // Crear un nuevo usuario
         $user = User::create([
@@ -75,6 +75,7 @@ class UserSeeder extends Seeder
 
         $user->assignRole(RoleEnum::ADMIN->value);
 
+        // Crear un nuevo artista
         $user = User::create([
             'id' => '5d5e1b6c-71ec-49ea-bfb1-19100f7d5cf7',
             'username' => 'Peso Pluma',
