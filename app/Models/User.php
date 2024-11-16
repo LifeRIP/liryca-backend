@@ -70,19 +70,19 @@ class User extends Authenticatable implements MustVerifyEmail
     // Relación con Artist
     public function artist()
     {
-        return $this->hasOne(Artist::class, 'userID');
+        return $this->hasOne(Artist::class, 'user_id');
     }
 
     // Relación con Post
     public function posts()
     {
-        return $this->hasMany(Post::class, 'userID');
+        return $this->hasMany(Post::class, 'user_id');
     }
 
     // Relación con los likes de los posts
     public function postlikes()
     {
-        return $this->hasMany(PostLike::class, 'userID');
+        return $this->hasMany(PostLike::class, 'user_id');
     }
 
     // Relación con los likes de los comentarios
@@ -94,18 +94,18 @@ class User extends Authenticatable implements MustVerifyEmail
     // Relación con Follow (seguidores y seguidos)
     public function followers()
     {
-        return $this->belongsToMany(User::class, 'follows', 'followingID', 'followerID');
+        return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id');
     }
 
     public function following()
     {
-        return $this->belongsToMany(User::class, 'follows', 'followerID', 'followingID');
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id');
     }
 
     // Relación con Playlist
     public function playlists()
     {
-        return $this->hasMany(Playlist::class, 'userID');
+        return $this->hasMany(Playlist::class, 'user_id');
     }
 
     // Relación con playlistSong
@@ -117,12 +117,12 @@ class User extends Authenticatable implements MustVerifyEmail
     // Relación con PlaybackHistory
     public function playbackHistory()
     {
-        return $this->hasMany(PlaybackHistory::class, 'userID');
+        return $this->hasMany(PlaybackHistory::class, 'user_id');
     }
 
     // Relación con Comment
     public function comments()
     {
-        return $this->hasMany(Comment::class, 'userID');
+        return $this->hasMany(Comment::class, 'user_id');
     }
 }

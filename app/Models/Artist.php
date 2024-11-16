@@ -28,7 +28,7 @@ class Artist extends Model
      */
     public function albums()
     {
-        return $this->hasMany(Album::class, 'artistID');
+        return $this->hasMany(Album::class, 'artist_id');
     }
 
     /**
@@ -37,7 +37,7 @@ class Artist extends Model
      */
     public function songs()
     {
-        return $this->hasMany(Song::class, 'artistID');
+        return $this->hasMany(Song::class, 'artist_id');
     }
 
     // Relacion uno a muchos con songs con el artista como colaborador

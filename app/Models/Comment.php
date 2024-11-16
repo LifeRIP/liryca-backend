@@ -34,6 +34,6 @@ class Comment extends Model
     // Relación con los likes de los comentarios
     public function likes()
     {
-        return $this->hasMany(CommentLike::class);
+        return $this->hasMany(CommentLike::class, 'comment_id');
     }
 }
