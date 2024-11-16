@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware([
     'auth:sanctum'
 ])->group(function () {
-    Route::resource('/', UserController::class)->parameters(['' => 'user']);
+    Route::resource('/', UserController::class)->parameters(['' => 'artist']);
 });
 
 Route::get('/{artistId}/albums', [ArtistController::class, 'getAlbumsByArtist']);
