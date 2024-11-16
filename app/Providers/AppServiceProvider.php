@@ -28,9 +28,9 @@ class AppServiceProvider extends ServiceProvider
         }
         // Implicitly grant "Super Admin" role all permissions
         // This works in the app by using gate-related functions like auth()->user->can() and @can()
-        // But it isn't working then authorize the role in every middleware
+        // Only works if role_or_permission middleware is used, this doesn't work with role middleware
         Gate::before(function ($user, $ability) {
-            return $user->hasRole(RoleEnum::ADMIN) ? true : null;
+            return $user->hasRole(RoleEnum::ADMIN->value) ? true : null;
         });
     }
 }
