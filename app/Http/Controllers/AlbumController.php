@@ -16,9 +16,31 @@ class AlbumController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        // Obtener todos los álbumes del artista
-        $albums = Album::where('artist_id', $request->user()->artist->id)->get();
-        return response()->json($albums);
+        try {
+            // Verificar si el usuario es un artista con el rol de artista en users
+            if ($request->user()->role !== 'artist') {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            // Obtener todos los álbumes del artista con el user_id
+            $albums = Album::where('artist_id', $request->user()->id)->get();
+
+            // Si no hay álbumes
+            if ($albums->count() === 0) {
+                return response()->json([
+                    'message' => 'No albums found'
+                ], 404);
+            }
+
+            return response()->json($albums);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -27,6 +49,13 @@ class AlbumController extends Controller
     public function store(Request $request)
     {
         try {
+
+            // Verificar si el usuario es un artista con el rol de artista en users
+            if ($request->user()->role !== 'artist') {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
 
             // Validar los campos requeridos
             $validator = Validator::make($request->all(), [
@@ -96,20 +125,35 @@ class AlbumController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $Name): JsonResponse
+    public function show(Request $request, string $Name): JsonResponse
     {
-        // Buscar el álbum por el nombre
-        $album = Album::where('title', $Name)->first();
+        try {
 
-        //Si el álbum no existe
-        if (!$album) {
+            // Verificar si el usuario es un artista con el rol de artista en users
+            if ($request->user()->role !== 'artist') {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            // Buscar el álbum por el nombre
+            $album = Album::where('title', $Name)->first();
+
+            //Si el álbum no existe
+            if (!$album) {
+                return response()->json([
+                    'message' => 'Album not found'
+                ], 404);
+            }
+
+            // Retornar el álbum
+            return response()->json($album);
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Album not found'
-            ], 404);
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
         }
-
-        // Retornar el álbum
-        return response()->json($album);
     }
 
     /**
@@ -117,46 +161,141 @@ class AlbumController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        // Comprobar si el álbum existe
-        $album = Album::find($id);
+        try {
 
-        // Si el álbum no existe
-        if (!$album) {
+            // Verificar si el usuario es un artista con el rol de artista en users
+            if ($request->user()->role !== 'artist') {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            // Validar los campos requeridos
+            $validator = Validator::make($request->all(), [
+                'title' => 'string|max:255',
+                'release_date' => 'date',
+                'description' => 'string',
+                'icon' => 'string',
+                'is_active' => 'boolean'
+            ]);
+
+            // Comprobar si la validación falla
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 400);
+            }
+            // Validar que se esté ingresando un ID
+            if (!$id) {
+                return response()->json([
+                    'message' => 'ID is required'
+                ], 400);
+            }
+
+            // Comprobar si el álbum existe
+            $album = Album::find($id);
+
+            // Si el álbum no existe
+            if (!$album) {
+                return response()->json([
+                    'message' => 'Album not found'
+                ], 404);
+            }
+
+            // Actualizar el álbum
+            $album->update($request->all());
+
             return response()->json([
-                'message' => 'Album not found'
-            ], 404);
+                'success' => true,
+                'data' => $album
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
         }
-
-        // Actualizar el álbum
-        $album->update($request->all());
-
-        return response()->json([
-            'success' => true,
-            'data' => $album
-        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
-        // Buscar el álbum por el ID
-        $album = Album::find($id);
+        try {
 
-        // Si el álbum no existe
-        if (!$album) {
+            // Verificar si el usuario es un artista con el rol de artista en users
+            if ($request->user()->role !== 'artist') {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            // Validar que se esté ingresando un ID
+            if (!$id) {
+                return response()->json([
+                    'message' => 'ID is required'
+                ], 400);
+            }
+
+            // Buscar el álbum por el ID
+            $album = Album::find($id);
+
+            // Si el álbum no existe
+            if (!$album) {
+                return response()->json([
+                    'message' => 'Album not found'
+                ], 404);
+            }
+
+            // Eliminar el álbum
+            $album->delete();
+
             return response()->json([
-                'message' => 'Album not found'
-            ], 404);
+                'success' => true,
+                'data' => $album
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
         }
+    }
 
-        // Eliminar el álbum
-        $album->delete();
+    public function getAlbumsbyArtist(string $artistId): JsonResponse
+    {
+        // Obtener los álbumes de un artista
 
-        return response()->json([
-            'success' => true,
-            'data' => $album
-        ]);
+        try {
+            // Validar que se esté ingresando un ID
+            if (!$artistId) {
+                return response()->json([
+                    'message' => 'ID is required'
+                ], 400);
+            }
+
+            // Obtener el artista
+            $artist = Artist::find($artistId);
+
+            // Si el artista no existe
+            if (!$artist) {
+                return response()->json([
+                    'message' => 'Artist not found'
+                ], 404);
+            }
+
+            // Obtener los álbumes del artista que estén activos paginados
+            $albums = Album::where('artist_id', $artistId)->where('is_active', true)->paginate(5);
+
+
+            return response()->json($albums);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 }

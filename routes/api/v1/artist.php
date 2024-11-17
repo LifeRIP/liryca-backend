@@ -10,5 +10,3 @@ Route::middleware([
 ])->group(function () {
     Route::resource('/', UserController::class)->parameters(['' => 'artist']);
 });
-
-Route::get('/{artistId}/albums', [ArtistController::class, 'getAlbumsByArtist']);
