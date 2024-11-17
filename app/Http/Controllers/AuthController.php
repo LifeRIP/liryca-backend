@@ -148,6 +148,37 @@ class AuthController extends Controller
         // Crear un token de acceso para el usuario
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Verificar si el usuario es un artista
+        if ($user->role === RoleEnum::ARTIST->value) {
+            // Crear un perfil de artista para el usuario
+            $artist = $user->artist()->create([
+                'user_id' => $user->id,
+                'verified' => false,
+            ]);
+
+            return response()->json([
+                'message' => 'Artist registered',
+                'user' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'country' => $user->country,
+                    'birthday' => $user->birthday,
+                    'role' => $user->role,
+                    'profile_picture' => $user->profile_picture,
+                    'profile_banner' => $user->profile_banner,
+                    'created_at' => $user->created_at,
+                    'updated_at' => $user->updated_at,
+                    'artist' => [
+                        'id' => $artist->id,
+                        'verified' => $artist->verified,
+                    ],
+                ],
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ], 201);
+        }
+
         return response()->json([
             'message' => 'User logged in',
             'user' => $user,
