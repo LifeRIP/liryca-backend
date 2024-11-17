@@ -51,12 +51,10 @@ class SongController extends Controller
             // Validar los campos requeridos
             $validator = Validator::make($request->all(), [
                 'title' => 'required|string|max:255',
-                'artist_id' => 'required|exists:artists,id',
                 'album_id' => 'nullable|exists:albums,id',
                 'time' => 'required|date_format:H:i:s', // Formato HH:MM:SS
                 'genre' => 'required|string|max:100',
                 'url_song' => 'required|url',
-                'is_active' => 'boolean',
                 'collaborators' => 'array', // Colaboradores
             ]);
 
@@ -68,9 +66,11 @@ class SongController extends Controller
                 ], 400);
             }
 
+            $artist = Artist::where('user_id', $request->user()->id)->first();
+
             // Validar si la canción con el mismo título y artista ya existe
             $existingSong = Song::where('title', $request->title)
-                ->where('artist_id', $request->artist_id)
+                ->where('artist_id', $artist->id)
                 ->first();
             if ($existingSong) {
                 return response()->json([
@@ -80,7 +80,14 @@ class SongController extends Controller
             }
 
             // Crear una nueva canción
-            $song = Song::create($request->all());
+            $song = Song::create([
+                'title' => $request->title,
+                'artist_id' => $artist->id,
+                'album_id' => $request->album_id,
+                'time' => $request->time,
+                'genre' => $request->genre,
+                'url_song' => $request->url_song,
+            ]);
 
             // Crear los colaboradores de la canción
             if ($request->collaborators) {
