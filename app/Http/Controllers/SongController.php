@@ -251,4 +251,22 @@ class SongController extends Controller
             ]);
         }
     }
+
+    public function getTopSongsByArtist($artistId)
+    {
+        $topSongs = Song::where('artist_id', $artistId)
+            ->where('is_active', true)
+            ->withCount('playbackHistories as play_count')
+            ->orderByDesc('play_count')
+            ->take(10)
+            ->get();
+
+        if ($topSongs->isEmpty()) {
+            return response()->json(['error' => 'No songs found for this artist'], 404);
+        }
+
+        return response()->json([
+            'data' => $topSongs,
+        ]);
+    }
 }
