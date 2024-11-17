@@ -128,36 +128,7 @@ class AlbumController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request, string $Name): JsonResponse
-    {
-        try {
-
-            // Verificar si el usuario es un artista con el rol de artista en users
-            if ($request->user()->role !== 'artist') {
-                return response()->json([
-                    'message' => 'Unauthorized'
-                ], 401);
-            }
-
-            // Buscar el álbum por el nombre y contar las canciones
-            $album = Album::where('title', $Name)->withCount('songs')->first();
-
-            //Si el álbum no existe
-            if (!$album) {
-                return response()->json([
-                    'message' => 'Album not found'
-                ], 404);
-            }
-
-            // Retornar el álbum
-            return response()->json($album);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-    }
+    //public function show(Request $request, string $Name): JsonResponse {}
 
     /**
      * Update the specified resource in storage.
@@ -267,7 +238,38 @@ class AlbumController extends Controller
         }
     }
 
-    public function getAlbumsByArtist(string $artistId): JsonResponse
+    public function getAlbumByTitle(Request $request, string $title): JsonResponse
+    {
+        try {
+
+            // Verificar si el usuario es un artista con el rol de artista en users
+            if ($request->user()->role !== 'artist') {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            // Buscar el álbum por el nombre y contar las canciones
+            $album = Album::where('title', $title)->withCount('songs')->first();
+
+            //Si el álbum no existe
+            if (!$album) {
+                return response()->json([
+                    'message' => 'Album not found'
+                ], 404);
+            }
+
+            // Retornar el álbum
+            return response()->json($album);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function getAlbumsByArtistId(string $artistId): JsonResponse
     {
         // Obtener los álbumes de un artista
         try {
