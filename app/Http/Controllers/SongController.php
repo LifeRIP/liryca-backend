@@ -269,4 +269,17 @@ class SongController extends Controller
             'data' => $topSongs,
         ]);
     }
+
+    public function getSongsByAlbumId($albumId)
+    {
+        $songs = Song::where('album_id', $albumId)->get();
+
+        if ($songs->isEmpty()) {
+            return response()->json(['error' => 'No songs found for this album'], 404);
+        }
+
+        return response()->json([
+            'data' => $songs,
+        ]);
+    }
 }
