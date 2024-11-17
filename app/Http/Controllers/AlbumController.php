@@ -315,8 +315,7 @@ class AlbumController extends Controller
             $albums = Album::where('artist_id', $artistId)->where('is_active', true)->withCount('songs')->paginate(5);
 
             return response()->json([
-                'artist_id' => $artistId,
-                'albums' => $albums->items(),  // Retorna solo los álbumes de la página actual
+                'data' => $albums->items(),  // Retorna solo los álbumes de la página actual
                 'pagination' => [
                     'current_page' => $albums->currentPage(),
                     'per_page' => $albums->perPage(),
