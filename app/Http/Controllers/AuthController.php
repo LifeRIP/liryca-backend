@@ -151,10 +151,7 @@ class AuthController extends Controller
         // Verificar si el usuario es un artista
         if ($user->role === RoleEnum::ARTIST->value) {
             // Crear un perfil de artista para el usuario
-            $artist = $user->artist()->create([
-                'user_id' => $user->id,
-                'verified' => false,
-            ]);
+            $artist = $user->artist()->first();
 
             return response()->json([
                 'message' => 'Artist registered',
