@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Album;
 use App\Models\Artist;
+use GuzzleHttp\Psr7\Request as Psr7Request;
 use Illuminate\Support\Facades\Validator;
 
 class AlbumController extends Controller
@@ -13,9 +14,10 @@ class AlbumController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $albums = Album::all();
+        // Obtener todos los álbumes del artista
+        $albums = Album::where('artist_id', $request->user()->artist->id)->get();
         return response()->json($albums);
     }
 
