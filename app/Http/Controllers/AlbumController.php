@@ -24,8 +24,11 @@ class AlbumController extends Controller
                 ], 401);
             }
 
+            // Obtener el artista con el user_id
+            $artist = Artist::where('user_id', $request->user()->id)->first();
+
             // Obtener todos los álbumes del artista con el user_id
-            $albums = Album::where('artist_id', $request->user()->id)->get();
+            $albums = Album::where('artist_id', $artist->id)->get();
 
             // Si no hay álbumes
             if ($albums->count() === 0) {
