@@ -267,10 +267,9 @@ class AlbumController extends Controller
         }
     }
 
-    public function getAlbumsbyArtist(string $artistId): JsonResponse
+    public function getAlbumsByArtist(string $artistId): JsonResponse
     {
         // Obtener los álbumes de un artista
-
         try {
             // Validar que se esté ingresando un ID
             if (!$artistId) {
@@ -293,7 +292,18 @@ class AlbumController extends Controller
             $albums = Album::where('artist_id', $artistId)->where('is_active', true)->paginate(5);
 
 
-            return response()->json($albums);
+            return response()->json([
+                'artist_id' => $artistId,
+                'albums' => $albums->items(),  // Retorna solo los álbumes de la página actual
+                'pagination' => [
+                    'current_page' => $albums->currentPage(),
+                    'per_page' => $albums->perPage(),
+                    'total' => $albums->total(),
+                    'last_page' => $albums->lastPage(),
+                    'next_page_url' => $albums->nextPageUrl(),
+                    'prev_page_url' => $albums->previousPageUrl(),
+                ],
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

@@ -9,5 +9,5 @@ use App\Http\Controllers\AlbumController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::resource('/', AlbumController::class)->parameters(['' => 'album']);
-    Route::get('/albums/artist/{artistId}', [AlbumController::class, 'getAlbumsbyArtist']);
+    Route::get('/by-artist/{artistId}', [AlbumController::class, 'getAlbumsByArtist']);
 });
