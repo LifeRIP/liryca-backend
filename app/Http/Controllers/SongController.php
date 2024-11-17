@@ -266,8 +266,7 @@ class SongController extends Controller
         }
 
         return response()->json([
-            'artist_id' => $artistId,
-            'top_songs' => $topSongs,
+            'data' => $topSongs,
         ]);
     }
 }
