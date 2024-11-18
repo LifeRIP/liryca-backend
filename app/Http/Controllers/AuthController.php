@@ -73,6 +73,10 @@ class AuthController extends Controller
 
             // Verificar si el usuario es un artista
             if ($user->role === RoleEnum::ARTIST->value) {
+
+                // Asignar el rol de artista al usuario
+                $user->assignRole(RoleEnum::ARTIST->value);
+
                 // Crear un perfil de artista para el usuario
                 $artist = $user->artist()->create([
                     'user_id' => $user->id,
@@ -101,6 +105,9 @@ class AuthController extends Controller
                     'token_type' => 'Bearer'
                 ], 201);
             }
+
+            // Asignar el rol de usuario al usuario
+            $user->assignRole(RoleEnum::USER->value);
 
             return response()->json([
                 'message' => 'User registered',
