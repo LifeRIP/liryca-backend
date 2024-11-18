@@ -290,19 +290,19 @@ class AlbumController extends Controller
         }
     }
 
-    public function getAlbumsByArtistId(string $artistId): JsonResponse
+    public function getAlbumsByUserId(string $userId): JsonResponse
     {
         // Obtener los álbumes de un artista
         try {
-            // Validar que se esté ingresando un ID
-            if (!$artistId) {
+            // Validar que se esté ingresando un UUID
+            if (!$userId) {
                 return response()->json([
-                    'message' => 'ID is required'
+                    'message' => 'User ID is required'
                 ], 400);
             }
 
             // Obtener el artista
-            $artist = Artist::find($artistId);
+            $artist = Artist::where('user_id', $userId)->first();
 
             // Si el artista no existe
             if (!$artist) {
@@ -312,7 +312,7 @@ class AlbumController extends Controller
             }
 
             // Obtener los álbumes del artista que estén activos paginados
-            $albums = Album::where('artist_id', $artistId)->where('is_active', true)->withCount('songs')->paginate(5);
+            $albums = Album::where('artist_id', $artist->id)->where('is_active', true)->withCount('songs')->paginate(5);
 
             return response()->json([
                 'data' => $albums->items(),  // Retorna solo los álbumes de la página actual
