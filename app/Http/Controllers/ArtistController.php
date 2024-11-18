@@ -45,7 +45,7 @@ class ArtistController extends Controller
         }
     }
 
-    public function show(string $artist_id)
+    public function show(string $user_id)
     {
         try {
 
@@ -53,7 +53,7 @@ class ArtistController extends Controller
             $artist = DB::table('users')
                 ->join('artists', 'users.id', '=', 'artists.user_id')
                 ->select('users.username', 'artists.user_id', 'artists.id', 'users.birthday', 'users.country', 'users.email', 'users.description', 'users.is_active', 'users.profile_picture', 'users.profile_banner', 'artists.about')
-                ->where('artists.id', $artist_id)
+                ->where('artists.user_id', $user_id)
                 ->first();
 
             return response()->json($artist);
