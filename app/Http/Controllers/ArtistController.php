@@ -52,7 +52,7 @@ class ArtistController extends Controller
             //Información del artista mediante el id
             $artist = DB::table('users')
                 ->join('artists', 'users.id', '=', 'artists.user_id')
-                ->select('users.username', 'users.birthday', 'users.country', 'users.email', 'users.description', 'users.is_active', 'users.profile_picture', 'users.profile_banner', 'artists.about')
+                ->select('users.username', 'artists.id', 'users.birthday', 'users.country', 'users.email', 'users.description', 'users.is_active', 'users.profile_picture', 'users.profile_banner', 'artists.about')
                 ->where('artists.id', $artist_id)
                 ->first();
 
