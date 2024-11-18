@@ -33,7 +33,7 @@ class SongSeeder extends Seeder
             'album_id' => Album::where('artist_id', $artist_id)->first()->id, // ID del álbum (suponiendo que el álbum ya existe)
             'time' => '00:03:45', // Duración de la canción en formato hh:mm:ss
             'genre' => 'Reggaeton', // Género musical
-            'url_song' => 'https://i.scdn.co/image/ab67616d0000b273d6451db776f3c3eac2c8f7b3', // URL de la canción (puedes cambiarlo si tienes la URL correcta)
+            'url_song' => 'https://i.scdn.co/image/ab67616d0000b2730bcfe30a8ac5fee4463fc6f1', // URL de la canción (puedes cambiarlo si tienes la URL correcta)
         ]);
     }
 }
