@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Follow;
 use App\Models\User;
 
+use function Pest\Laravel\get;
 
 class FollowsController extends Controller
 {
@@ -99,29 +100,18 @@ class FollowsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request, string $following_id)
     {
-
         try {
-            //Validar los datos
-            $validator = Validator::make($request->all(), [
-                'following_id' => 'required|uuid|exists:users,id'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json($validator->errors(), 400);
-            }
-
-            //Comprobar si el usuario sigue al usuario
+            // Comprobar si el usuario sigue al usuario
             $follow = Follow::where('follower_id', $request->user()->id)
-                ->where('following_id', $request->following_id)
-                ->first();
+                ->where('following_id', $following_id);
 
             if (!$follow) {
                 return response()->json(['message' => 'No sigues a este usuario'], 400);
             }
 
-            //Eliminar la relacion de seguidor
+            // Dejar de seguir al usuario
             $follow->delete();
 
             return response()->json(['message' => 'Usuario dejado de seguir correctamente'], 200);
@@ -130,14 +120,14 @@ class FollowsController extends Controller
         }
     }
 
-    public function followUnit(Request $request, string $id_following)
+    public function followUnit(Request $request, string $following_id)
     {
 
         //validar si el usuario es seguido
         try {
 
             //Validar los datos
-            $validator = Validator::make(['following_id' => $id_following], [
+            $validator = Validator::make(['following_id' => $following_id], [
                 'following_id' => 'required|uuid|exists:users,id'
             ]);
 
@@ -146,7 +136,7 @@ class FollowsController extends Controller
             }
 
             $follow = Follow::where('follower_id', $request->user()->id)
-                ->where('following_id', $id_following)
+                ->where('following_id', $following_id)
                 ->first();
 
             //retornar variable follow con boolean
