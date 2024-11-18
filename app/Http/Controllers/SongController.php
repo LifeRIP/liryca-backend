@@ -272,11 +272,30 @@ class SongController extends Controller
 
     public function getSongsByAlbumId($albumId)
     {
-        $songs = Song::where('album_id', $albumId)->get();
+        $songs = Song::where('album_id', $albumId)
+            ->with(['album', 'artist'])
+            ->get();
 
         if ($songs->isEmpty()) {
             return response()->json(['error' => 'No songs found for this album'], 404);
         }
+
+        $songs = $songs->map(function ($song) {
+            return [
+                'id' => $song->id,
+                'title' => $song->title,
+                'artist_id' => $song->artist_id,
+                'album_id' => $song->album_id,
+                'time' => $song->time,
+                'genre' => $song->genre,
+                'url_song' => $song->url_song,
+                'is_active' => $song->is_active,
+                'album_icon' => $song->album->icon,
+                'artist_username' => $song->artist->user->username,
+                'created_at' => $song->created_at,
+                'updated_at' => $song->updated_at,
+            ];
+        });
 
         return response()->json([
             'data' => $songs,
