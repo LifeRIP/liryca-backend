@@ -16,31 +16,36 @@ class FollowsController extends Controller
      */
     public function store(Request $request)
     {
-        //Validar los datos
-        $validator = Validator::make($request->all(), [
-            'following_id' => 'required|uuid|exists:users,id'
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+        try {
+            //Validar los datos
+            $validator = Validator::make($request->all(), [
+                'following_id' => 'required|uuid|exists:users,id'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 400);
+            }
+
+            //Comprobar si el usuario ya sigue al usuario
+            $follow = Follow::where('follower_id', $request->user()->id)
+                ->where('following_id', $request->following_id)
+                ->first();
+
+            if ($follow) {
+                return response()->json(['message' => 'Ya sigues a este usuario'], 400);
+            }
+
+            //Crear el nuevo seguidor
+            $follow = new Follow();
+            $follow->follower_id = $request->user()->id;
+            $follow->following_id = $request->following_id;
+            $follow->save();
+
+            return response()->json(['message' => 'Usuario seguido correctamente'], 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al seguir al usuario'], 500);
         }
-
-        //Comprobar si el usuario ya sigue al usuario
-        $follow = Follow::where('follower_id', $request->user()->id)
-            ->where('following_id', $request->following_id)
-            ->first();
-
-        if ($follow) {
-            return response()->json(['message' => 'Ya sigues a este usuario'], 400);
-        }
-
-        //Crear el nuevo seguidor
-        $follow = new Follow();
-        $follow->follower_id = $request->user()->id;
-        $follow->following_id = $request->following_id;
-        $follow->save();
-
-        return response()->json(['message' => 'Usuario seguido correctamente'], 201);
     }
 
     /**
@@ -48,42 +53,47 @@ class FollowsController extends Controller
      */
     public function show(Request $request)
     {
-        //Obtener los seguidores del usuario autenticado
-        $follows = Follow::where('follower_id', $request->user()->id)->get();
 
-        //Obtener el numero de seguidores
-        $count_followers = Follow::where('following_id', $request->user()->id)->count();
+        try {
+            //Obtener los seguidores del usuario autenticado
+            $follows = Follow::where('follower_id', $request->user()->id)->get();
 
-        //Obtener el id, username, icono y banner de los usuarios seguidos
-        $users = [];
-        foreach ($follows as $follow) {
-            $user = User::select('id', 'username', 'profile_picture', 'profile_banner')
-                ->where('id', $follow->following_id)
-                ->first();
-            $users[] = $user;
+            //Obtener el numero de seguidores
+            $count_followers = Follow::where('following_id', $request->user()->id)->count();
+
+            //Obtener el id, username, icono y banner de los usuarios seguidos
+            $users = [];
+            foreach ($follows as $follow) {
+                $user = User::select('id', 'username', 'profile_picture', 'profile_banner')
+                    ->where('id', $follow->following_id)
+                    ->first();
+                $users[] = $user;
+            }
+
+            //Obtener los seguidos del usuario autenticado
+            $following = Follow::where('following_id', $request->user()->id)->get();
+
+            //Obtener el numero de seguidos
+            $count_following = Follow::where('follower_id', $request->user()->id)->count();
+
+            //Obtener el id, username, icono y banner de los seguidores
+            $followers = [];
+            foreach ($following as $follow) {
+                $follower = User::select('id', 'username', 'profile_picture', 'profile_banner')
+                    ->where('id', $follow->follower_id)
+                    ->first();
+                $followers[] = $follower;
+            }
+
+            return response()->json([
+                'count_followers' => $count_followers,
+                'followers' => $followers,
+                'count_following' => $count_following,
+                'following' => $users
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al obtener los seguidores'], 500);
         }
-
-        //Obtener los seguidos del usuario autenticado
-        $following = Follow::where('following_id', $request->user()->id)->get();
-
-        //Obtener el numero de seguidos
-        $count_following = Follow::where('follower_id', $request->user()->id)->count();
-
-        //Obtener el id, username, icono y banner de los seguidores
-        $followers = [];
-        foreach ($following as $follow) {
-            $follower = User::select('id', 'username', 'profile_picture', 'profile_banner')
-                ->where('id', $follow->follower_id)
-                ->first();
-            $followers[] = $follower;
-        }
-
-        return response()->json([
-            'count_followers' => $count_followers,
-            'followers' => $followers,
-            'count_following' => $count_following,
-            'following' => $users
-        ], 200);
     }
 
     /**
@@ -91,26 +101,62 @@ class FollowsController extends Controller
      */
     public function destroy(Request $request)
     {
-        //Validar los datos
-        $validator = Validator::make($request->all(), [
-            'following_id' => 'required|uuid|exists:users,id'
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+        try {
+            //Validar los datos
+            $validator = Validator::make($request->all(), [
+                'following_id' => 'required|uuid|exists:users,id'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 400);
+            }
+
+            //Comprobar si el usuario sigue al usuario
+            $follow = Follow::where('follower_id', $request->user()->id)
+                ->where('following_id', $request->following_id)
+                ->first();
+
+            if (!$follow) {
+                return response()->json(['message' => 'No sigues a este usuario'], 400);
+            }
+
+            //Eliminar la relacion de seguidor
+            $follow->delete();
+
+            return response()->json(['message' => 'Usuario dejado de seguir correctamente'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al dejar de seguir al usuario'], 500);
         }
+    }
 
-        //Comprobar si el usuario sigue al usuario
-        $follow = Follow::where('follower_id', $request->user()->id)
-            ->where('following_id', $request->following_id);
+    public function followUnit(Request $request, string $id_following)
+    {
 
-        if (!$follow) {
-            return response()->json(['message' => 'No sigues a este usuario'], 400);
+        //validar si el usuario es seguido
+        try {
+
+            //Validar los datos
+            $validator = Validator::make(['following_id' => $id_following], [
+                'following_id' => 'required|uuid|exists:users,id'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 400);
+            }
+
+            $follow = Follow::where('follower_id', $request->user()->id)
+                ->where('following_id', $id_following)
+                ->first();
+
+            //retornar variable follow con boolean
+            if (!$follow) {
+                return response()->json(['follow' => false], 200);
+            }
+
+            return response()->json(['follow' => true], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al comprobar si sigues al usuario'], 500);
         }
-
-        //Eliminar la relacion de seguidor
-        $follow->delete();
-
-        return response()->json(['message' => 'Usuario dejado de seguir correctamente'], 200);
     }
 }
