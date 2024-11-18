@@ -195,7 +195,7 @@ class AuthController extends Controller
     /**
      * @OA\Get(
      *    path="/api/v1/auth/logout",
-     *    summary="Logout",
+     *    summary="Logout the authenticated user",
      *    description="Logout the authenticated user",
      *    operationId="logout",
      *    tags={"auth"},

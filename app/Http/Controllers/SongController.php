@@ -257,7 +257,7 @@ class SongController extends Controller
      *     path="/api/v1/song/top-by-artist/{artistId}",
      *     summary="Get top songs by artist",
      *     description="Returns the top 10 songs by an artist based on playback count",
-     *     operationId="getTopSongsByArtist",
+     *     operationId="top-by-artist",
      *     tags={"song"},
      *     security={{"sanctum": {}}},
      *     @OA\Parameter(
@@ -323,6 +323,60 @@ class SongController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/song/by-album-id/{albumId}",
+     *     summary="Get songs by album",
+     *     description="Returns all songs from a specific album",
+     *     operationId="by-album-id",
+     *     tags={"song"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="albumId",
+     *         in="path",
+     *         description="ID of the album",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="OK",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="Mírame"),
+     *                     @OA\Property(property="artist_id", type="integer", example=1),
+     *                     @OA\Property(property="album_id", type="integer", example=1),
+     *                     @OA\Property(property="time", type="string", example="00:01:38"),
+     *                     @OA\Property(property="genre", type="string", example="Reggaeton"),
+     *                     @OA\Property(property="url_song", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
+     *                     @OA\Property(property="is_active", type="boolean", example=true),
+     *                     @OA\Property(property="album_icon", type="string", example="https://i.scdn.co/image/ab67616d0000b273c164b1a439733e92b5044700"),
+     *                     @OA\Property(property="artist_username", type="string", example="artist_username"),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Error: Not Found",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="error",
+     *                 type="string",
+     *                 example="No songs found for this album"
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function getSongsByAlbumId($albumId)
     {
         $songs = Song::where('album_id', $albumId)
