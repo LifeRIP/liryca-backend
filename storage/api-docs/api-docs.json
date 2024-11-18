@@ -61,12 +61,126 @@
                     }
                 ]
             }
+        },
+        "/api/v1/song/top-by-artist/{artistId}": {
+            "get": {
+                "tags": [
+                    "song"
+                ],
+                "summary": "Get top songs by artist",
+                "description": "Returns the top 10 songs by an artist based on playback count",
+                "operationId": "getTopSongsByArtist",
+                "parameters": [
+                    {
+                        "name": "artistId",
+                        "in": "path",
+                        "description": "ID of the artist",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Mírame"
+                                                    },
+                                                    "artist_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "album_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "time": {
+                                                        "type": "string",
+                                                        "example": "00:01:38"
+                                                    },
+                                                    "genre": {
+                                                        "type": "string",
+                                                        "example": "Reggaeton"
+                                                    },
+                                                    "url_song": {
+                                                        "type": "string",
+                                                        "example": "https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-11-18T00:20:29.000000Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-11-18T00:20:29.000000Z"
+                                                    },
+                                                    "play_count": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "No songs found for this artist"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "tags": [
         {
             "name": "auth",
             "description": "auth"
+        },
+        {
+            "name": "song",
+            "description": "song"
         }
     ],
     "components": {
@@ -77,7 +191,7 @@
                 "name": "Authorization",
                 "in": "header",
                 "scheme": "bearer",
-                "bearerFormat": "sactum"
+                "bearerFormat": "sanctum"
             }
         }
     }
