@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\RoleEnum;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ArtistController;
 
-Route::middleware([
-    'auth:sanctum'
-])->group(function () {
-    Route::resource('/', UserController::class)->parameters(['' => 'artist']);
+// Artist //
+Route::middleware('auth:sanctum')->group(function () {
+    Route::resource('/', ArtistController::class)->parameters(['' => 'artist']);
 });
