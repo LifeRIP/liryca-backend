@@ -149,4 +149,89 @@ class FollowsController extends Controller
             return response()->json(['message' => 'Error al comprobar si sigues al usuario'], 500);
         }
     }
+
+    public function followsCount(string $user_id)
+    {
+        try {
+            //Validar los datos
+            $validator = Validator::make(['user_id' => $user_id], [
+                'user_id' => 'required|uuid|exists:users,id'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 400);
+            }
+
+            //Obtener el numero de seguidores
+
+            $count_followers = Follow::where('following_id', $user_id)->count();
+
+            //Obtener el numero de seguidos
+
+            $count_following = Follow::where('follower_id', $user_id)->count();
+
+            return response()->json([
+                'count_followers' => $count_followers,
+                'count_following' => $count_following
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al obtener el numero de seguidores y seguidos'], 500);
+        }
+    }
+
+    public function getFollowsInfo(Request $request, string $user_id)
+    {
+        try {
+            //Validar los datos
+            $validator = Validator::make(['user_id' => $user_id], [
+                'user_id' => 'required|uuid|exists:users,id'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 400);
+            }
+
+            //Obtener el id, username, icono y información si lo sigo
+            $followers = Follow::where('following_id', $user_id)->get();
+            $followers_info = [];
+
+            foreach ($followers as $follow) {
+                $follower = User::select('id', 'username', 'profile_picture')
+                    ->where('id', $follow->follower_id)
+                    ->first();
+
+                $follower->follow = Follow::where('follower_id', $request->user()->id)
+                    ->where('following_id', $follower->id)
+                    ->exists();
+
+                $followers_info[] = $follower;
+            }
+
+            //Obtener el id, username, icono y información si me sigue
+            $following = Follow::where('follower_id', $user_id)->get();
+            $following_info = [];
+
+            foreach ($following as $follow) {
+                $followed = User::select('id', 'username', 'profile_picture')
+                    ->where('id', $follow->following_id)
+                    ->first();
+
+                $followed->follow = Follow::where('follower_id', $request->user()->id)
+                    ->where('following_id', $followed->id)
+                    ->exists();
+
+                $following_info[] = $followed;
+            }
+
+            //organizar la información
+            $info = [
+                'followers' => $followers_info,
+                'following' => $following_info
+            ];
+
+            return response()->json($info, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al obtener la información de los seguidores y seguidos'], 500);
+        }
+    }
 }
