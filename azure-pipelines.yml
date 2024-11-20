@@ -6,33 +6,51 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  phpVersion: 8.2
+
 steps:
   - script: |
-      sudo add-apt-repository ppa:ondrej/php -y
-      sudo apt-get update
-      sudo apt-get install php8.2 php8.2-cli php8.2-fpm php8.2-mbstring php8.2-xml php8.2-bcmath php8.2-curl php8.2-zip php8.2-tokenizer -y
-      php -v
-    displayName: 'Instalar PHP 8.2 y extensiones necesarias'
+      sudo update-alternatives --set php /usr/bin/php$(phpVersion)
+      sudo update-alternatives --set phar /usr/bin/phar$(phpVersion)
+      sudo update-alternatives --set phpdbg /usr/bin/phpdbg$(phpVersion)
+      sudo update-alternatives --set php-cgi /usr/bin/php-cgi$(phpVersion)
+      sudo update-alternatives --set phar.phar /usr/bin/phar.phar$(phpVersion)
+    displayName: 'Use PHP version $(phpVersion)'
 
-  - script: |
-      sudo apt-get install -y zip unzip
-      curl -sS https://getcomposer.org/installer | php
-      sudo mv composer.phar /usr/local/bin/composer
-    displayName: 'Instalar Composer'
-
-  - script: |
-      composer install
-    displayName: 'Instalar dependencias de PHP'
+  - script: composer install --no-interaction --prefer-dist
+    displayName: 'composer install'
 
   - task: NodeTool@0
     inputs:
       versionSpec: '18.x'
-    displayName: 'Instalar Node.js'
+    displayName: 'Install Node.js'
 
-  - script: |
-      npm install
-      npm run prod
-    displayName: 'Compilar assets de Laravel'
+  - task: Npm@1
+    inputs:
+      command: 'install'
+      workingDir: '$(Build.SourcesDirectory)'
+    displayName: 'npm install'
+
+  - task: Npm@1
+    inputs:
+      command: 'custom'
+      workingDir: '$(Build.SourcesDirectory)'
+      customCommand: 'run build'
+    displayName: 'npm build'
+
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: |
+        **/**
+        !**/node_modules/**
+        !**/.git/**
+        !**/storage/**
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      CleanTargetFolder: true
+      OverWrite: true
+    displayName: 'Copy files to publish directory'
 
   - script: |
       cp .env.example .env
@@ -42,3 +60,10 @@ steps:
   - script: |
       php artisan migrate --force
     displayName: 'Ejecutar migraciones de base de datos'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
+      StoreAsTar: true
