@@ -19,7 +19,7 @@ stages:
     - script: |
         sudo add-apt-repository ppa:ondrej/php -y
         sudo apt-get update
-        sudo apt-get install php$(phpVersion) php$(phpVersion)cli php$(phpVersion)-mbstring php$(phpVersion)-xml php$(phpVersion)-curl -y
+        sudo apt-get install php$(phpVersion) php$(phpVersion)-cli php$(phpVersion)-mbstring php$(phpVersion)-xml php$(phpVersion)-curl -y
         sudo update-alternatives --set php /usr/bin/php$(phpVersion)
         php -v
       displayName: 'Install PHP 8.2'
