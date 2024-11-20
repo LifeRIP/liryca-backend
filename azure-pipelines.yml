@@ -51,11 +51,14 @@ steps:
   - script: |
       cp .env.example .env
       php artisan key:generate
-    displayName: 'Configurar entorno de Laravel'
+    displayName: 'Config laravel enviroment'
 
-  - script: |
-      php artisan migrate --force
-    displayName: 'Ejecutar migraciones de base de datos'
+#  - script: |
+#      php artisan migrate --force
+#    displayName: 'Run database migrations'
+
+#  - script: vendor/bin/phpunit
+#    displayName: 'Run unit tests'
 
   - task: PublishBuildArtifacts@1
     inputs:
