@@ -5,6 +5,7 @@ trigger:
 
 variables:
   vmImageName: 'ubuntu-latest'
+  rootFolder: $(System.DefaultWorkingDirectory)
 
 stages:
 - stage: Build
