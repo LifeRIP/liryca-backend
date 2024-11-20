@@ -3,66 +3,78 @@ trigger:
     include:
       - main
 
-pool:
-  vmImage: 'ubuntu-latest'
+variables:
+  vmImageName: 'ubuntu-latest'
 
-steps:
-  - script: |
-      sudo add-apt-repository ppa:ondrej/php -y
-      sudo apt-get update
-      sudo apt-get install php8.2 php8.2-cli php8.2-fpm php8.2-mbstring php8.2-xml php8.2-bcmath php8.2-curl php8.2-zip php8.2-tokenizer -y
-      php -v
-    displayName: 'Install PHP 8.2 and necessary extensions'
+stages:
+- stage: Build
+  displayName: Build stage
+  variables:
+    phpVersion: '8.2'
+  jobs:
+  - job: BuildJob
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - script: |
+        sudo update-alternatives --set php /usr/bin/php$(phpVersion)
+        sudo update-alternatives --set phar /usr/bin/phar$(phpVersion)
+        sudo update-alternatives --set phpdbg /usr/bin/phpdbg$(phpVersion)
+        sudo update-alternatives --set php-cgi /usr/bin/php-cgi$(phpVersion)
+        sudo update-alternatives --set phar.phar /usr/bin/phar.phar$(phpVersion)
+        php -version
+      workingDirectory: $(rootFolder)
+      displayName: 'Use PHP version $(phpVersion)'
 
-  - script: composer install --no-interaction --prefer-dist
-    displayName: 'composer install'
+    - script: composer install --no-interaction --prefer-dist
+      displayName: 'composer install'
 
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '18.x'
-    displayName: 'Install Node.js'
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
 
-  - task: Npm@1
-    inputs:
-      command: 'install'
-      workingDir: '$(Build.SourcesDirectory)'
-    displayName: 'npm install'
+    - task: Npm@1
+      inputs:
+        command: 'install'
+        workingDir: '$(Build.SourcesDirectory)'
+      displayName: 'npm install'
 
-  - task: Npm@1
-    inputs:
-      command: 'custom'
-      workingDir: '$(Build.SourcesDirectory)'
-      customCommand: 'run build'
-    displayName: 'npm build'
+    - task: Npm@1
+      inputs:
+        command: 'custom'
+        workingDir: '$(Build.SourcesDirectory)'
+        customCommand: 'run build'
+      displayName: 'npm build'
 
-  - task: CopyFiles@2
-    inputs:
-      SourceFolder: '$(Build.SourcesDirectory)'
-      Contents: |
-        **/**
-        !**/node_modules/**
-        !**/.git/**
-        !**/storage/**
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      CleanTargetFolder: true
-      OverWrite: true
-    displayName: 'Copy files to publish directory'
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'
+        Contents: |
+          **/**
+          !**/node_modules/**
+          !**/.git/**
+          !**/storage/**
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        CleanTargetFolder: true
+        OverWrite: true
+      displayName: 'Copy files to publish directory'
 
-  - script: |
-      cp .env.example .env
-      php artisan key:generate
-    displayName: 'Config laravel enviroment'
+    - script: |
+        cp .env.example .env
+        php artisan key:generate
+      displayName: 'Config laravel enviroment'
 
-#  - script: |
-#      php artisan migrate --force
-#    displayName: 'Run database migrations'
+#    - script: |
+#        php artisan migrate --force
+#      displayName: 'Run database migrations'
 
-#  - script: vendor/bin/phpunit
-#    displayName: 'Run unit tests'
+#    - script: vendor/bin/phpunit
+#      displayName: 'Run unit tests'
 
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: 'drop'
-      publishLocation: 'Container'
-      StoreAsTar: true
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+        StoreAsTar: true
