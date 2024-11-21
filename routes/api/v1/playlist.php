@@ -6,4 +6,6 @@ use Illuminate\Support\Facades\Route;
 
 // Playlist //
 
-Route::resource('/', PlaylistController::class)->parameters(['' => 'playlist']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::resource('/', PlaylistController::class)->parameters(['' => 'playlist']);
+});
