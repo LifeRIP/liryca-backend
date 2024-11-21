@@ -68,13 +68,6 @@ class ArtistController extends Controller
     public function update(Request $request): JsonResponse
     {
         try {
-
-            // Verificar si el usuario es un artista con el rol de artista en users
-            if ($request->user()->role !== 'artist') {
-                return response()->json([
-                    'message' => 'Unauthorized'
-                ], 401);
-            }
             // Actualizar la información del artista en la tabla users
             $user = User::find($request->user()->id);
 

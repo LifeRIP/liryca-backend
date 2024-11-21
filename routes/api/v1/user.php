@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\RoleEnum;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 

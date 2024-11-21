@@ -16,20 +16,63 @@ class PlaylistController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Obtener todas las listas de reproducción publicas
-        $playlists = Playlist::where('privacy', 'public')->get();
+        try {
+            //Obtener todas las listas de reproducción del usuario
+            $playlists = Playlist::where('user_id', $request->user()->id)->get();
+            $sharedPlaylists = SharedPlaylist::where('user_id', $request->user()->id)->get();
+            $followedPlaylists = FollowedPlaylist::where('user_id', $request->user()->id)->get();
 
-        //si no hay listas de reproducción publicas
+            // Obtener la información de las listas de reproducción compartidas
+            $sharedPlaylistsInfo = [];
 
-        if (!$playlists) {
+            foreach ($sharedPlaylists as $sharedPlaylist) {
+                $playlist = Playlist::find($sharedPlaylist->playlist_id);
+                $user = User::find($playlist->user_id);
+                $sharedPlaylistsInfo[] = [
+                    'id' => $playlist->id,
+                    'name' => $playlist->name,
+                    'image' => $playlist->image,
+                    'owner' => $user->nameusername
+                ];
+            }
+
+            // Obtener la información de las listas de reproducción seguidas
+            $followedPlaylistsInfo = [];
+
+            foreach ($followedPlaylists as $followedPlaylist) {
+                $playlist = Playlist::find($followedPlaylist->playlist_id);
+                $user = User::find($playlist->user_id);
+                $followedPlaylistsInfo[] = [
+                    'id' => $playlist->id,
+                    'name' => $playlist->name,
+                    'image' => $playlist->image,
+                    'owner' => $user->nameusername
+                ];
+            }
+
+            // Obtener la información de las listas de reproducción propias
+            $playlistsInfo = [];
+
+            foreach ($playlists as $playlist) {
+                $user = User::find($playlist->user_id);
+                $playlistsInfo[] = [
+                    'id' => $playlist->id,
+                    'name' => $playlist->name,
+                    'image' => $playlist->image,
+                    'owner' => $user->username
+                ];
+            }
+
             return response()->json([
-                'message' => 'No playlists found'
-            ], 404);
+                'playlists' => $playlistsInfo,
+                'shared_playlists' => $sharedPlaylistsInfo,
+                'followed_playlists' => $followedPlaylistsInfo
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error getting playlists'], 500);
         }
-
-        return response()->json($playlists);
     }
 
     /**
@@ -37,46 +80,35 @@ class PlaylistController extends Controller
      */
     public function store(Request $request)
     {
-        // Validar los campos requeridos
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'user_id' => 'required',
-            'description' => 'required',
-            'privacy' => 'required' | 'in:public,private',
-            'image' => 'required',
-            'is_active' => 'required'
-        ]);
+        try {
+            // Comprobar si el usuario existe
+            $user = User::find($request->user()->id);
+            if (!$user) {
+                return response()->json([
+                    'message' => 'User not found'
+                ], 404);
+            }
 
-        // Comprobar si la validación falla
-        if ($validator->fails()) {
+            // Comprobar cuantas listas de reproducción tiene el usuario entre propias y compartidas y seguidas
+            $playlists = Playlist::where('user_id', $request->user()->id)->get();
+            $sharedPlaylists = SharedPlaylist::where('user_id', $request->user()->id)->get();
+            $followedPlaylists = FollowedPlaylist::where('user_id', $request->user()->id)->get();
+
+            $Nplaylists = count($playlists) + count($sharedPlaylists) + count($followedPlaylists);
+
+            // Crear una nueva lista de reproducción
+            $playlist = new Playlist();
+            $playlist->name = "Playlist #" . ($Nplaylists + 1);
+            $playlist->user_id = $request->user()->id;
+            $playlist->save();
+
             return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 400);
+                'message' => 'Playlist created successfully',
+                'playlist' => $playlist
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error creating playlist'], 500);
         }
-
-        // Comprobar si el usuario existe
-        $user = User::find($request->user_id);
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found'
-            ], 404);
-        }
-
-        // Crear una nueva lista de reproducción
-        $playlist = new Playlist();
-        $playlist->name = $request->name;
-        $playlist->user_id = $request->user_id;
-        $playlist->description = $request->description;
-        $playlist->privacy = $request->privacy;
-        $playlist->image = $request->image;
-        $playlist->is_active = $request->is_active;
-        $playlist->save();
-
-        return response()->json([
-            'message' => 'Playlist created successfully',
-            'playlist' => $playlist
-        ], 201);
     }
 
     /**
@@ -84,14 +116,29 @@ class PlaylistController extends Controller
      */
     public function show(string $id)
     {
-        // Obtener la lista de reproducción por nombre
-        $playlist = Playlist::where('name', $id)->first();
-        if (!$playlist) {
+        try {
+            // Obtener la lista de reproducción por id
+            $playlist = Playlist::find($id);
+
+            // Si la lista de reproducción no existe o is_active es false
+            if (!$playlist) {
+                return response()->json([
+                    'message' => 'Playlist not found'
+                ], 404);
+            }
+
+            if (!$playlist->is_active) {
+                return response()->json([
+                    'message' => 'Playlist not found'
+                ], 404);
+            }
+
             return response()->json([
-                'message' => 'Playlist not found'
-            ], 404);
+                'playlist' => $playlist
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error getting playlist'], 500);
         }
-        return response()->json($playlist);
     }
 
     /**
@@ -99,37 +146,42 @@ class PlaylistController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Buscar la lista de reproducción por ID
-        $playlist = Playlist::find($id);
+        try {
+            // Buscar la lista de reproducción por ID
+            $playlist = Playlist::find($id);
 
-        // Si la lista de reproducción no existe
-        if (!$playlist) {
+            // Si la lista de reproducción no existe
+            if (!$playlist) {
+                return response()->json([
+                    'message' => 'Playlist not found'
+                ], 404);
+            }
+
+            // Comprobar si el usuario existe y es el propietario de la lista de reproducción 
+            $user = User::find($request->user()->id);
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            if ($playlist->user_id !== $request->user()->id) {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            // Actualizar la lista de reproducción
+            $playlist->update($request->all());
+
             return response()->json([
-                'message' => 'Playlist not found'
-            ], 404);
+                'message' => 'Playlist updated successfully',
+                'playlist' => $playlist
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error updating playlist'], 500);
         }
-
-        // Comprobar si el usuario existe y es el propietario de la lista de reproducción
-        $user = User::find($request->user_id);
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found'
-            ], 404);
-        }
-
-        if ($playlist->user_id !== $request->user_id) {
-            return response()->json([
-                'message' => 'Unauthorized'
-            ], 401);
-        }
-
-        // Actualizar la lista de reproducción
-        $playlist->update($request->all());
-
-        return response()->json([
-            'message' => 'Playlist updated successfully',
-            'playlist' => $playlist
-        ]);
     }
 
     /**
@@ -137,36 +189,41 @@ class PlaylistController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
-        // Buscar la lista de reproducción por ID
-        $playlist = Playlist::find($id);
+        try {
+            // Buscar la lista de reproducción por ID
+            $playlist = Playlist::find($id);
 
-        // Si la lista de reproducción no existe
-        if (!$playlist) {
+            // Si la lista de reproducción no existe
+            if (!$playlist) {
+                return response()->json([
+                    'message' => 'Playlist not found'
+                ], 404);
+            }
+
+            // Comprobar si el usuario existe y es el propietario de la lista de reproducción
+            $user = User::find($request->user()->id);
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            if ($playlist->user_id !== $request->user()->id) {
+                return response()->json([
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            // Eliminar la lista de reproducción
+            $playlist->delete();
+
             return response()->json([
-                'message' => 'Playlist not found'
-            ], 404);
+                'message' => 'Playlist deleted successfully',
+                'data' => $playlist
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error deleting playlist'], 500);
         }
-
-        // Comprobar si el usuario existe y es el propietario de la lista de reproducción
-        $user = User::find($request->user_id);
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found'
-            ], 404);
-        }
-
-        if ($playlist->user_id !== $request->user_id) {
-            return response()->json([
-                'message' => 'Unauthorized'
-            ], 401);
-        }
-
-        // Eliminar la lista de reproducción
-        $playlist->delete();
-
-        return response()->json([
-            'message' => 'Playlist deleted successfully',
-            'data' => $playlist
-        ]);
     }
 }

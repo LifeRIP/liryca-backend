@@ -15,34 +15,51 @@ class PlaybackHistoryController extends Controller
      */
     public function store(Request $request)
     {
-        //Validar los datos
-        $validator = Validator::make($request->all(), [
-            'song_id' => 'required|exists:songs,id'
-        ]);
+        try {
+            //Validar los datos
+            $validator = Validator::make($request->all(), [
+                'song_id' => 'required|exists:songs,id'
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 400);
+            }
+
+            //Crear el nuevo historial de reproduccion
+            $playbackHistory = new PlaybackHistory();
+            $playbackHistory->user_id = $request->user()->id;
+            $playbackHistory->song_id = $request->song_id;
+            $playbackHistory->save();
+
+            return response()->json($playbackHistory, 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al guardar el historial de reproduccion'], 500);
         }
-
-        //Guardar cancion en la tabla de historial de reproducciones
-        $playbackHistory = new PlaybackHistory();
-        $playbackHistory->user_id = $request->user()->id;
-        $playbackHistory->song_id = $request->song_id;
-        $playbackHistory->save();
-
-        return response()->json($playbackHistory, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Request $request)
+    public function index(Request $request)
     {
-        //Mostrar historial de reproducciones de la mas reciente a la mas antigua
-        $playbackHistory = PlaybackHistory::where('user_id', $request->user()->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        try {
+            //Obtener el historial de reproduccion del usuario autenticado
+            $playbackHistory = PlaybackHistory::where('user_id', $request->user()->id)->get();
 
-        return response()->json($playbackHistory, 200);
+            //Agregar nombre de la cancion , foto del album, id de la cancion, url de la cancion, nombre del artista
+            $playbackHistory = $playbackHistory->map(function ($history) {
+                return [
+                    'song_name' => $history->song->title,
+                    'album_image' => $history->song->album->icon,
+                    'song_id' => $history->song->id,
+                    'song_url' => $history->song->url_song,
+                    'artist_name' => $history->song->album->artist->user->username
+                ];
+            });
+
+            return response()->json($playbackHistory, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al obtener el historial de reproduccion'], 500);
+        }
     }
 }
