@@ -6,6 +6,8 @@ use App\Enums\RoleEnum;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use SocialiteProviders\Manager\SocialiteWasCalled;
+use SocialiteProviders\Discord\DiscordExtendSocialite;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,5 +34,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user->hasRole(RoleEnum::ADMIN->value) ? true : null;
         });
+
+        // Registrar el controlador de Discord
+        $this->app['events']->listen(
+            SocialiteWasCalled::class,
+            [DiscordExtendSocialite::class, 'handle']
+        );
     }
 }

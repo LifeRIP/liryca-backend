@@ -26,7 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['web'])->group(function () {
-    // Rutas para el inicio de sesión con OAuth (Google, Facebook, Github)
+    // Rutas para el inicio de sesión con OAuth (Google, Facebook, Github, Discord)
     Route::get('/{provider}', [AuthController::class, 'redirectToProvider']);
     Route::get('/{provider}/callback', [AuthController::class, 'handleProviderCallback']);
 });

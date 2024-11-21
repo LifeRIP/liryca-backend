@@ -553,11 +553,61 @@ class AuthController extends Controller
         Auth::login($user, true); //login the user
         return redirect('/dashboard'); //redirect to another page
     }
+
+
+
+    // Método para redirigir a discord auth
+    public function redirectToDiscord()
+    {
+        return Socialite::driver('discord')->redirect();
+    }
+
+    public function handleDiscordCallback()
+    {
+        $user_discord = socialite::driver('discord')->user();
+
+        $user = User::where('external_id', $user_discord->id)->orWhere('email', $user_discord->email)->first();
+
+        if (!$user) {
+            $user = User::create([
+                'name' => $user_discord->name,
+                'email' => $user_discord->email,
+                'username' => $user_discord->nickname ?? $user_discord->name,
+                'password' => bcrypt(Str::random(16)), // a default password on password field
+                'external_id' => $user_discord->id,
+                'external_auth' => 'discord',
+                'birthday' => '2000-01-01',
+                'country' => 'Unknown',
+            ]);
+        }
+
+        $user = User::updateorCreate(
+            [
+                'external_id' => $user_discord->id,
+            ],
+            [
+                //'name' => $user_github->name,
+                'email' => $user_discord->email,
+                'username' => $user_discord->nickname ?? $user_discord->name,
+                'birthday' => '2000-01-01',
+                'country' => 'Unknown',
+
+            ]
+        );
+        Auth::login($user, true); //login the user
+        return redirect('/dashboard'); //redirect to another page
+    }
+
+
+
+
+
+
     public function redirectToProvider($provider)
     {
         // Validar el proveedor
         $validator = Validator::make(['provider' => $provider], [
-            'provider' => ['required', 'string', Rule::in(['google', 'facebook', 'github'])],
+            'provider' => ['required', 'string', Rule::in(['google', 'facebook', 'github', 'discord'])],
         ]);
 
         if ($validator->fails()) {
