@@ -359,7 +359,11 @@ class AuthController extends Controller
             return response()->json(['message' => '2FA secret not found'], 400);
         }
 
-        if (! $request->validateToken()) {
+        /*if (! $request->validateToken()) {
+            return response()->json(['message' => 'Invalid verification code, please try again'], 400);
+        }*/
+
+        if (!$this->validateToken($request)) {
             return response()->json(['message' => 'Invalid verification code, please try again'], 400);
         }
 
@@ -401,7 +405,7 @@ class AuthController extends Controller
     }
 
 
-    public function validateToken(Request $request): bool
+    /*public function validateToken(Request $request): bool
     {
         $user = $request->user();
 
@@ -412,7 +416,21 @@ class AuthController extends Controller
         }
 
         abort(HTTP_SERVER_ERROR, 'Unable to verify your two-factor authentication token. Please contact support.');
+    }*/
+
+    public function validateToken(Request $request): bool
+{
+    $user = $request->user();  // Obtén el usuario autenticado
+    $token = $request->input('token'); // Obtén el token de la solicitud
+
+    try {
+        return Google2FA::verifyKey($user->two_factor_secret, $token); // Verifica el token usando la clave secreta
+    } catch (Exception $e) {
+        report($e); // Registra cualquier error
     }
+
+    abort(500, 'Unable to verify your two-factor authentication token. Please contact support.');
+}
 
 
     public function verify(Request $request)
@@ -611,47 +629,110 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->json(['message' => 'Invalid provider specified'], 400);
         }
 
         return Socialite::driver($provider)->redirect();
     }
 
     public function handleProviderCallback($provider)
-    {
-        $user_provider = Socialite::driver($provider)->user();
-        $user = User::firstOrCreate(
-            [
-                'email' => $user_provider->email
-            ],
-            [
-                'username' => $user_provider->nickname ?? $user_provider->name,
-                'email' => $user_provider->email,
-                'password' => Hash::make(Str::random(16)), // Un valor predeterminado en el campo de contraseña
+{
+    $user_provider = Socialite::driver($provider)->user();
+
+    // Buscar al usuario por correo
+    $user = User::where('email', $user_provider->email)->first();
+
+    if ($user) {
+        // Si el usuario ya existe, actualizar campos adicionales si es necesario
+        if (!$user->is_migrated) {
+            try{
+            $user->update([
+                'is_migrated' => 1,
                 'external_id' => $user_provider->id,
                 'external_auth' => $provider,
-                'birthday' => '2000-01-01',
-                'country' => 'Unknown',
-            ]
-        );
+             ]);
 
-        // Verificar si el proveedor de OAuth coincide con el proveedor de la solicitud
-        if ($user->external_auth !== $provider) {
-            return response()->json(['message' => 'Provider mismatch'], 400);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Error migrating user', 'error' => $e->getMessage()], 500);
+            }
         }
+    } else {
+        // Si el usuario no existe, crear uno nuevo
 
-        // Crear un token de acceso para el usuario
-        $token = $user->createToken('auth_token')->plainTextToken;
+        try{
+        $user = User::create([
+            'username' => $user_provider->nickname ?? $user_provider->name,
+            'email' => $user_provider->email,
+            'password' => Hash::make(Str::random(16)),
+            'external_id' => $user_provider->id,
+            'external_auth' => $provider,
+            'birthday' => '2000-01-01',
+            'country' => 'Unknown',
+            'is_migrated' => 1,
+            ]);
+             
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error creating user', 'error' => $e->getMessage()], 500);
+        }
+    }
 
-        Auth::login($user, true);
+    // Crear un token de acceso para el usuario
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    Auth::login($user, true);
+
+    return response()->json([
+        'message' => 'User logged in',
+        'user' => $user,
+        'token' => $token,
+        'token_type' => 'Bearer',
+        'remember' => true,
+    ], 201);
+}
+
+
+
+
+    public function updateInformation(Request $request )
+    {
+        $user = Auth::user();
+
+        // Validar los datos del formulario
+        //tambien permite cambiar la contraseña del usuario, por si este no la olvidó si no que desea cambiarla directamente estando logeado
+        $validated = $request->validate([
+            'username' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'description' => 'nullable|string',
+            'birthday' => 'nullable|date',
+            'country' => 'nullable|string|max:255',
+            //'password' => 'nullable|confirmed|min:8',
+        ]);
+
+        // Actualizar los datos del usuario
+        $user->update([
+            'username' => $validated['username'],
+            'email' => $validated['email'],
+            'description' => $validated [ 'description'] ?? $user->description,
+            'birthday' => $validated['birthday'] ?? $user->birthday,
+            'country' => $validated['country'] ?? $user->country,
+            //'password' => $validated['password'] ? Hash::make($validated['password']) : $user->password,
+        ]);
+
+        
 
         return response()->json([
-            'message' => 'User logged in',
+            'message' => 'Profile updated successfully!',
             'user' => $user,
-            'token' => $token,
-            'token_type' => 'Bearer',
-            'remember' => true
-        ], 201);
-        //return redirect((config('app.frontend_url') . '/dashboard'));
+        ], 200);
     }
+
+
+
+
+
+
+
+
+
+
 }

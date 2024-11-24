@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/enable2fa', [AuthController::class, 'enable2fa'])->name('enable');
     Route::post('/disable-2fa', [AuthController::class, 'disable2fa'])->name('disable2fa');
     Route::post('/verify-secret', [AuthController::class, 'verify'])->name('verify');
+    Route::put('/profile', [AuthController::class, 'updateInformation'])->name('profile.updateInformation');
 });
 
 Route::middleware(['web'])->group(function () {

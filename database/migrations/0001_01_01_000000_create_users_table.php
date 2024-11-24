@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->boolean('is_migrated')->default(0);
             $table->string('username')->unique();
             $table->date('birthday');
             $table->string('country');
