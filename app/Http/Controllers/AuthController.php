@@ -147,6 +147,14 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
+        // Si el usuario tiene 2FA habilitado, devolver un mensaje solicitando el código 2FA
+        if ($user->enable_two_factor_auth) {
+            return response()->json(['message' => 'Two-factor authentication code required'], 400);
+        }
+
+
+        
+
         // Recordar el inicio de sesión del usuario
         $remember = $request->remember ?? false;
 
@@ -433,29 +441,73 @@ class AuthController extends Controller
 }
 
 
-    public function verify(Request $request)
-    {
-        $user = $request->user(); // Obtén el usuario autenticado
+public function verify(Request $request)
+{
+    $user = $request->user(); // Obtén el usuario autenticado
 
-        // El token enviado desde Postman
-        $token = $request->input('token');
-
-        // Instancia de Google2FA
-        $google2fa = app('pragmarx.google2fa');
-
-        // Verificamos el token usando la clave secreta del usuario
-        $isValid = $google2fa->verifyKey($user->two_factor_secret, $token);
-
-        if ($isValid) {
-            return response()->json([
-                'message' => '2FA verification successful',
-            ], 200);
-        } else {
-            return response()->json([
-                'message' => 'Invalid 2FA token, please try again',
-            ], 400);
-        }
+    // Verificar si la 2FA está habilitada
+    if (!$user->enable_two_factor_auth) {
+        return response()->json(['message' => 'Two-factor authentication is not enabled'], 400);
     }
+
+    // El token enviado desde Postman
+    $token = $request->input('token');
+
+    // Instancia de Google2FA
+    $google2fa = app('pragmarx.google2fa');
+
+    // Verificamos el token usando la clave secreta del usuario
+    $isValid = $google2fa->verifyKey($user->two_factor_secret, $token);
+
+    if ($isValid) {
+        // Si el código es válido, generamos el token de acceso para la API
+        // Usamos el guardia 'api' para generar el token de acceso.
+        $accessToken = $user->createToken('auth_token')->plainTextToken;
+
+        // Verificar si el usuario es un artista y devolver la respuesta adecuada
+        if ($user->role === RoleEnum::ARTIST->value) {
+            $artist = $user->artist()->first();
+
+            return response()->json([
+                'message' => 'Artist registered',
+                'user' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'country' => $user->country,
+                    'birthday' => $user->birthday,
+                    'role' => $user->role,
+                    'profile_picture' => $user->profile_picture,
+                    'profile_banner' => $user->profile_banner,
+                    'created_at' => $user->created_at,
+                    'updated_at' => $user->updated_at,
+                    'artist' => [
+                        'id' => $artist->id,
+                        'verified' => $artist->verified,
+                    ],
+                ],
+                'token' => $accessToken,
+                'token_type' => 'Bearer'
+            ], 201);
+        }
+
+        // Si no es un artista, devolvemos la respuesta estándar
+        return response()->json([
+            'message' => 'User logged in successfully',
+            'user' => $user,
+            'token' => $accessToken,
+            'token_type' => 'Bearer'
+        ], 200);
+    } else {
+        // Si el token es inválido
+        return response()->json([
+            'message' => 'Invalid 2FA token, please try again',
+        ], 400);
+    }
+}
+
+
+
 
     public function redirectToGoogle()
     {
