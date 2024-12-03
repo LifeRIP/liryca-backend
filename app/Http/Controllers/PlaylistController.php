@@ -169,6 +169,7 @@ class PlaylistController extends Controller
                 'username' => $user->username,
                 'profile_picture' => $user->profile_picture,
                 'privacy' => $playlist['privacy'],
+                'created_at' => $playlist['created_at'],
                 'shared_with' => $sharedPlaylistInfo
             ];
 
