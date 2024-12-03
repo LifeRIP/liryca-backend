@@ -117,7 +117,7 @@ class PlaylistController extends Controller
     public function show(string $id)
     {
         try {
-            // Obtener la lista de reproducción por id
+            // Obtener la lista de reproducción por id y nombre del propietario
             $playlist = Playlist::find($id);
 
             // Si la lista de reproducción no existe o is_active es false
@@ -133,8 +133,47 @@ class PlaylistController extends Controller
                 ], 404);
             }
 
+            // Obtener el propietario de la lista de reproducción, username y profile_picture
+
+            $user = User::find($playlist->user_id);
+
+            $playlistInfo = [
+                'id' => $playlist->id,
+                'name' => $playlist->name,
+                'image' => $playlist->image,
+                'owner' => $user->username,
+                'owner_image' => $user->profile_picture
+            ];
+
+            // si la lista de reproducción es compartida mostrar el propietario y las personas con las que se ha compartido
+            $sharedPlaylist = SharedPlaylist::where('playlist_id', $playlist->id)->get();
+            $sharedPlaylistInfo = [];
+
+            if (count($sharedPlaylist) > 0) {
+                foreach ($sharedPlaylist as $shared) {
+                    $user = User::find($shared->user_id);
+                    $sharedPlaylistInfo[] = [
+                        'id' => $user->id,
+                        'username' => $user->username,
+                        'profile_picture' => $user->profile_picture
+                    ];
+                }
+            }
+
+            $playlistResponse = [
+                'id' => $playlist['id'],
+                'name' => $playlist['name'],
+                'description' => $playlist['description'],
+                'image' => $playlist['image'],
+                'user_id' => $playlist['user_id'],
+                'username' => $user->username,
+                'profile_picture' => $user->profile_picture,
+                'privacy' => $playlist['privacy'],
+                'shared_with' => $sharedPlaylistInfo
+            ];
+
             return response()->json([
-                'playlist' => $playlist
+                'playlist' => $playlistResponse
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error getting playlist'], 500);
