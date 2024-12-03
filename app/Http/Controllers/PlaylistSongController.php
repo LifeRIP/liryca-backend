@@ -117,6 +117,16 @@ class PlaylistSongController extends Controller
             // Obtener todas las canciones de la playlist
             $playlistSongs = PlaylistSong::where('playlist_id', $id)->get();
 
+            // Añadir Username de el add_by y profile_picture de el usuario que añadió la canción dentro del campo add_by
+
+            $playlistSongs->map(function ($playlistSong) {
+                $playlistSong->add_by = User::select('id', 'username', 'profile_picture')
+                    ->where('id', $playlistSong->add_by)
+                    ->first();
+
+                return $playlistSong;
+            });
+
             // Obtener por medio de un select nombre de la canción, time, url_song, nombre del album, portada del album, username del artista de las canciones de la playlist
             $playlistSongs->map(function ($playlistSong) {
                 $playlistSong->song = Song::select('title', 'time', 'url_song', 'album_id')
