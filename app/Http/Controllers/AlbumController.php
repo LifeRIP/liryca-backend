@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Album;
+use App\Models\User;
 use App\Models\Artist;
 use Illuminate\Support\Facades\Validator;
 
@@ -325,6 +326,49 @@ class AlbumController extends Controller
                     'prev_page_url' => $albums->previousPageUrl(),
                 ],
             ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function getRecentlyAlbums(): JsonResponse
+    {
+        try {
+            // Obtener los álbumes recientes de los artistas verificados y activos
+            $albums = Album::Select('id', 'title', 'release_date', 'icon', 'artist_id')
+                ->where('is_active', true)
+                ->whereHas('artist', function ($query) {
+                    $query->where('verified', true);
+                })
+                ->orderBy('release_date', 'desc')
+                ->limit(15)
+                ->get();
+
+            // Si no hay álbumes recientes
+            if ($albums->count() === 0) {
+                return response()->json([
+                    'message' => 'No albums found'
+                ], 404);
+            }
+
+            // Añadir el nombre del artista e id 
+            $albums->map(function ($album) {
+                $album->artist = Artist::select('user_id')
+                    ->where('id', $album->artist_id)
+                    ->first();
+
+                $album->artist->username = User::select('username')
+                    ->where('id', $album->artist->user_id)
+                    ->first()
+                    ->username;
+
+                return $album;
+            });
+
+            return response()->json($albums);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

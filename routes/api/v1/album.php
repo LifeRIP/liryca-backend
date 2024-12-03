@@ -11,4 +11,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('/', AlbumController::class)->parameters(['' => 'album']);
     Route::get('/by-title/{title}', [AlbumController::class, 'getAlbumByTitle']);
     Route::get('/by-user-id/{userId}', [AlbumController::class, 'getAlbumsByUserId']);
+    Route::get('/albums/recents', [AlbumController::class, 'getRecentlyAlbums']);
 });
