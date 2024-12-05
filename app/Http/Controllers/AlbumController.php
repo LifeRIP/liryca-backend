@@ -381,7 +381,7 @@ class AlbumController extends Controller
     {
         try {
             // Obtener los álbumes de los artistas de mi país
-            $albums = Album::Select('id', 'title', 'release_date', 'icon', 'artist_id')
+            $albums = Album::select('id', 'title', 'release_date', 'icon', 'artist_id')
                 ->where('is_active', true)
                 ->whereHas('artist', function ($query) use ($request) {
                     $query->where('verified', true)
@@ -396,7 +396,8 @@ class AlbumController extends Controller
             // Si no hay álbumes de mi país
             if ($albums->count() === 0) {
                 return response()->json([
-                    'message' => 'No albums found'
+                    'success' => false,
+                    'data' => 'No albums found'
                 ], 404);
             }
 
@@ -414,11 +415,14 @@ class AlbumController extends Controller
                 return $album;
             });
 
-            return response()->json($albums);
+            return response()->json([
+                'success' => true,
+                'data' => $albums
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'data' => $e->getMessage()
             ]);
         }
     }
