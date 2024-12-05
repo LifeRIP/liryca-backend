@@ -231,4 +231,69 @@ class PlaylistSongController extends Controller
             ], 500);
         }
     }
+
+    public function listOfPlaylist(Request $request, string $id)
+    {
+        try {
+
+            //verificar la existencia de la cancion
+            $song = Song::find($id);
+
+            if (!$song) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Song not found'
+                ], 404);
+            }
+
+            //obtener el id de todas mis playlist y de las playlist que me han compartido
+            $myPlaylists = Playlist::where('user_id', $request->user()->id)
+                ->get();
+
+            $sharedPlaylists = SharedPlaylist::select('playlist_id')
+                ->where('user_id', $request->user()->id)
+                ->get();
+
+            //obtener la informacion de las playlist con los playlist_id obtenidos
+            $playlists = Playlist::whereIn('id', $myPlaylists->pluck('id'))
+                ->orWhereIn('id', $sharedPlaylists->pluck('playlist_id'))
+                ->get();
+
+            // buscar si la cancion ya esta en alguna de mis playlist
+            $playlists->map(function ($playlist) use ($id) {
+                $playlistSong = PlaylistSong::where('playlist_id', $playlist->id)
+                    ->where('song_id', $id)
+                    ->first();
+
+                if ($playlistSong) {
+                    $playlist->song_exists = true;
+                } else {
+                    $playlist->song_exists = false;
+                }
+
+                return $playlist;
+            });
+
+            //Retornar solo id, nombre, image, song_exists de las playlist
+            $playlists = $playlists->map(function ($playlist) {
+                return [
+                    'id' => $playlist->id,
+                    'name' => $playlist->name,
+                    'image' => $playlist->image,
+                    'song_exists' => $playlist->song_exists
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $playlists
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
