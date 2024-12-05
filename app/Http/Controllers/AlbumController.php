@@ -376,4 +376,50 @@ class AlbumController extends Controller
             ]);
         }
     }
+
+    public function getAlbumsByMyCountry(Request $request): JsonResponse
+    {
+        try {
+            // Obtener los álbumes de los artistas de mi país
+            $albums = Album::Select('id', 'title', 'release_date', 'icon', 'artist_id')
+                ->where('is_active', true)
+                ->whereHas('artist', function ($query) use ($request) {
+                    $query->where('verified', true)
+                        ->whereHas('user', function ($query) use ($request) {
+                            $query->where('country', $request->user()->country);
+                        });
+                })
+                ->orderBy('release_date', 'desc')
+                ->limit(15)
+                ->get();
+
+            // Si no hay álbumes de mi país
+            if ($albums->count() === 0) {
+                return response()->json([
+                    'message' => 'No albums found'
+                ], 404);
+            }
+
+            // Añadir el nombre del artista e id 
+            $albums->map(function ($album) {
+                $album->artist = Artist::select('user_id')
+                    ->where('id', $album->artist_id)
+                    ->first();
+
+                $album->artist->username = User::select('username')
+                    ->where('id', $album->artist->user_id)
+                    ->first()
+                    ->username;
+
+                return $album;
+            });
+
+            return response()->json($albums);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
 }
