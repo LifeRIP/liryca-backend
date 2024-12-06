@@ -125,7 +125,9 @@ class ArtistController extends Controller
                 ->pluck('following_id');
 
             // Obtener detalles de los artistas
-            $artists = Artist::whereIn('user_id', $artistIds)->get();
+            $artists = Artist::whereIn('user_id', $artistIds)
+                ->take(10)
+                ->get();
 
             return response()->json([
                 'success' => true,
