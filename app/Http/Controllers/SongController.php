@@ -6,9 +6,11 @@ use App\Http\Requests\SongRequest;
 use Illuminate\Http\Request;
 use App\Models\Album;
 use App\Models\Artist;
+use App\Models\PlaybackHistory;
 use App\Models\Song;
 use App\Models\SongCollaborator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class SongController extends Controller
@@ -455,7 +457,14 @@ class SongController extends Controller
      */
     public function getTopSongsToday()
     {
-        $topSongs = Song::where('is_active', true)
+        $topSongs = Song::where('songs.is_active', true)
+            ->join('artists', 'songs.artist_id', '=', 'artists.id')
+            ->join('users', 'artists.user_id', '=', 'users.id')
+            ->select(
+                'songs.*',
+                'users.id as user_id',
+                'users.username'
+            )
             ->whereHas('playbackHistories', function ($query) {
                 $query->whereDate('created_at', today());
             })
@@ -466,13 +475,105 @@ class SongController extends Controller
             ->take(10)
             ->get();
 
-        if ($topSongs->isEmpty()) {
-            return response()->json(['' => 'No songs found'], 404);
-        }
-
         return response()->json([
             'success' => true,
-            'data' => $topSongs,
+            'data' => $topSongs->map(function ($song) {
+                return [
+                    'id' => $song->id,
+                    'title' => $song->title,
+                    'artist_id' => $song->artist_id,
+                    'album_id' => $song->album_id,
+                    'url_song' => $song->url_song,
+                    'artist' => [
+                        'user_id' => $song->user_id,
+                        'username' => $song->username
+                    ],
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/song/songs/top-today/by-my-country",
+     *     summary="Get top songs today by my country",
+     *     description="Returns the top 10 songs played today by my country",
+     *     operationId="top-songs-today-by-my-country",
+     *     tags={"song"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="OK",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="Mírame"),
+     *                     @OA\Property(property="artist_id", type="integer", example=1),
+     *                     @OA\Property(property="album_id", type="integer", example=1),
+     *                     @OA\Property(property="time", type="string", example="00:01:38"),
+     *                     @OA\Property(property="genre", type="string", example="Reggaeton"),
+     *                     @OA\Property(property="url_song", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
+     *                     @OA\Property(property="is_active", type="boolean", example=true),
+     *                     @OA\Property(property="play_count", type="integer", example=1),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Error: Not Found",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="error",
+     *                 type="string",
+     *                 example="No songs found"
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function getTopSongsTodayByMyCountry(Request $request)
+    {
+        // Obtener el país del usuario autenticado desde el token
+        $country = $request->user()->country;
+
+        // Inicio del día actual
+        $today = now()->startOfDay();
+
+        // Consulta para obtener las canciones más escuchadas hoy en el país del usuario
+        $topSongs = PlaybackHistory::query()
+            ->select('songs.id', 'songs.title', 'songs.artist_id', 'songs.album_id', 'songs.url_song', 'users.id as user_id', 'users.username', DB::raw('COUNT(playback_histories.id) as play_count'))
+            ->join('songs', 'playback_histories.song_id', '=', 'songs.id')
+            ->join('artists', 'songs.artist_id', '=', 'artists.id')
+            ->join('users', 'artists.user_id', '=', 'users.id')
+            ->where('users.country', '=', $country)
+            ->where('playback_histories.created_at', '>=', $today)
+            ->groupBy('songs.id', 'songs.title', 'songs.artist_id', 'songs.album_id', 'songs.url_song', 'users.id', 'users.username')
+            ->orderByDesc('play_count')
+            ->take(10) // Limita a las 10 canciones más escuchadas
+            ->get();
+        //return $topSongs;
+
+        return response()->json([
+            'succes' => true,
+            'data' => $topSongs->map(function ($song) {
+                return [
+                    'id' => $song->id,
+                    'title' => $song->title,
+                    'artist_id' => $song->artist_id,
+                    'album_id' => $song->album_id,
+                    'url_song' => $song->url_song,
+                    'artist' => [
+                        'user_id' => $song->user_id,
+                        'username' => $song->username
+                    ],
+                ];
+            }),
         ]);
     }
 }
