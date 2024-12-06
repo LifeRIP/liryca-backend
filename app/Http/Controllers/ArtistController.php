@@ -112,4 +112,27 @@ class ArtistController extends Controller
             ], 500);
         }
     }
+
+    public function getFollowingArtists(Request $request)
+    {
+        try {
+            // Obtener los artistas que sigue el usuario
+            $followingArtists = DB::table('users')
+                ->join('follows', 'users.id', '=', 'follows.following_id')
+                ->join('artists', 'users.id', '=', 'artists.user_id')
+                ->select('users.username', 'users.birthday', 'users.country', 'users.email', 'users.description', 'users.is_active', 'users.profile_picture', 'users.profile_banner', 'artists.about')
+                ->where('follows.follower_id', $request->user()->id)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $followingArtists
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
 }

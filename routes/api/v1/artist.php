@@ -12,4 +12,5 @@ Route::middleware([
     //'role_or_permission' . RoleEnum::ARTIST
 ])->group(function () {
     Route::resource('/', ArtistController::class)->parameters(['' => 'artist']);
+    Route::get('/artists/following', [ArtistController::class, 'getFollowingArtists']);
 });
