@@ -21,6 +21,12 @@ class FollowSeeder extends Seeder
 
         // Crear un nuevo follow
         Follow::create([
+            'follower_id' => '8f6eea1e-9011-40ec-8ae4-19916127672b', // John Doe
+            'following_id' => '5d5e1b6c-71ec-49ea-bfb1-19100f7d5cf7', // Peso Pluma
+        ]);
+
+        // Crear un nuevo follow
+        Follow::create([
             'follower_id' => '741944d5-4f2e-4533-af0d-1155ededce3a', // Blessd
             'following_id' => '8f6eea1e-9011-40ec-8ae4-19916127672b', // John Doe
         ]);
