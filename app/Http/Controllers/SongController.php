@@ -309,11 +309,11 @@ class SongController extends Controller
      */
     public function getTopSongsByUser($userId)
     {
-        //return 'a';
         $topSongs = Song::whereHas('artist', function ($query) use ($userId) {
             $query->where('user_id', $userId);
         })
             ->where('is_active', true)
+            ->with(['album:id,icon', 'artist.user:id,username']) // Include album icon and user username
             ->withCount('playbackHistories as play_count')
             ->orderByDesc('play_count')
             ->take(10)
@@ -324,7 +324,28 @@ class SongController extends Controller
         }
 
         return response()->json([
-            'data' => $topSongs,
+            'data' => $topSongs->map(function ($song) {
+                return [
+                    'id' => $song->id,
+                    'title' => $song->title,
+                    'artist_id' => $song->artist_id,
+                    'album_id' => $song->album_id,
+                    'time' => $song->time,
+                    'genre' => $song->genre,
+                    'url_song' => $song->url_song,
+                    'is_active' => $song->is_active,
+                    'created_at' => $song->created_at,
+                    'updated_at' => $song->updated_at,
+                    'play_count' => $song->play_count,
+                    'album' => [
+                        'icon' => $song->album->icon,
+                    ],
+                    'artist' => [
+                        'user_id' => $song->artist->user->id,
+                        'username' => $song->artist->user->username,
+                    ]
+                ];
+            }),
         ]);
     }
 
