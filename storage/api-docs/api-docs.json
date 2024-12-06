@@ -18,7 +18,7 @@
                 "tags": [
                     "auth"
                 ],
-                "summary": "Logout",
+                "summary": "Logout the authenticated user",
                 "description": "Logout the authenticated user",
                 "operationId": "logout",
                 "responses": {
@@ -236,7 +236,7 @@
                                                     },
                                                     "album_icon": {
                                                         "type": "string",
-                                                        "example": "https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"
+                                                        "example": "https://i.scdn.co/image/ab67616d0000b273c164b1a439733e92b5044700"
                                                     },
                                                     "artist_username": {
                                                         "type": "string",
@@ -271,6 +271,105 @@
                                         "error": {
                                             "type": "string",
                                             "example": "No songs found for this album"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/song/songs/top-today": {
+            "get": {
+                "tags": [
+                    "song"
+                ],
+                "summary": "Get top songs today",
+                "description": "Returns the top 10 songs played today",
+                "operationId": "top-songs-today",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Mírame"
+                                                    },
+                                                    "artist_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "album_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "time": {
+                                                        "type": "string",
+                                                        "example": "00:01:38"
+                                                    },
+                                                    "genre": {
+                                                        "type": "string",
+                                                        "example": "Reggaeton"
+                                                    },
+                                                    "url_song": {
+                                                        "type": "string",
+                                                        "example": "https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "play_count": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-11-18T00:20:29.000000Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-11-18T00:20:29.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "No songs found"
                                         }
                                     },
                                     "type": "object"

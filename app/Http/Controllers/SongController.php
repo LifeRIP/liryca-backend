@@ -408,4 +408,71 @@ class SongController extends Controller
             'data' => $songs,
         ]);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/song/songs/top-today",
+     *     summary="Get top songs today",
+     *     description="Returns the top 10 songs played today",
+     *     operationId="top-songs-today",
+     *     tags={"song"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="OK",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="Mírame"),
+     *                     @OA\Property(property="artist_id", type="integer", example=1),
+     *                     @OA\Property(property="album_id", type="integer", example=1),
+     *                     @OA\Property(property="time", type="string", example="00:01:38"),
+     *                     @OA\Property(property="genre", type="string", example="Reggaeton"),
+     *                     @OA\Property(property="url_song", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
+     *                     @OA\Property(property="is_active", type="boolean", example=true),
+     *                     @OA\Property(property="play_count", type="integer", example=1),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Error: Not Found",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="error",
+     *                 type="string",
+     *                 example="No songs found"
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function getTopSongsToday()
+    {
+        $topSongs = Song::where('is_active', true)
+            ->whereHas('playbackHistories', function ($query) {
+                $query->whereDate('created_at', today());
+            })
+            ->withCount(['playbackHistories as play_count' => function ($query) {
+                $query->whereDate('created_at', today());
+            }])
+            ->orderByDesc('play_count')
+            ->take(10)
+            ->get();
+
+        if ($topSongs->isEmpty()) {
+            return response()->json(['' => 'No songs found'], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $topSongs,
+        ]);
+    }
 }
