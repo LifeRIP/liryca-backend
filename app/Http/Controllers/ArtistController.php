@@ -148,7 +148,7 @@ class ArtistController extends Controller
             ]);
         }
     }
-    public function getTopArtistsToday()
+    public function getTopArtists()
     {
         try {
             //$today = now(tz: 'America/Bogota')->startOfDay();
