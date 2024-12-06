@@ -74,9 +74,9 @@ class UserController extends Controller
     public function update(Request $request, string $id): JsonResponse
     {
         try {
-            // Validar los campos requeridos
+            // Validar los campos requeridos.
             $validator = Validator::make($request->all(), [
-                'username' => 'string|max:255|unique:users',
+                'username' => 'string|max:255|unique:users,username,' . $id,
                 'birthday' => 'date',
                 'country' => 'string|max:255',
                 'email' => 'string|email|max:255|unique:users',
