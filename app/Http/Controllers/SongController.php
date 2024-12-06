@@ -310,9 +310,10 @@ class SongController extends Controller
     public function getTopSongsByUser($userId)
     {
         //return 'a';
-        $topSongs = Song::join('artists', 'songs.artist_id', '=', 'artists.id')
-            ->where('artists.user_id', $userId)
-            ->where('songs.is_active', true)
+        $topSongs = Song::whereHas('artist', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })
+            ->where('is_active', true)
             ->withCount('playbackHistories as play_count')
             ->orderByDesc('play_count')
             ->take(10)
