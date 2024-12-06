@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Artist;
+use App\Models\Follow;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -116,18 +117,33 @@ class ArtistController extends Controller
     public function getFollowingArtists(Request $request)
     {
         try {
-            // Obtener los artistas que sigue el usuario
-            $followingArtists = DB::table('users')
-                ->join('follows', 'users.id', '=', 'follows.following_id')
-                ->join('artists', 'users.id', '=', 'artists.user_id')
-                ->select('users.username', 'users.birthday', 'users.country', 'users.email', 'users.description', 'users.is_active', 'users.profile_picture', 'users.profile_banner', 'artists.about')
-                ->where('follows.follower_id', $request->user()->id)
-                ->get();
+            // Obtener los IDs de los artistas que sigue
+            $artistIds = Follow::where('follower_id', $request->user()->id)
+                ->whereHas('following', function ($query) {
+                    $query->where('role', 'artist'); // Solo artistas
+                })
+                ->pluck('following_id');
+
+            // Obtener detalles de los artistas
+            $artists = Artist::whereIn('user_id', $artistIds)->get();
 
             return response()->json([
                 'success' => true,
-                'data' => $followingArtists
-            ]);
+                'data' => $artists->map(function ($artist) {
+                    return [
+                        'id' => $artist->id,
+                        'user_id' => $artist->user_id,
+                        'username' => $artist->user->username,
+                        'country' => $artist->user->country,
+                        'description' => $artist->user->description,
+                        'is_active' => $artist->user->is_active,
+                        'profile_picture' => $artist->user->profile_picture,
+                        'profile_banner' => $artist->user->profile_banner,
+                        'verified' => $artist->verified,
+                        'about' => $artist->about,
+                    ];
+                }),
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
