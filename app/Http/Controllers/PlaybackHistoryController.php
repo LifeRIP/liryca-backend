@@ -43,8 +43,18 @@ class PlaybackHistoryController extends Controller
     public function index(Request $request)
     {
         try {
-            //Obtener el historial de reproduccion del usuario autenticado
-            $playbackHistory = PlaybackHistory::where('user_id', $request->user()->id)->get();
+            //Obtener el historial de reproduccion del usuario autenticado 
+
+            $playbackHistory = PlaybackHistory::where('user_id', $request->user()->id)->orderBy('created_at', 'desc')->get();
+
+            // si el song_id n+1 es igual al song_id n, eliminar el song_id n+1
+
+            $playbackHistory = $playbackHistory->filter(function ($history, $key) use ($playbackHistory) {
+                if ($key + 1 < $playbackHistory->count()) {
+                    return $history->song_id != $playbackHistory[$key + 1]->song_id;
+                }
+                return true;
+            });
 
             //Agregar nombre de la cancion , foto del album, id de la cancion, url de la cancion, nombre del artista
             $playbackHistory = $playbackHistory->map(function ($history) {
