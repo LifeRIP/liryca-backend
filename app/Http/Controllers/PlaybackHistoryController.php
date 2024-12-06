@@ -60,10 +60,12 @@ class PlaybackHistoryController extends Controller
             $playbackHistory = $playbackHistory->map(function ($history) {
                 return [
                     'song_name' => $history->song->title,
+                    "album_id" => $history->song->album->id,
                     'album_image' => $history->song->album->icon,
                     'song_id' => $history->song->id,
                     'song_url' => $history->song->url_song,
-                    'artist_name' => $history->song->album->artist->user->username
+                    'artist_name' => $history->song->album->artist->user->username,
+                    'artist_id' => $history->song->album->artist->user->id
                 ];
             });
 
