@@ -29,10 +29,6 @@ class FollowedPlaylistController extends Controller
             if ($followedPlaylist) {
                 // Si ya sigue la playlist dejar de seguirla
 
-                $followedPlaylist = FollowedPlaylist::where('user_id', $request->user()->id)
-                    ->where('playlist_id', $playlist_id)
-                    ->first();
-
                 $followedPlaylist->delete();
 
                 return response()->json(['message' => 'Playlist dejada de seguir'], 200);
