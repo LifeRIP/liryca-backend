@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Artist;
 use App\Models\Follow;
+use App\Models\PlaybackHistory;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -136,20 +137,55 @@ class ArtistController extends Controller
                         'id' => $artist->id,
                         'user_id' => $artist->user_id,
                         'username' => $artist->user->username,
-                        'country' => $artist->user->country,
-                        'description' => $artist->user->description,
-                        'is_active' => $artist->user->is_active,
-                        'profile_picture' => $artist->user->profile_picture,
-                        'profile_banner' => $artist->user->profile_banner,
-                        'verified' => $artist->verified,
-                        'about' => $artist->about,
+                        'profile_picture' => $artist->user->profile_picture
                     ];
                 }),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'An error occurred'
+            ]);
+        }
+    }
+    public function getTopArtistsToday()
+    {
+        try {
+            $today = now(tz: 'America/Bogota')->startOfDay();
+
+            $topArtists = PlaybackHistory::with(['song.artist.user'])
+                ->select('artists.id', 'artists.user_id', 'users.username', 'users.profile_picture', DB::raw('COUNT(*) as play_count'))
+                ->join('songs', 'playback_histories.song_id', '=', 'songs.id')
+                ->join('artists', 'songs.artist_id', '=', 'artists.id')
+                ->join('users', 'artists.user_id', '=', 'users.id')
+                ->where('playback_histories.created_at', '>=', $today)
+                ->groupBy('artists.id', 'artists.user_id', 'users.username', 'users.profile_picture')
+                ->orderByDesc('play_count')
+                ->take(10)
+                ->get();
+
+            if ($topArtists->count() === 0) {
+                return response()->json([
+                    'success' => false,
+                    'data' => 'No artist found'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $topArtists->map(function ($artist) {
+                    return [
+                        'id' => $artist->id,
+                        'user_id' => $artist->user_id,
+                        'username' => $artist->user->username,
+                        'profile_picture' => $artist->profile_picture
+                    ];
+                }),
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred'
             ]);
         }
     }

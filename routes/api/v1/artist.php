@@ -13,4 +13,5 @@ Route::middleware([
 ])->group(function () {
     Route::resource('/', ArtistController::class)->parameters(['' => 'artist']);
     Route::get('/artists/following', [ArtistController::class, 'getFollowingArtists']);
+    Route::get('/artists/top-today', [ArtistController::class, 'getTopArtistsToday']);
 });
