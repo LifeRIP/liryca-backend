@@ -28,7 +28,7 @@ class AlbumSeeder extends Seeder
             'artist_id' => Artist::where('user_id', '5d5e1b6c-71ec-49ea-bfb1-19100f7d5cf7')->first()->id, // Blessd
             'release_date' => '2023-06-22',
             'description' => 'Es el tercer álbum de estudio del cantante mexicano Peso Pluma',
-            'icon' => 'https://i.scdn.co/image/ab67616d0000b273c164b1a439733e92b5044700',
+            'icon' => 'https://i.scdn.co/image/ab67616d0000b2732fb583ed96f8f35cbf2897ba',
         ]);
     }
 }
