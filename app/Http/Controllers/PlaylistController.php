@@ -100,6 +100,7 @@ class PlaylistController extends Controller
             $playlist = new Playlist();
             $playlist->name = "Playlist #" . ($Nplaylists + 1);
             $playlist->user_id = $request->user()->id;
+            $playlist->image = 'https://firebasestorage.googleapis.com/v0/b/liryca-c9f2e.appspot.com/o/playlistCover%2FdefaultCover.jpg?alt=media&token=c199cc9f-afca-460b-8b70-3d45eaf39e80';
             $playlist->save();
 
             return response()->json([

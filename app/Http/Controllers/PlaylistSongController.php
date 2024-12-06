@@ -296,4 +296,69 @@ class PlaylistSongController extends Controller
             ], 500);
         }
     }
+
+    public function likeSong(Request $request, string $id)
+    {
+        try {
+            //verificar la existencia de la cancion
+            $song = Song::find($id);
+
+            if (!$song) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Song not found'
+                ], 404);
+            }
+
+            // Comprobar si la playlist LikedSong existe sino crearla
+            $playlist = Playlist::where('user_id', $request->user()->id)
+                ->where('name', 'LikedSongs')
+                ->first();
+
+            if (!$playlist) {
+                $playlist = new Playlist();
+                $playlist->user_id = $request->user()->id;
+                $playlist->name = 'LikedSongs';
+                $playlist->privacy = 'private';
+                $playlist->image = 'like.png';
+                $playlist->save();
+            }
+
+            // Verificar si la canción ya está en la playlist LikedSongs
+            $playlistSong = PlaylistSong::where('playlist_id', $playlist->id)
+                ->where('song_id', $id)
+                ->first();
+
+            if ($playlistSong) {
+                //Eliminar la relación
+                $playlistSong = PlaylistSong::where('playlist_id', $playlist->id)
+                    ->where('song_id', $id);
+
+                $playlistSong->delete();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Song removed from LikedSongs'
+                ]);
+            }
+
+            // Crear una nueva relación entre la playlist LikedSongs y la canción
+            $playlistSong = new PlaylistSong();
+            $playlistSong->playlist_id = $playlist->id;
+            $playlistSong->song_id = $id;
+            $playlistSong->add_by = $request->user()->id;
+            $playlistSong->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Song added to LikedSongs'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
