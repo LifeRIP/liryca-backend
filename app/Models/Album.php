@@ -36,4 +36,10 @@ class Album extends Model
     {
         return $this->hasMany(Post::class, 'album_id');
     }
+
+    // Relación con FollowAlbum
+    public function followAlbums()
+    {
+        return $this->hasMany(FollowAlbum::class, 'album_id');
+    }
 }

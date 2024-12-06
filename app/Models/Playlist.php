@@ -48,4 +48,13 @@ class Playlist extends Model
     {
         return $this->hasMany(Post::class, 'playlist_id');
     }
+
+    /**
+     * Relación con el modelo FollowedPlaylist.
+     * Una playlist puede ser seguida por varios usuarios.
+     */
+    public function followedPlaylists()
+    {
+        return $this->hasMany(FollowedPlaylist::class, 'playlist_id');
+    }
 }

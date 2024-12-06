@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             SharedPlaylistSeeder::class,
             PlaybackHistorySeeder::class,
             FollowedPlaylistSeeder::class,
+            FollowAlbumSeeder::class,
         ]);
     }
 }
