@@ -326,24 +326,18 @@ class SongController extends Controller
         return response()->json([
             'data' => $topSongs->map(function ($song) {
                 return [
-                    'id' => $song->id,
-                    'title' => $song->title,
-                    'artist_id' => $song->artist_id,
+                    'song_id' => $song->id,
                     'album_id' => $song->album_id,
                     'time' => $song->time,
                     'genre' => $song->genre,
-                    'url_song' => $song->url_song,
+                    'song_url' => $song->url_song,
                     'is_active' => $song->is_active,
                     'created_at' => $song->created_at,
                     'updated_at' => $song->updated_at,
-                    'play_count' => $song->play_count,
-                    'album' => [
-                        'icon' => $song->album->icon,
-                    ],
-                    'artist' => [
-                        'user_id' => $song->artist->user->id,
-                        'username' => $song->artist->user->username,
-                    ]
+                    'song_name' => $song->title,
+                    'artist_id' => $song->artist->user->id,
+                    'album_image' => $song->album->icon,
+                    'artist_name' => $song->artist->user->username,
                 ];
             }),
         ]);
@@ -415,18 +409,18 @@ class SongController extends Controller
 
         $songs = $songs->map(function ($song) {
             return [
-                'id' => $song->id,
-                'title' => $song->title,
-                'artist_id' => $song->artist_id,
+                'song_id' => $song->id,
                 'album_id' => $song->album_id,
                 'time' => $song->time,
                 'genre' => $song->genre,
-                'url_song' => $song->url_song,
+                'song_url' => $song->url_song,
                 'is_active' => $song->is_active,
-                'album_icon' => $song->album->icon,
-                'artist_username' => $song->artist->user->username,
                 'created_at' => $song->created_at,
                 'updated_at' => $song->updated_at,
+                'song_name' => $song->title,
+                'artist_id' => $song->artist->user->id,
+                'album_image' => $song->album->icon,
+                'artist_name' => $song->artist->user->username,
             ];
         });
 
@@ -503,15 +497,12 @@ class SongController extends Controller
             'success' => true,
             'data' => $topSongs->map(function ($song) {
                 return [
-                    'id' => $song->id,
-                    'title' => $song->title,
-                    'artist_id' => $song->artist_id,
+                    'song_id' => $song->id,
                     'album_id' => $song->album_id,
-                    'url_song' => $song->url_song,
-                    'artist' => [
-                        'user_id' => $song->user_id,
-                        'username' => $song->username
-                    ],
+                    'song_url' => $song->url_song,
+                    'song_name' => $song->title,
+                    'artist_id' => $song->artist->user->id,
+                    'artist_name' => $song->artist->user->username,
                 ];
             }),
         ]);
@@ -587,15 +578,12 @@ class SongController extends Controller
             'succes' => true,
             'data' => $topSongs->map(function ($song) {
                 return [
-                    'id' => $song->id,
-                    'title' => $song->title,
-                    'artist_id' => $song->artist_id,
+                    'song_id' => $song->id,
                     'album_id' => $song->album_id,
-                    'url_song' => $song->url_song,
-                    'artist' => [
-                        'user_id' => $song->user_id,
-                        'username' => $song->username
-                    ],
+                    'song_url' => $song->url_song,
+                    'song_name' => $song->title,
+                    'artist_id' => $song->user_id,
+                    'artist_name' => $song->username
                 ];
             }),
         ]);
