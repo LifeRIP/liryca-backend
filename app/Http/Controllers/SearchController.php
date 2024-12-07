@@ -73,6 +73,7 @@ class SearchController extends Controller
                     'title' => $song->title,
                     'genre' => $song->genre,
                     'url' => $song->url,
+                    'duration' => $song->duration,
                     'album_id' => $song->album->id,
                     'album_image' => $song->album->icon,
                     'album_title' => $song->album->title,
