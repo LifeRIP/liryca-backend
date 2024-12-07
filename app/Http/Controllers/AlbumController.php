@@ -148,10 +148,19 @@ class AlbumController extends Controller
                 ], 404);
             }
 
-            return response()->json([
-                'success' => true,
-                'data' => $album
-            ]);
+            // Retornar el álbum
+            $response = [
+                'id' => $album->id,
+                'title' => $album->title,
+                'artist_id' => $album->artist->user_id,
+                'release_date' => $album->release_date,
+                'description' => $album->description,
+                'icon' => $album->icon,
+                'is_active' => $album->is_active,
+                'artist' => $album->artist->user->username
+            ];
+
+            return response()->json($response);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

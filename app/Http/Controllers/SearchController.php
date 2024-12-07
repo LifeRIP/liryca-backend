@@ -181,6 +181,7 @@ class SearchController extends Controller
                     'id' => $user->id,
                     'username' => $user->username,
                     'profile_picture' => $user->profile_picture,
+                    'profile_banner' => $user->profile_banner,
                     'follow' => $user->is_followed
 
                 ];
@@ -213,6 +214,7 @@ class SearchController extends Controller
                     'id' => $user->id,
                     'username' => $user->username,
                     'profile_picture' => $user->profile_picture,
+                    'profile_banner' => $user->profile_banner,
                     'follow' => $user->is_followed
                 ];
             });
