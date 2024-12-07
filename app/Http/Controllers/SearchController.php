@@ -23,9 +23,10 @@ class SearchController extends Controller
 
             $Playlists = $this->Playlists($request->search);
 
-            $Artists = $this->Artists($request->search);
+            $Artists = $this->Artists($request, $request->search);
 
-            $Users = $this->Users($request->search);
+
+            $Users = $this->Users($request, $request->search);
 
             $response = [
                 'songs' => $Songs,
@@ -151,7 +152,7 @@ class SearchController extends Controller
         }
     }
 
-    public function Artists(string $search)
+    public function Artists(Request $request, string $search)
     {
         try {
             // Buscar usuarios contengan la palabra en el nombre o en la descripcion y rol sea artist
@@ -169,11 +170,19 @@ class SearchController extends Controller
                 $UserArtists = $UserArtists->merge(User::where('id', $Artist->user_id)->get());
             }
 
+            //Comprobar si el usuario sigue a los artistas
+            $UserArtists = $UserArtists->map(function ($user) use ($request) {
+                $user->is_followed = $user->followers->contains($request->user()->id);
+                return $user;
+            });
+
             $UserArtists = $UserArtists->map(function ($user) {
                 return [
                     'id' => $user->id,
                     'username' => $user->username,
-                    'profile_picture' => $user->profile_picture
+                    'profile_picture' => $user->profile_picture,
+                    'follow' => $user->is_followed
+
                 ];
             });
 
@@ -183,7 +192,7 @@ class SearchController extends Controller
         }
     }
 
-    public function Users(string $search)
+    public function Users(Request $request, string $search)
     {
         try {
             // Buscar usuarios contengan la palabra en el nombre o en la descripcion y rol sea user
@@ -193,11 +202,18 @@ class SearchController extends Controller
                 ->where('role', 'user')
                 ->get();
 
+            //Comprobar si el usuario sigue a los usuarios 
+            $Users = $Users->map(function ($user) use ($request) {
+                $user->is_followed = $user->followers->contains($request->user()->id);
+                return $user;
+            });
+
             $Users = $Users->map(function ($user) {
                 return [
                     'id' => $user->id,
                     'username' => $user->username,
-                    'profile_picture' => $user->profile_picture
+                    'profile_picture' => $user->profile_picture,
+                    'follow' => $user->is_followed
                 ];
             });
 
