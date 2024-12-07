@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->boolean('verified')->default(false);
-            $table->text('about')->nullable();
+            $table->text('about')->nullable()->collation('utf8_general_ci');
             $table->timestamps();
         });
     }

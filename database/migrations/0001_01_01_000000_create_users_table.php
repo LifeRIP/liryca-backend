@@ -16,9 +16,9 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->boolean('is_migrated')->default(0);
-            $table->string('username')->unique();
+            $table->string('username')->unique()->collation('utf8_general_ci');
             $table->date('birthday');
-            $table->string('country');
+            $table->string('country')->collation('utf8_general_ci');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();

@@ -14,10 +14,10 @@ return new class extends Migration
 
         Schema::create('albums', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('title')->collation('utf8_general_ci');
             $table->foreignId('artist_id')->constrained('artists')->onDelete('cascade');
             $table->date('release_date');
-            $table->text('description')->nullable();
+            $table->text('description')->nullable()->collation('utf8_general_ci');
             $table->string('icon')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
