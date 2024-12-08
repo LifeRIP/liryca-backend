@@ -45,7 +45,7 @@ class PlaybackHistoryController extends Controller
         try {
             //Obtener el historial de reproduccion del usuario autenticado 
 
-            $playbackHistory = PlaybackHistory::where('user_id', $request->user()->id)->orderBy('created_at', 'desc')->get();
+            $playbackHistory = PlaybackHistory::where('user_id', $request->user()->id)->orderBy('created_at', 'desc')->get()->take(10);
 
             // si el song_id n+1 es igual al song_id n, eliminar el song_id n+1
 

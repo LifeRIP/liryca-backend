@@ -31,18 +31,17 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
         try {
             // Validar los campos requeridos
             $validator = Validator::make($request->all(), [
-                'user_id' => 'required|exists:users,id',
                 'content' => 'required|string',
                 'song_id' => 'exists:songs,id',
                 'album_id' => 'exists:albums,id',
                 'artist_id' => 'exists:artists,id',
                 'playlist_id' => 'exists:playlists,id',
-                'action_type' => 'required|in:shared,recommended,not_recommended',
+                'action_type' => 'in:shared,recommended,not_recommended',
             ]);
 
             // Comprobar si la validación falla
@@ -53,12 +52,19 @@ class PostController extends Controller
                 ], 400);
             }
 
-            // Crear un nuevo post
-            $post = Post::create($request->all());
-            return response()->json([
-                'success' => true,
-                'data' => $post
-            ], 201);
+            // Crear un nuevo post con el user_id del usuario autenticado
+            $post = new Post();
+            $post->user_id = $request->user()->id;
+            $post->content = $request->get('content');
+            $post->song_id = $request->get('song_id');
+            $post->album_id = $request->get('album_id');
+            $post->artist_id = $request->get('artist_id');
+            $post->playlist_id = $request->get('playlist_id');
+            $post->action_type = $request->get('action_type');
+            $post->save();
+
+            // devolver una respuesta de el post se ha creado correctamente
+            return response()->json($post, 201);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

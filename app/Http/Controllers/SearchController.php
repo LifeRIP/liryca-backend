@@ -13,20 +13,23 @@ use App\Models\Playlist;
 
 class SearchController extends Controller
 {
-    public function search_bar(Request $request)
+    public function search_bar(Request $request, string $search)
     {
         try {
 
-            $Songs = $this->Songs($request->search);
+            //reemplazar los & por espacios para la busqueda 
+            $search = str_replace('&', ' ', $search);
 
-            $Albums = $this->Albums($request->search);
+            $Songs = $this->Songs($search);
 
-            $Playlists = $this->Playlists($request->search);
+            $Albums = $this->Albums($search);
 
-            $Artists = $this->Artists($request, $request->search);
+            $Playlists = $this->Playlists($search);
+
+            $Artists = $this->Artists($request, $search);
 
 
-            $Users = $this->Users($request, $request->search);
+            $Users = $this->Users($request, $search);
 
             $response = [
                 'songs' => $Songs,

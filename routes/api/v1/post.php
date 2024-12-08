@@ -3,4 +3,8 @@
 use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('/', PostController::class)->parameters(['' => 'post']);
+// Post con middleware
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::resource('/', PostController::class)->parameters(['' => 'post']);
+});
