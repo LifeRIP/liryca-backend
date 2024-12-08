@@ -129,6 +129,7 @@ class SearchController extends Controller
         try {
             // Buscar playlist que contengan la palabra en el nombre
             $Playlists = Playlist::where('name', 'like', '%' . $search . '%')
+                ->where('privacy', 'public')
                 ->orWhere('description', 'like', '%' . $search . '%')
                 ->where('privacy', 'public')
                 ->get();
