@@ -10,6 +10,7 @@ use App\Models\Artist;
 use App\Models\Album;
 use App\Models\Song;
 use App\Models\Playlist;
+use App\Models\PlaylistSong;
 
 class SearchController extends Controller
 {
@@ -53,6 +54,9 @@ class SearchController extends Controller
                 ->orWhere('genre', 'like', '%' . $search . '%')
                 ->get();
 
+            //comprobar si la canción está en la playlist llamada LikedSongs 
+            $LikedSongs = Playlist::where('name', 'LikedSongs')->first();
+
             // Buscar canciones que contengan la palabra en el nombre del Usuario y rol sea artista
             $UserArtists = User::where('username', 'like', '%' . $search . '%')
                 ->where('role', 'artist')
@@ -70,6 +74,14 @@ class SearchController extends Controller
                 $Songs = $Songs->merge($Album->songs);
             }
 
+            //Comprobar si la canción tiene like
+            $Songs = $Songs->map(function ($song) use ($LikedSongs) {
+                $song->is_liked = PlaylistSong::where('playlist_id', $LikedSongs->id)
+                    ->where('song_id', $song->id)
+                    ->exists();
+                return $song;
+            });
+
             $Songs = $Songs->map(function ($song) {
                 return [
                     'id' => $song->id,
@@ -81,7 +93,8 @@ class SearchController extends Controller
                     'album_image' => $song->album->icon,
                     'album_title' => $song->album->title,
                     'artist_name' => $song->artist->user->username,
-                    'artist_id' => $song->artist->user->id
+                    'artist_id' => $song->artist->user->id,
+                    'is_liked' => $song->is_liked
                 ];
             });
 

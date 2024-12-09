@@ -128,10 +128,20 @@ class PlaylistSongController extends Controller
             });
 
             // Obtener por medio de un select nombre de la canción, time, url_song, nombre del album, portada del album, username del artista de las canciones de la playlist
-            $playlistSongs->map(function ($playlistSong) {
+            $playlistSongs->map(function ($playlistSong)  use ($request) {
+
                 $playlistSong->song = Song::select('title', 'time', 'url_song', 'album_id')
                     ->where('id', $playlistSong->song_id)
                     ->first();
+
+                //comprobar si la canción tiene like
+                $playlistSong->song->is_liked = Playlist::where('user_id', $request->user()->id)
+                    ->where('name', 'LikedSongs')
+                    ->first()
+                    ->songs()
+                    ->where('song_id', $playlistSong->song_id)
+                    ->exists();
+
 
                 $playlistSong->album = Album::select('title', 'icon', 'artist_id')
                     ->where('id', $playlistSong->song->album_id)

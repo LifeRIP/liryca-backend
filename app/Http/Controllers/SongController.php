@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SongRequest;
+
 use Illuminate\Http\Request;
 use App\Models\Album;
 use App\Models\Artist;
@@ -27,7 +27,7 @@ class SongController extends Controller
                 $collaborators = SongCollaborator::where('song_id', $song->id)
                     ->join('artists', 'song_collaborators.artist_id', '=', 'artists.id')
                     ->join('users', 'artists.user_id', '=', 'users.id')
-                    ->select('users.id', 'users.name')
+                    ->select('users.id', 'users.username')
                     ->get();
                 $song->collaborators = $collaborators;
             }

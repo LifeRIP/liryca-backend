@@ -56,6 +56,12 @@ class PlaybackHistoryController extends Controller
                 return true;
             });
 
+            //comprobar si la canción tiene like
+            $playbackHistory = $playbackHistory->map(function ($history) use ($request) {
+                $history->is_liked = $request->user()->playlists()->where('name', 'LikedSongs')->first()->songs->contains($history->song_id);
+                return $history;
+            });
+
             //Agregar nombre de la cancion , foto del album, id de la cancion, url de la cancion, nombre del artista
             $playbackHistory = $playbackHistory->map(function ($history) {
                 return [
@@ -65,7 +71,9 @@ class PlaybackHistoryController extends Controller
                     'song_id' => $history->song->id,
                     'song_url' => $history->song->url_song,
                     'artist_name' => $history->song->album->artist->user->username,
-                    'artist_id' => $history->song->album->artist->user->id
+                    'artist_id' => $history->song->album->artist->user->id,
+                    'is_liked' => $history->is_liked
+
                 ];
             });
 
