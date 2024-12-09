@@ -219,6 +219,14 @@ class PostController extends Controller
                 ], 404);
             }
 
+            // Verificar si el usuario autenticado es el propietario del post
+            if ($request->user()->id !== $post->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to update this post'
+                ], 403);
+            }
+
             // Actualizar el post
             $post->update($request->all());
             return response()->json([
