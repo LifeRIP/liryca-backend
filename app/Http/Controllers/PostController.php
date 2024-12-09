@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostLike;
+use App\Models\Song;
+use App\Models\Album;
+use App\Models\Artist;
+use App\Models\Playlist;
+use Illuminate\Http\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -168,10 +173,8 @@ class PostController extends Controller
             // Validar los campos requeridos
             $validator = Validator::make($request->all(), [
                 'content' => 'required|string',
-                'song_id' => 'exists:songs,id',
-                'album_id' => 'exists:albums,id',
-                'artist_id' => 'exists:artists,id',
-                'playlist_id' => 'exists:playlists,id',
+                'id' => 'required',
+                'post_type' => 'in:song,album,artist,playlist',
                 'action_type' => 'in:shared,recommended,not_recommended',
             ]);
 
@@ -183,16 +186,77 @@ class PostController extends Controller
                 ], 400);
             }
 
+            // Verificar si el id es correcto dependiendo del tipo de post
+            switch ($request->get('post_type')) {
+                case 'song':
+                    if (!Song::find($request->get('id'))) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Song not found'
+                        ], 404);
+                    }
+                    break;
+                case 'album':
+                    if (!Album::find($request->get('id'))) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Album not found'
+                        ], 404);
+                    }
+                    break;
+                case 'artist':
+                    if (!Artist::where('user_id', $request->get('id'))->exists()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Artist not found'
+                        ], 404);
+                    }
+                    break;
+                case 'playlist':
+                    if (!Playlist::find($request->get('id'))) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Playlist not found'
+                        ], 404);
+                    }
+                    break;
+            }
+
             // Crear un nuevo post con el user_id del usuario autenticado
-            $post = new Post();
-            $post->user_id = $request->user()->id;
-            $post->content = $request->get('content');
-            $post->song_id = $request->get('song_id');
-            $post->album_id = $request->get('album_id');
-            $post->artist_id = $request->get('artist_id');
-            $post->playlist_id = $request->get('playlist_id');
-            $post->action_type = $request->get('action_type');
-            $post->save();
+            switch ($request->get('post_type')) {
+                case 'song':
+                    $post = new Post();
+                    $post->user_id = $request->user()->id;
+                    $post->content = $request->get('content');
+                    $post->song_id = $request->get('id');
+                    $post->action_type = $request->get('action_type');
+                    $post->save();
+                    break;
+                case 'album':
+                    $post = new Post();
+                    $post->user_id = $request->user()->id;
+                    $post->content = $request->get('content');
+                    $post->album_id = $request->get('id');
+                    $post->action_type = $request->get('action_type');
+                    $post->save();
+                    break;
+                case 'artist':
+                    $post = new Post();
+                    $post->user_id = $request->user()->id;
+                    $post->content = $request->get('content');
+                    $post->artist_id = Artist::where('user_id', $request->get('id'))->first()->id;
+                    $post->action_type = $request->get('action_type');
+                    $post->save();
+                    break;
+                case 'playlist':
+                    $post = new Post();
+                    $post->user_id = $request->user()->id;
+                    $post->content = $request->get('content');
+                    $post->playlist_id = $request->get('id');
+                    $post->action_type = $request->get('action_type');
+                    $post->save();
+                    break;
+            }
 
             // devolver una respuesta de el post se ha creado correctamente
             return response()->json($post, 201);
