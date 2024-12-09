@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
 use App\Models\Post;
+use App\Models\PostLike;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -17,6 +19,9 @@ class PostController extends Controller
         try {
             // Obtener todos los posts en orden
             $posts = Post::orderBy('created_at', 'desc')->get();
+
+            //Obtener si el usuario autenticado le ha dado like a cada post
+
 
             // Ootener el tipo de post 
             foreach ($posts as $post) {
@@ -33,28 +38,11 @@ class PostController extends Controller
                     case $post->playlist_id:
                         $post->type = 'playlist';
                         break;
+                    default:
+                        $post->type = 'text';
+                        break;
                 }
             }
-
-            // Obtener diversos datos de los posts 
-            $posts = $posts->map(function ($post) {
-                $post->user = $post->user;
-                switch ($post->type) {
-                    case 'song':
-                        $post->song = $post->song;
-                        break;
-                    case 'album':
-                        $post->album = $post->album;
-                        break;
-                    case 'artist':
-                        $post->artist = $post->artist;
-                        break;
-                    case 'playlist':
-                        $post->playlist = $post->playlist;
-                        break;
-                }
-                return $post;
-            });
 
             // Organizar la información que se va a devolver
             $posts = $posts->map(function ($post) {
@@ -78,6 +66,9 @@ class PostController extends Controller
                             'icon' => $post->song->album->icon,
                             'artist_id' => $post->song->artist->user_id,
                             'artist_name' => $post->song->artist->user->username,
+                            'is_liked' => PostLike::where('post_id', $post->id)->where('user_id', request()->user()->id)->exists(),
+                            'like_count' => PostLike::where('post_id', $post->id)->count(),
+                            'comment_count' => Comment::where('post_id', $post->id)->count(),
                             'released_at' => $post->created_at,
                         ];
                     case 'album':
@@ -95,6 +86,9 @@ class PostController extends Controller
                             'icon' => $post->album->icon,
                             'artist_id' => $post->album->artist->user_id,
                             'artist_name' => $post->album->artist->user->username,
+                            'is_liked' => PostLike::where('post_id', $post->id)->where('user_id', request()->user()->id)->exists(),
+                            'like_count' => PostLike::where('post_id', $post->id)->count(),
+                            'comment_count' => Comment::where('post_id', $post->id)->count(),
                             'released_at' => $post->created_at,
                         ];
                     case 'artist':
@@ -111,6 +105,9 @@ class PostController extends Controller
                             'about' => $post->artist->about,
                             'artist_profile_picture' => $post->artist->user->profile_picture,
                             'artist_profile_banner' => $post->artist->user->profile_banner,
+                            'is_liked' => PostLike::where('post_id', $post->id)->where('user_id', request()->user()->id)->exists(),
+                            'like_count' => PostLike::where('post_id', $post->id)->count(),
+                            'comment_count' => Comment::where('post_id', $post->id)->count(),
                             'released_at' => $post->created_at,
                         ];
                     case 'playlist':
@@ -128,6 +125,23 @@ class PostController extends Controller
                             'owner_name' => $post->playlist->user->username,
                             'description' => $post->playlist->description,
                             'image' => $post->playlist->image,
+                            'is_liked' => PostLike::where('post_id', $post->id)->where('user_id', request()->user()->id)->exists(),
+                            'like_count' => PostLike::where('post_id', $post->id)->count(),
+                            'comment_count' => Comment::where('post_id', $post->id)->count(),
+                            'released_at' => $post->created_at,
+                        ];
+                    case 'text':
+                        return [
+                            'id' => $post->id,
+                            'user_id' => $post->user_id,
+                            'profile_picture' => $post->user->profile_picture,
+                            'username' => $post->user->username,
+                            'action_type' => $post->action_type,
+                            'content' => $post->content,
+                            'type' => $post->type,
+                            'is_liked' => PostLike::where('post_id', $post->id)->where('user_id', request()->user()->id)->exists(),
+                            'like_count' => PostLike::where('post_id', $post->id)->count(),
+                            'comment_count' => Comment::where('post_id', $post->id)->count(),
                             'released_at' => $post->created_at,
                         ];
                 }

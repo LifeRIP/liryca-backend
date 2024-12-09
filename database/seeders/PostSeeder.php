@@ -48,5 +48,11 @@ class PostSeeder extends Seeder
             'content' => 'This is my favorite playlist',
             'playlist_id' => $playlist_id, // La mejor musica
         ]);
+
+        // Crear un nuevo post
+        Post::create([
+            'user_id' => '741944d5-4f2e-4533-af0d-1155ededce3a', // Valentina
+            'content' => 'Helloo Amikos',
+        ]);
     }
 }
