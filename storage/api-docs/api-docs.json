@@ -207,15 +207,7 @@
                                             "type": "array",
                                             "items": {
                                                 "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "title": {
-                                                        "type": "string",
-                                                        "example": "Mírame"
-                                                    },
-                                                    "artist_id": {
+                                                    "song_id": {
                                                         "type": "integer",
                                                         "example": 1
                                                     },
@@ -231,21 +223,13 @@
                                                         "type": "string",
                                                         "example": "Reggaeton"
                                                     },
-                                                    "url_song": {
+                                                    "song_url": {
                                                         "type": "string",
                                                         "example": "https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"
                                                     },
                                                     "is_active": {
                                                         "type": "boolean",
                                                         "example": true
-                                                    },
-                                                    "album_icon": {
-                                                        "type": "string",
-                                                        "example": "https://i.scdn.co/image/ab67616d0000b273c164b1a439733e92b5044700"
-                                                    },
-                                                    "artist_username": {
-                                                        "type": "string",
-                                                        "example": "artist_username"
                                                     },
                                                     "created_at": {
                                                         "type": "string",
@@ -256,6 +240,26 @@
                                                         "type": "string",
                                                         "format": "date-time",
                                                         "example": "2024-11-18T00:20:29.000000Z"
+                                                    },
+                                                    "song_name": {
+                                                        "type": "string",
+                                                        "example": "Mírame"
+                                                    },
+                                                    "artist_id": {
+                                                        "type": "integer",
+                                                        "example": "264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"
+                                                    },
+                                                    "album_image": {
+                                                        "type": "string",
+                                                        "example": "https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"
+                                                    },
+                                                    "artist_name": {
+                                                        "type": "string",
+                                                        "example": "Blessd"
+                                                    },
+                                                    "is_liked": {
+                                                        "type": "boolean",
+                                                        "example": true
                                                     }
                                                 },
                                                 "type": "object"
@@ -310,15 +314,7 @@
                                             "type": "array",
                                             "items": {
                                                 "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "title": {
-                                                        "type": "string",
-                                                        "example": "Mírame"
-                                                    },
-                                                    "artist_id": {
+                                                    "song_id": {
                                                         "type": "integer",
                                                         "example": 1
                                                     },
@@ -326,35 +322,25 @@
                                                         "type": "integer",
                                                         "example": 1
                                                     },
-                                                    "time": {
-                                                        "type": "string",
-                                                        "example": "00:01:38"
-                                                    },
-                                                    "genre": {
-                                                        "type": "string",
-                                                        "example": "Reggaeton"
-                                                    },
-                                                    "url_song": {
+                                                    "song_url": {
                                                         "type": "string",
                                                         "example": "https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"
                                                     },
-                                                    "is_active": {
+                                                    "song_name": {
+                                                        "type": "string",
+                                                        "example": "Mírame"
+                                                    },
+                                                    "artist_id": {
+                                                        "type": "integer",
+                                                        "example": "264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"
+                                                    },
+                                                    "artist_name": {
+                                                        "type": "string",
+                                                        "example": "Blessd"
+                                                    },
+                                                    "is_liked": {
                                                         "type": "boolean",
                                                         "example": true
-                                                    },
-                                                    "play_count": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-11-18T00:20:29.000000Z"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-11-18T00:20:29.000000Z"
                                                     }
                                                 },
                                                 "type": "object"
@@ -390,7 +376,7 @@
                 ]
             }
         },
-        "/api/v1/song/songs/top-today/by-my-country": {
+        "/api/v1/song/songs/top-today-by-my-country": {
             "get": {
                 "tags": [
                     "song"
@@ -409,15 +395,7 @@
                                             "type": "array",
                                             "items": {
                                                 "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "title": {
-                                                        "type": "string",
-                                                        "example": "Mírame"
-                                                    },
-                                                    "artist_id": {
+                                                    "song_id": {
                                                         "type": "integer",
                                                         "example": 1
                                                     },
@@ -425,35 +403,25 @@
                                                         "type": "integer",
                                                         "example": 1
                                                     },
-                                                    "time": {
-                                                        "type": "string",
-                                                        "example": "00:01:38"
-                                                    },
-                                                    "genre": {
-                                                        "type": "string",
-                                                        "example": "Reggaeton"
-                                                    },
-                                                    "url_song": {
+                                                    "song_url": {
                                                         "type": "string",
                                                         "example": "https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"
                                                     },
-                                                    "is_active": {
+                                                    "song_name": {
+                                                        "type": "string",
+                                                        "example": "Mírame"
+                                                    },
+                                                    "artist_id": {
+                                                        "type": "integer",
+                                                        "example": "264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"
+                                                    },
+                                                    "artist_name": {
+                                                        "type": "string",
+                                                        "example": "Blessd"
+                                                    },
+                                                    "is_liked": {
                                                         "type": "boolean",
                                                         "example": true
-                                                    },
-                                                    "play_count": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-11-18T00:20:29.000000Z"
-                                                    },
-                                                    "updated_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2024-11-18T00:20:29.000000Z"
                                                     }
                                                 },
                                                 "type": "object"

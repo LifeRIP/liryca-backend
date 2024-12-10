@@ -501,8 +501,8 @@ class SongController extends Controller
      *                     @OA\Property(property="album_id", type="integer", example=1),
      *                     @OA\Property(property="song_url", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
      *                     @OA\Property(property="song_name", type="string", example="Mírame"),
-     *                     @OA\Property(property="artist_id", type="integer", example=1),
-     *                     @OA\Property(property="artist_name", type="string", example="ArtistName"),
+     *                     @OA\Property(property="artist_id", type="integer", example="264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"),
+     *                     @OA\Property(property="artist_name", type="string", example="Blessd"),
      *                     @OA\Property(property="is_liked", type="boolean", example=true)
      *                 )
      *             )
@@ -583,7 +583,7 @@ class SongController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/v1/song/songs/top-today/by-my-country",
+     *     path="/api/v1/song/songs/top-today-by-my-country",
      *     summary="Get top songs today by my country",
      *     description="Returns the top 10 songs played today by my country",
      *     operationId="top-songs-today-by-my-country",
@@ -597,17 +597,13 @@ class SongController extends Controller
      *                 property="data",
      *                 type="array",
      *                 @OA\Items(
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="title", type="string", example="Mírame"),
-     *                     @OA\Property(property="artist_id", type="integer", example=1),
+     *                     @OA\Property(property="song_id", type="integer", example=1),
      *                     @OA\Property(property="album_id", type="integer", example=1),
-     *                     @OA\Property(property="time", type="string", example="00:01:38"),
-     *                     @OA\Property(property="genre", type="string", example="Reggaeton"),
-     *                     @OA\Property(property="url_song", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
-     *                     @OA\Property(property="is_active", type="boolean", example=true),
-     *                     @OA\Property(property="play_count", type="integer", example=1),
-     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z")
+     *                     @OA\Property(property="song_url", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
+     *                     @OA\Property(property="song_name", type="string", example="Mírame"),
+     *                     @OA\Property(property="artist_id", type="integer", example="264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"),
+     *                     @OA\Property(property="artist_name", type="string", example="Blessd"),
+     *                     @OA\Property(property="is_liked", type="boolean", example=true)
      *                 )
      *             )
      *         )
@@ -645,7 +641,30 @@ class SongController extends Controller
             ->orderByDesc('play_count')
             ->take(10) // Limita a las 10 canciones más escuchadas
             ->get();
-        //return $topSongs;
+
+        // Comprobar que la playlist likedSongs exista
+        if (Playlist::where('user_id', $request->user()->id)
+            ->where('name', 'LikedSongs')
+            ->exists()
+
+        ) {
+            $LikedSongs = Playlist::where('user_id', $request->user()->id)
+                ->where('name', 'LikedSongs')
+                ->first();
+
+            //Comprobar si la canción tiene like
+            $topSongs = $topSongs->map(function ($song) use ($LikedSongs) {
+                $song->is_liked = PlaylistSong::where('playlist_id', $LikedSongs->id)
+                    ->where('song_id', $song->id)
+                    ->exists();
+                return $song;
+            });
+        } else {
+            $topSongs = $topSongs->map(function ($song) {
+                $song->is_liked = false;
+                return $song;
+            });
+        }
 
         return response()->json([
             'succes' => true,
@@ -656,7 +675,8 @@ class SongController extends Controller
                     'song_url' => $song->url_song,
                     'song_name' => $song->title,
                     'artist_id' => $song->user_id,
-                    'artist_name' => $song->username
+                    'artist_name' => $song->username,
+                    'is_liked' => $song->is_liked
                 ];
             }),
         ]);
