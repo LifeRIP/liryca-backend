@@ -497,17 +497,13 @@ class SongController extends Controller
      *                 property="data",
      *                 type="array",
      *                 @OA\Items(
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="title", type="string", example="Mírame"),
-     *                     @OA\Property(property="artist_id", type="integer", example=1),
+     *                     @OA\Property(property="song_id", type="integer", example=1),
      *                     @OA\Property(property="album_id", type="integer", example=1),
-     *                     @OA\Property(property="time", type="string", example="00:01:38"),
-     *                     @OA\Property(property="genre", type="string", example="Reggaeton"),
-     *                     @OA\Property(property="url_song", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
-     *                     @OA\Property(property="is_active", type="boolean", example=true),
-     *                     @OA\Property(property="play_count", type="integer", example=1),
-     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z")
+     *                     @OA\Property(property="song_url", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
+     *                     @OA\Property(property="song_name", type="string", example="Mírame"),
+     *                     @OA\Property(property="artist_id", type="integer", example=1),
+     *                     @OA\Property(property="artist_name", type="string", example="ArtistName"),
+     *                     @OA\Property(property="is_liked", type="boolean", example=true)
      *                 )
      *             )
      *         )
@@ -525,7 +521,7 @@ class SongController extends Controller
      *     )
      * )
      */
-    public function getTopSongsToday()
+    public function getTopSongsToday(Request $request)
     {
         $topSongs = Song::where('songs.is_active', true)
             ->join('artists', 'songs.artist_id', '=', 'artists.id')
@@ -545,6 +541,30 @@ class SongController extends Controller
             ->take(10)
             ->get();
 
+        // Comprobar que la playlist likedSongs exista
+        if (Playlist::where('user_id', $request->user()->id)
+            ->where('name', 'LikedSongs')
+            ->exists()
+
+        ) {
+            $LikedSongs = Playlist::where('user_id', $request->user()->id)
+                ->where('name', 'LikedSongs')
+                ->first();
+
+            //Comprobar si la canción tiene like
+            $topSongs = $topSongs->map(function ($song) use ($LikedSongs) {
+                $song->is_liked = PlaylistSong::where('playlist_id', $LikedSongs->id)
+                    ->where('song_id', $song->id)
+                    ->exists();
+                return $song;
+            });
+        } else {
+            $topSongs = $topSongs->map(function ($song) {
+                $song->is_liked = false;
+                return $song;
+            });
+        }
+
         return response()->json([
             'success' => true,
             'data' => $topSongs->map(function ($song) {
@@ -555,6 +575,7 @@ class SongController extends Controller
                     'song_name' => $song->title,
                     'artist_id' => $song->artist->user->id,
                     'artist_name' => $song->artist->user->username,
+                    'is_liked' => $song->is_liked
                 ];
             }),
         ]);
