@@ -360,7 +360,7 @@
                                     "properties": {
                                         "error": {
                                             "type": "string",
-                                            "example": "No songs found"
+                                            "example": "No songs found for today"
                                         }
                                     },
                                     "type": "object"
@@ -441,7 +441,7 @@
                                     "properties": {
                                         "error": {
                                             "type": "string",
-                                            "example": "No songs found"
+                                            "example": "No songs found for today in my country"
                                         }
                                     },
                                     "type": "object"

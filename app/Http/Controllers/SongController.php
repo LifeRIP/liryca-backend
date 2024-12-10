@@ -515,7 +515,7 @@ class SongController extends Controller
      *             @OA\Property(
      *                 property="error",
      *                 type="string",
-     *                 example="No songs found"
+     *                 example="No songs found for today"
      *             )
      *         )
      *     )
@@ -540,6 +540,10 @@ class SongController extends Controller
             ->orderByDesc('play_count')
             ->take(10)
             ->get();
+
+        if ($topSongs->isEmpty()) {
+            return response()->json(['error' => 'No songs found for today'], 404);
+        }
 
         // Comprobar que la playlist likedSongs exista
         if (Playlist::where('user_id', $request->user()->id)
@@ -615,7 +619,7 @@ class SongController extends Controller
      *             @OA\Property(
      *                 property="error",
      *                 type="string",
-     *                 example="No songs found"
+     *                 example="No songs found for today in my country"
      *             )
      *         )
      *     )
@@ -625,34 +629,38 @@ class SongController extends Controller
     {
         // Obtener el país del usuario autenticado desde el token
         $country = $request->user()->country;
-
         // Inicio del día actual
         $today = now()->startOfDay();
 
         // Consulta para obtener las canciones más escuchadas hoy en el país del usuario
         $topSongs = PlaybackHistory::query()
-            ->select('songs.id', 'songs.title', 'songs.artist_id', 'songs.album_id', 'songs.url_song', 'users.id as user_id', 'users.username', DB::raw('COUNT(playback_histories.id) as play_count'))
+            ->select('songs.id', 'songs.title', 'songs.artist_id', 'songs.album_id', 'songs.url_song', 'artists.user_id as artist_user_id', 'artist_users.username', DB::raw('COUNT(playback_histories.id) as play_count'))
             ->join('songs', 'playback_histories.song_id', '=', 'songs.id')
             ->join('artists', 'songs.artist_id', '=', 'artists.id')
-            ->join('users', 'artists.user_id', '=', 'users.id')
-            ->where('users.country', '=', $country)
+            ->join('users as artist_users', 'artists.user_id', '=', 'artist_users.id') // Unir con la tabla users a través de artists
+            ->join('users as playback_users', 'playback_histories.user_id', '=', 'playback_users.id') // Unir con la tabla users para filtrar por país
+            ->where('playback_users.country', '=', $country)
             ->where('playback_histories.created_at', '>=', $today)
-            ->groupBy('songs.id', 'songs.title', 'songs.artist_id', 'songs.album_id', 'songs.url_song', 'users.id', 'users.username')
+            ->groupBy('songs.id', 'songs.title', 'songs.artist_id', 'songs.album_id', 'songs.url_song', 'artists.user_id', 'artist_users.username')
             ->orderByDesc('play_count')
             ->take(10) // Limita a las 10 canciones más escuchadas
             ->get();
+
+        //return $topSongs;
+        if ($topSongs->isEmpty()) {
+            return response()->json(['error' => 'No songs found for today in my country'], 404);
+        }
 
         // Comprobar que la playlist likedSongs exista
         if (Playlist::where('user_id', $request->user()->id)
             ->where('name', 'LikedSongs')
             ->exists()
-
         ) {
             $LikedSongs = Playlist::where('user_id', $request->user()->id)
                 ->where('name', 'LikedSongs')
                 ->first();
 
-            //Comprobar si la canción tiene like
+            // Comprobar si la canción tiene like
             $topSongs = $topSongs->map(function ($song) use ($LikedSongs) {
                 $song->is_liked = PlaylistSong::where('playlist_id', $LikedSongs->id)
                     ->where('song_id', $song->id)
@@ -667,14 +675,14 @@ class SongController extends Controller
         }
 
         return response()->json([
-            'succes' => true,
+            'success' => true,
             'data' => $topSongs->map(function ($song) {
                 return [
                     'song_id' => $song->id,
                     'album_id' => $song->album_id,
                     'song_url' => $song->url_song,
                     'song_name' => $song->title,
-                    'artist_id' => $song->user_id,
+                    'artist_id' => $song->artist_user_id,
                     'artist_name' => $song->username,
                     'is_liked' => $song->is_liked
                 ];
