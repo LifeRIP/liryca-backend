@@ -173,8 +173,7 @@ class PostController extends Controller
             // Validar los campos requeridos
             $validator = Validator::make($request->all(), [
                 'content' => 'required|string',
-                'id' => 'required',
-                'post_type' => 'in:song,album,artist,playlist',
+                'post_type' => 'in:song,album,artist,playlist,text',
                 'action_type' => 'in:shared,recommended,not_recommended',
             ]);
 
@@ -253,6 +252,13 @@ class PostController extends Controller
                     $post->user_id = $request->user()->id;
                     $post->content = $request->get('content');
                     $post->playlist_id = $request->get('id');
+                    $post->action_type = $request->get('action_type');
+                    $post->save();
+                    break;
+                case 'text':
+                    $post = new Post();
+                    $post->user_id = $request->user()->id;
+                    $post->content = $request->get('content');
                     $post->action_type = $request->get('action_type');
                     $post->save();
                     break;
