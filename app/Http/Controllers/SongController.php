@@ -394,18 +394,19 @@ class SongController extends Controller
      *                 property="data",
      *                 type="array",
      *                 @OA\Items(
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="title", type="string", example="Mírame"),
-     *                     @OA\Property(property="artist_id", type="integer", example=1),
+     *                     @OA\Property(property="song_id", type="integer", example=1),
      *                     @OA\Property(property="album_id", type="integer", example=1),
      *                     @OA\Property(property="time", type="string", example="00:01:38"),
      *                     @OA\Property(property="genre", type="string", example="Reggaeton"),
-     *                     @OA\Property(property="url_song", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
+     *                     @OA\Property(property="song_url", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
      *                     @OA\Property(property="is_active", type="boolean", example=true),
-     *                     @OA\Property(property="album_icon", type="string", example="https://i.scdn.co/image/ab67616d0000b273c164b1a439733e92b5044700"),
-     *                     @OA\Property(property="artist_username", type="string", example="artist_username"),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z")
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
+     *                     @OA\Property(property="song_name", type="string", example="Mírame"),
+     *                     @OA\Property(property="artist_id", type="integer", example="264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"),
+     *                     @OA\Property(property="album_image", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
+     *                     @OA\Property(property="artist_name", type="string", example="Blessd"),
+     *                     @OA\Property(property="is_liked", type="boolean", example=true)
      *                 )
      *             )
      *         )
@@ -423,7 +424,7 @@ class SongController extends Controller
      *     )
      * )
      */
-    public function getSongsByAlbumId($albumId)
+    public function getSongsByAlbumId(Request $request, $albumId)
     {
         $songs = Song::where('album_id', $albumId)
             ->with(['album', 'artist'])
@@ -431,6 +432,30 @@ class SongController extends Controller
 
         if ($songs->isEmpty()) {
             return response()->json(['error' => 'No songs found for this album'], 404);
+        }
+
+        // Comprobar que la playlist likedSongs exista
+        if (Playlist::where('user_id', $request->user()->id)
+            ->where('name', 'LikedSongs')
+            ->exists()
+
+        ) {
+            $LikedSongs = Playlist::where('user_id', $request->user()->id)
+                ->where('name', 'LikedSongs')
+                ->first();
+
+            //Comprobar si la canción tiene like
+            $songs = $songs->map(function ($song) use ($LikedSongs) {
+                $song->is_liked = PlaylistSong::where('playlist_id', $LikedSongs->id)
+                    ->where('song_id', $song->id)
+                    ->exists();
+                return $song;
+            });
+        } else {
+            $songs = $songs->map(function ($song) {
+                $song->is_liked = false;
+                return $song;
+            });
         }
 
         $songs = $songs->map(function ($song) {
@@ -447,6 +472,7 @@ class SongController extends Controller
                 'artist_id' => $song->artist->user->id,
                 'album_image' => $song->album->icon,
                 'artist_name' => $song->artist->user->username,
+                'is_liked' => $song->is_liked
             ];
         });
 
