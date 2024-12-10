@@ -21,7 +21,7 @@ class SearchController extends Controller
             //reemplazar los & por espacios para la busqueda 
             $search = str_replace('&', ' ', $search);
 
-            $Songs = $this->Songs($search);
+            $Songs = $this->Songs($request, $search);
 
             $Albums = $this->Albums($search);
 
@@ -46,16 +46,13 @@ class SearchController extends Controller
         }
     }
 
-    public function Songs(string $search)
+    public function Songs(Request $request, string $search)
     {
         try {
             // Buscar canciones que contengan la palabra en el nombre o en el genero
             $Songs = Song::where('title', 'like', '%' . $search . '%')
                 ->orWhere('genre', 'like', '%' . $search . '%')
                 ->get();
-
-            //comprobar si la canción está en la playlist llamada LikedSongs 
-            $LikedSongs = Playlist::where('name', 'LikedSongs')->first();
 
             // Buscar canciones que contengan la palabra en el nombre del Usuario y rol sea artista
             $UserArtists = User::where('username', 'like', '%' . $search . '%')
@@ -74,13 +71,29 @@ class SearchController extends Controller
                 $Songs = $Songs->merge($Album->songs);
             }
 
-            //Comprobar si la canción tiene like
-            $Songs = $Songs->map(function ($song) use ($LikedSongs) {
-                $song->is_liked = PlaylistSong::where('playlist_id', $LikedSongs->id)
-                    ->where('song_id', $song->id)
-                    ->exists();
-                return $song;
-            });
+            // Comprobar que la playlist likedSongs exista
+            if (Playlist::where('user_id', $request->user()->id)
+                ->where('name', 'LikedSongs')
+                ->exists()
+
+            ) {
+                $LikedSongs = Playlist::where('user_id', $request->user()->id)
+                    ->where('name', 'LikedSongs')
+                    ->first();
+
+                //Comprobar si la canción tiene like
+                $Songs = $Songs->map(function ($song) use ($LikedSongs) {
+                    $song->is_liked = PlaylistSong::where('playlist_id', $LikedSongs->id)
+                        ->where('song_id', $song->id)
+                        ->exists();
+                    return $song;
+                });
+            } else {
+                $Songs = $Songs->map(function ($song) {
+                    $song->is_liked = false;
+                    return $song;
+                });
+            }
 
             $Songs = $Songs->map(function ($song) {
                 return [

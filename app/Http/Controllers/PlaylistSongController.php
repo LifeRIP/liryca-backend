@@ -134,14 +134,21 @@ class PlaylistSongController extends Controller
                     ->where('id', $playlistSong->song_id)
                     ->first();
 
-                //comprobar si la canción tiene like
-                $playlistSong->song->is_liked = Playlist::where('user_id', $request->user()->id)
+                //comprobar si la playlist LikedSongs existe
+                if (Playlist::where('user_id', $request->user()->id)
                     ->where('name', 'LikedSongs')
-                    ->first()
-                    ->songs()
-                    ->where('song_id', $playlistSong->song_id)
-                    ->exists();
-
+                    ->exists()
+                ) {
+                    //comprobar si la canción tiene like
+                    $playlistSong->song->is_liked = Playlist::where('user_id', $request->user()->id)
+                        ->where('name', 'LikedSongs')
+                        ->first()
+                        ->songs()
+                        ->where('song_id', $playlistSong->song_id)
+                        ->exists();
+                } else {
+                    $playlistSong->song->is_liked = false;
+                }
 
                 $playlistSong->album = Album::select('title', 'icon', 'artist_id')
                     ->where('id', $playlistSong->song->album_id)
