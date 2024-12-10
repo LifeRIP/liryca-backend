@@ -77,6 +77,8 @@ class PlaybackHistoryController extends Controller
                 ];
             });
 
+            dd("flag");
+
             return response()->json($playbackHistory, 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error al obtener el historial de reproduccion'], 500);
