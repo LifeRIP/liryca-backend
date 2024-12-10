@@ -56,8 +56,6 @@ class PlaybackHistoryController extends Controller
                 return true;
             });
 
-            dd("flag");
-
             //comprobar si la canción tiene like
             $playbackHistory = $playbackHistory->map(function ($history) use ($request) {
                 $history->is_liked = $request->user()->playlists()->where('name', 'LikedSongs')->first()->songs->contains($history->song_id);
