@@ -25,8 +25,6 @@ class PostController extends Controller
             // Obtener todos los posts en orden
             $posts = Post::orderBy('created_at', 'desc')->get();
 
-            //Obtener si el usuario autenticado le ha dado like a cada post
-
 
             // Ootener el tipo de post 
             foreach ($posts as $post) {
@@ -274,6 +272,151 @@ class PostController extends Controller
         }
     }
 
+    /**
+     * Display the specified resource.
+     */
+    public function show(Request $request, string $user_id)
+    {
+        try {
+            // Obtener todos los posts del usuario en orden
+            $posts = Post::where('user_id', $user_id)->orderBy('created_at', 'desc')->get();
+
+
+            // Ootener el tipo de post 
+            foreach ($posts as $post) {
+                switch (true) {
+                    case $post->song_id:
+                        $post->type = 'song';
+                        break;
+                    case $post->album_id:
+                        $post->type = 'album';
+                        break;
+                    case $post->artist_id:
+                        $post->type = 'artist';
+                        break;
+                    case $post->playlist_id:
+                        $post->type = 'playlist';
+                        break;
+                    default:
+                        $post->type = 'text';
+                        break;
+                }
+            }
+
+            // Organizar la información que se va a devolver
+            $posts = $posts->map(function ($post) {
+                switch ($post->type) {
+                    case 'song':
+                        return [
+                            'id' => $post->id,
+                            'user_id' => $post->user_id,
+                            'profile_picture' => $post->user->profile_picture,
+                            'username' => $post->user->username,
+                            'action_type' => $post->action_type,
+                            'content' => $post->content,
+                            'type' => $post->type,
+                            'song_id' => $post->song_id,
+                            'title' => $post->song->title,
+                            'duration' => $post->song->time,
+                            'genre' => $post->song->genre,
+                            'url_song' => $post->song->url_song,
+                            'album_id' => $post->song->album->id,
+                            'album_title' => $post->song->album->title,
+                            'icon' => $post->song->album->icon,
+                            'artist_id' => $post->song->artist->user_id,
+                            'artist_name' => $post->song->artist->user->username,
+                            'is_liked' => PostLike::where('post_id', $post->id)->where('user_id', request()->user()->id)->exists(),
+                            'like_count' => PostLike::where('post_id', $post->id)->count(),
+                            'comment_count' => Comment::where('post_id', $post->id)->count(),
+                            'released_at' => $post->created_at,
+                        ];
+                    case 'album':
+                        return [
+                            'id' => $post->id,
+                            'user_id' => $post->user_id,
+                            'profile_picture' => $post->user->profile_picture,
+                            'username' => $post->user->username,
+                            'action_type' => $post->action_type,
+                            'content' => $post->content,
+                            'type' => $post->type,
+                            'album_id' => $post->album_id,
+                            'title' => $post->album->title,
+                            'description' => $post->album->description,
+                            'icon' => $post->album->icon,
+                            'artist_id' => $post->album->artist->user_id,
+                            'artist_name' => $post->album->artist->user->username,
+                            'is_liked' => PostLike::where('post_id', $post->id)->where('user_id', request()->user()->id)->exists(),
+                            'like_count' => PostLike::where('post_id', $post->id)->count(),
+                            'comment_count' => Comment::where('post_id', $post->id)->count(),
+                            'released_at' => $post->created_at,
+                        ];
+                    case 'artist':
+                        return [
+                            'id' => $post->id,
+                            'user_id' => $post->user_id,
+                            'profile_picture' => $post->user->profile_picture,
+                            'username' => $post->user->username,
+                            'action_type' => $post->action_type,
+                            'content' => $post->content,
+                            'type' => $post->type,
+                            'artist_id' => $post->artist->user_id,
+                            'name' => $post->artist->user->username,
+                            'about' => $post->artist->about,
+                            'artist_profile_picture' => $post->artist->user->profile_picture,
+                            'artist_profile_banner' => $post->artist->user->profile_banner,
+                            'is_liked' => PostLike::where('post_id', $post->id)->where('user_id', request()->user()->id)->exists(),
+                            'like_count' => PostLike::where('post_id', $post->id)->count(),
+                            'comment_count' => Comment::where('post_id', $post->id)->count(),
+                            'released_at' => $post->created_at,
+                        ];
+                    case 'playlist':
+                        return [
+                            'id' => $post->id,
+                            'user_id' => $post->user_id,
+                            'profile_picture' => $post->user->profile_picture,
+                            'username' => $post->user->username,
+                            'action_type' => $post->action_type,
+                            'content' => $post->content,
+                            'type' => $post->type,
+                            'playlist_id' => $post->playlist_id,
+                            'name' => $post->playlist->name,
+                            'owner_id' => $post->playlist->user_id,
+                            'owner_name' => $post->playlist->user->username,
+                            'description' => $post->playlist->description,
+                            'image' => $post->playlist->image,
+                            'is_liked' => PostLike::where('post_id', $post->id)->where('user_id', request()->user()->id)->exists(),
+                            'like_count' => PostLike::where('post_id', $post->id)->count(),
+                            'comment_count' => Comment::where('post_id', $post->id)->count(),
+                            'released_at' => $post->created_at,
+                        ];
+                    case 'text':
+                        return [
+                            'id' => $post->id,
+                            'user_id' => $post->user_id,
+                            'profile_picture' => $post->user->profile_picture,
+                            'username' => $post->user->username,
+                            'action_type' => $post->action_type,
+                            'content' => $post->content,
+                            'type' => $post->type,
+                            'is_liked' => PostLike::where('post_id', $post->id)->where('user_id', request()->user()->id)->exists(),
+                            'like_count' => PostLike::where('post_id', $post->id)->count(),
+                            'comment_count' => Comment::where('post_id', $post->id)->count(),
+                            'released_at' => $post->created_at,
+                        ];
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $posts
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
     /**
      * Update the specified resource in storage.
      */
