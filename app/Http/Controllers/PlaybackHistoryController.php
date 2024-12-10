@@ -56,9 +56,16 @@ class PlaybackHistoryController extends Controller
                 return true;
             });
 
-            //comprobar si la canción tiene like
+            //comprobar si la canción tiene like si no existe la playlist de LikedSongs, retornar false
             $playbackHistory = $playbackHistory->map(function ($history) use ($request) {
-                $history->is_liked = $request->user()->playlists()->where('name', 'LikedSongs')->first()->songs->contains($history->song_id);
+                // comprobar si existe la playlist de LikedSongs
+                if (!$request->user()->playlists()->where('name', 'LikedSongs')->exists()) {
+                    $history->is_liked = false;
+                    return $history;
+                }
+
+                $history->is_liked = $request->user()->playlists()->where('name', 'LikedSongs')->first()->songs()->where('song_id', $history->song_id)->exists();
+
                 return $history;
             });
 
@@ -76,8 +83,6 @@ class PlaybackHistoryController extends Controller
 
                 ];
             });
-
-            dd("flag");
 
             return response()->json($playbackHistory, 200);
         } catch (\Exception $e) {
