@@ -138,7 +138,7 @@ class CommentController extends Controller
         }
     }
 
-    public function postComments(string $post_id)
+    public function postComments(Request $request, string $post_id)
     {
         try {
             // Obtener los comentarios del post
@@ -153,12 +153,17 @@ class CommentController extends Controller
                 ->get();
 
             // Obtener los usuarios de los comentarios y los likes con map
-            $comments = $comments->map(function ($comment) {
+            $comments = $comments->map(function ($comment)  use ($request) {
                 $user = User::find($comment->user_id);
 
                 $like = CommentLike::where('comment_id', $comment->id)
                     ->selectRaw('count(*) as likes')
                     ->first();
+
+                // Validar si el usuario logueado le dio like al comentario
+                $like->liked = CommentLike::where('comment_id', $comment->id)
+                    ->where('user_id', $request->user()->id)
+                    ->exists();
 
                 return [
                     'id' => $comment->id,
@@ -168,6 +173,8 @@ class CommentController extends Controller
                     'name' => $user->username,
                     'profile_picture' => $user->profile_picture,
                     'comment_at' => $comment->created_at,
+                    'liked' => $like->liked
+
                 ];
             });
 
