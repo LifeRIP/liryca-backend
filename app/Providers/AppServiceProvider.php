@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Enums\RoleEnum;
+use App\Observers\ProfileChangeObserver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -40,5 +42,8 @@ class AppServiceProvider extends ServiceProvider
             SocialiteWasCalled::class,
             [DiscordExtendSocialite::class, 'handle']
         );
+
+         // Registrar el observador de cambios en el perfil
+         User::observe(ProfileChangeObserver::class);
     }
 }
