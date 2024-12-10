@@ -378,4 +378,82 @@ class PlaylistSongController extends Controller
             ], 500);
         }
     }
+
+    public function likeplaylist(Request $request)
+    {
+        try {
+            //Obtener la playlist LikedSongs
+            $playlist = Playlist::where('name', 'LikedSongs')->first();
+
+            //Comprobar si la playlist LikedSongs existe si no crearla
+            if (!$playlist) {
+                $playlist = new Playlist();
+                $playlist->name = 'LikedSongs';
+                $playlist->user_id = $request->user()->id;
+                $playlist->description = 'My favorite songs';
+                $playlist->privacy = 'private';
+                $playlist->image = 'https://firebasestorage.googleapis.com/v0/b/liryca-c9f2e.appspot.com/o/playlistCover%2FdefaultCover.jpg?alt=media&token=c199cc9f-afca-460b-8b70-3d45eaf39e80';
+                $playlist->save();
+            }
+
+            // Obtener todas las canciones de la playlist
+            $playlistSongs = PlaylistSong::where('playlist_id', $playlist->id)->get();
+
+            // Añadir Username de el add_by y profile_picture de el usuario que añadió la canción dentro del campo add_by
+
+            $playlistSongs->map(function ($playlistSong) {
+                $playlistSong->add_by = User::select('id', 'username', 'profile_picture')
+                    ->where('id', $playlistSong->add_by)
+                    ->first();
+
+                return $playlistSong;
+            });
+
+            // Obtener por medio de un select nombre de la canción, time, url_song, nombre del album, portada del album, username del artista de las canciones de la playlist
+            $playlistSongs->map(function ($playlistSong)  use ($request) {
+
+                $playlistSong->song = Song::select('title', 'time', 'url_song', 'album_id')
+                    ->where('id', $playlistSong->song_id)
+                    ->first();
+
+                //comprobar si la playlist LikedSongs existe
+                if (Playlist::where('user_id', $request->user()->id)
+                    ->where('name', 'LikedSongs')
+                    ->exists()
+                ) {
+                    //comprobar si la canción tiene like
+                    $playlistSong->song->is_liked = Playlist::where('user_id', $request->user()->id)
+                        ->where('name', 'LikedSongs')
+                        ->first()
+                        ->songs()
+                        ->where('song_id', $playlistSong->song_id)
+                        ->exists();
+                } else {
+                    $playlistSong->song->is_liked = false;
+                }
+
+                $playlistSong->album = Album::select('title', 'icon', 'artist_id')
+                    ->where('id', $playlistSong->song->album_id)
+                    ->first();
+
+                $playlistSong->artist = Artist::select('user_id')
+                    ->where('id', $playlistSong->album->artist_id)
+                    ->first();
+
+                $playlistSong->artist->username = User::select('username')
+                    ->where('id', $playlistSong->artist->user_id)
+                    ->first()
+                    ->username;
+
+                return $playlistSong;
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $playlistSongs
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error liking playlist'], 500);
+        }
+    }
 }
