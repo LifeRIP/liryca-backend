@@ -503,7 +503,8 @@ class SongController extends Controller
      *                     @OA\Property(property="song_name", type="string", example="Mírame"),
      *                     @OA\Property(property="artist_id", type="integer", example="264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"),
      *                     @OA\Property(property="artist_name", type="string", example="Blessd"),
-     *                     @OA\Property(property="is_liked", type="boolean", example=true)
+     *                     @OA\Property(property="album_icon", type="string", example="https://i.scdn.co/image/ab67616d0000b2732fb583ed96f8f35cbf2897ba"),
+     *                     @OA\Property(property="is_like1d", type="boolean", example=true)
      *                 )
      *             )
      *         )
@@ -526,10 +527,12 @@ class SongController extends Controller
         $topSongs = Song::where('songs.is_active', true)
             ->join('artists', 'songs.artist_id', '=', 'artists.id')
             ->join('users', 'artists.user_id', '=', 'users.id')
+            ->join('albums', 'songs.album_id', '=', 'albums.id') // Join with albums table
             ->select(
                 'songs.*',
                 'users.id as user_id',
-                'users.username'
+                'users.username',
+                'albums.icon as album_icon' // Select the album icon
             )
             ->whereHas('playbackHistories', function ($query) {
                 $query->whereDate('created_at', today());
@@ -549,13 +552,12 @@ class SongController extends Controller
         if (Playlist::where('user_id', $request->user()->id)
             ->where('name', 'LikedSongs')
             ->exists()
-
         ) {
             $LikedSongs = Playlist::where('user_id', $request->user()->id)
                 ->where('name', 'LikedSongs')
                 ->first();
 
-            //Comprobar si la canción tiene like
+            // Comprobar si la canción tiene like
             $topSongs = $topSongs->map(function ($song) use ($LikedSongs) {
                 $song->is_liked = PlaylistSong::where('playlist_id', $LikedSongs->id)
                     ->where('song_id', $song->id)
@@ -579,6 +581,7 @@ class SongController extends Controller
                     'song_name' => $song->title,
                     'artist_id' => $song->artist->user->id,
                     'artist_name' => $song->artist->user->username,
+                    'album_icon' => $song->album_icon, // Include the album icon in the response
                     'is_liked' => $song->is_liked
                 ];
             }),
@@ -607,6 +610,7 @@ class SongController extends Controller
      *                     @OA\Property(property="song_name", type="string", example="Mírame"),
      *                     @OA\Property(property="artist_id", type="integer", example="264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"),
      *                     @OA\Property(property="artist_name", type="string", example="Blessd"),
+     *                     @OA\Property(property="album_icon", type="string", example="https://i.scdn.co/image/ab67616d0000b2732fb583ed96f8f35cbf2897ba"),
      *                     @OA\Property(property="is_liked", type="boolean", example=true)
      *                 )
      *             )
@@ -634,19 +638,38 @@ class SongController extends Controller
 
         // Consulta para obtener las canciones más escuchadas hoy en el país del usuario
         $topSongs = PlaybackHistory::query()
-            ->select('songs.id', 'songs.title', 'songs.artist_id', 'songs.album_id', 'songs.url_song', 'artists.user_id as artist_user_id', 'artist_users.username', DB::raw('COUNT(playback_histories.id) as play_count'))
+            ->select(
+                'songs.id',
+                'songs.title',
+                'songs.artist_id',
+                'songs.album_id',
+                'songs.url_song',
+                'albums.icon as album_icon', // Select the album icon
+                'artists.user_id as artist_user_id',
+                'artist_users.username',
+                DB::raw('COUNT(playback_histories.id) as play_count')
+            )
             ->join('songs', 'playback_histories.song_id', '=', 'songs.id')
             ->join('artists', 'songs.artist_id', '=', 'artists.id')
             ->join('users as artist_users', 'artists.user_id', '=', 'artist_users.id') // Unir con la tabla users a través de artists
             ->join('users as playback_users', 'playback_histories.user_id', '=', 'playback_users.id') // Unir con la tabla users para filtrar por país
+            ->join('albums', 'songs.album_id', '=', 'albums.id') // Join with albums table
             ->where('playback_users.country', '=', $country)
             ->where('playback_histories.created_at', '>=', $today)
-            ->groupBy('songs.id', 'songs.title', 'songs.artist_id', 'songs.album_id', 'songs.url_song', 'artists.user_id', 'artist_users.username')
+            ->groupBy(
+                'songs.id',
+                'songs.title',
+                'songs.artist_id',
+                'songs.album_id',
+                'songs.url_song',
+                'albums.icon',
+                'artists.user_id',
+                'artist_users.username'
+            )
             ->orderByDesc('play_count')
             ->take(10) // Limita a las 10 canciones más escuchadas
             ->get();
 
-        //return $topSongs;
         if ($topSongs->isEmpty()) {
             return response()->json(['error' => 'No songs found for today in my country'], 404);
         }
@@ -684,6 +707,7 @@ class SongController extends Controller
                     'song_name' => $song->title,
                     'artist_id' => $song->artist_user_id,
                     'artist_name' => $song->username,
+                    'album_icon' => $song->album_icon, // Include the album icon in the response
                     'is_liked' => $song->is_liked
                 ];
             }),
