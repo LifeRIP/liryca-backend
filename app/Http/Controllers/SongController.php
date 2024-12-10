@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Album;
 use App\Models\Artist;
 use App\Models\PlaybackHistory;
+use App\Models\Playlist;
+use App\Models\PlaylistSong;
 use App\Models\Song;
 use App\Models\SongCollaborator;
 use Illuminate\Http\JsonResponse;
@@ -256,20 +258,17 @@ class SongController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/v1/song/top-by-artist/{artistId}",
-     *     summary="Get top songs by artist",
-     *     description="Returns the top 10 songs by an artist based on playback count",
-     *     operationId="top-by-artist",
+     *     path="/api/v1/song/top-by-user/{userId}",
+     *     summary="Get top songs by user",
+     *     description="Returns the top 10 songs by a user based on playback count",
+     *     operationId="top-by-user",
      *     tags={"song"},
      *     security={{"sanctum": {}}},
      *     @OA\Parameter(
-     *         name="artistId",
+     *         name="userId",
      *         in="path",
-     *         description="ID of the artist",
+     *         description="ID of the user",
      *         required=true,
-     *         @OA\Schema(
-     *             type="integer"
-     *         )
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -279,35 +278,37 @@ class SongController extends Controller
      *                 property="data",
      *                 type="array",
      *                 @OA\Items(
-     *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="title", type="string", example="Mírame"),
-     *                     @OA\Property(property="artist_id", type="integer", example=1),
+     *                     @OA\Property(property="song_id", type="integer", example=1),
      *                     @OA\Property(property="album_id", type="integer", example=1),
      *                     @OA\Property(property="time", type="string", example="00:01:38"),
      *                     @OA\Property(property="genre", type="string", example="Reggaeton"),
-     *                     @OA\Property(property="url_song", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
+     *                     @OA\Property(property="song_url", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
      *                     @OA\Property(property="is_active", type="boolean", example=true),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
      *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
-     *                     @OA\Property(property="play_count", type="integer", example=1)
+     *                     @OA\Property(property="song_name", type="string", example="Mírame"),
+     *                     @OA\Property(property="artist_id", type="integer", example="264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"),
+     *                     @OA\Property(property="album_image", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
+     *                     @OA\Property(property="artist_name", type="string", example="Blessd"),
+     *                     @OA\Property(property="is_liked", type="boolean", example=true)
      *                 )
      *             )
      *         )
      *     ),
-     *    @OA\Response(
-     *        response=404,
-     *        description="Error: Not Found",
-     *        @OA\JsonContent(
-     *            @OA\Property(
-     *            property="error",
-     *            type="string",
-     *            example="No songs found for this artist"
-     *            )
-     *        )
-     *    )
+     *     @OA\Response(
+     *         response=404,
+     *         description="Error: Not Found",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="error",
+     *                 type="string",
+     *                 example="No songs found for this user"
+     *             )
+     *         )
+     *     )
      * )
      */
-    public function getTopSongsByUser($userId)
+    public function getTopSongsByUser(Request $request, $userId)
     {
         $topSongs = Song::whereHas('artist', function ($query) use ($userId) {
             $query->where('user_id', $userId);
@@ -321,6 +322,30 @@ class SongController extends Controller
 
         if ($topSongs->isEmpty()) {
             return response()->json(['error' => 'No songs found for this artist'], 404);
+        }
+
+        // Comprobar que la playlist likedSongs exista
+        if (Playlist::where('user_id', $request->user()->id)
+            ->where('name', 'LikedSongs')
+            ->exists()
+
+        ) {
+            $LikedSongs = Playlist::where('user_id', $request->user()->id)
+                ->where('name', 'LikedSongs')
+                ->first();
+
+            //Comprobar si la canción tiene like
+            $topSongs = $topSongs->map(function ($song) use ($LikedSongs) {
+                $song->is_liked = PlaylistSong::where('playlist_id', $LikedSongs->id)
+                    ->where('song_id', $song->id)
+                    ->exists();
+                return $song;
+            });
+        } else {
+            $topSongs = $topSongs->map(function ($song) {
+                $song->is_liked = false;
+                return $song;
+            });
         }
 
         return response()->json([
@@ -338,6 +363,7 @@ class SongController extends Controller
                     'artist_id' => $song->artist->user->id,
                     'album_image' => $song->album->icon,
                     'artist_name' => $song->artist->user->username,
+                    'is_liked' => $song->is_liked
                 ];
             }),
         ]);

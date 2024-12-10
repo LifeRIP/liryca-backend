@@ -62,23 +62,20 @@
                 ]
             }
         },
-        "/api/v1/song/top-by-artist/{artistId}": {
+        "/api/v1/song/top-by-user/{userId}": {
             "get": {
                 "tags": [
                     "song"
                 ],
-                "summary": "Get top songs by artist",
-                "description": "Returns the top 10 songs by an artist based on playback count",
-                "operationId": "top-by-artist",
+                "summary": "Get top songs by user",
+                "description": "Returns the top 10 songs by a user based on playback count",
+                "operationId": "top-by-user",
                 "parameters": [
                     {
-                        "name": "artistId",
+                        "name": "userId",
                         "in": "path",
-                        "description": "ID of the artist",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
+                        "description": "ID of the user",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -92,15 +89,7 @@
                                             "type": "array",
                                             "items": {
                                                 "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "title": {
-                                                        "type": "string",
-                                                        "example": "Mírame"
-                                                    },
-                                                    "artist_id": {
+                                                    "song_id": {
                                                         "type": "integer",
                                                         "example": 1
                                                     },
@@ -116,7 +105,7 @@
                                                         "type": "string",
                                                         "example": "Reggaeton"
                                                     },
-                                                    "url_song": {
+                                                    "song_url": {
                                                         "type": "string",
                                                         "example": "https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"
                                                     },
@@ -134,9 +123,25 @@
                                                         "format": "date-time",
                                                         "example": "2024-11-18T00:20:29.000000Z"
                                                     },
-                                                    "play_count": {
+                                                    "song_name": {
+                                                        "type": "string",
+                                                        "example": "Mírame"
+                                                    },
+                                                    "artist_id": {
                                                         "type": "integer",
-                                                        "example": 1
+                                                        "example": "264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"
+                                                    },
+                                                    "album_image": {
+                                                        "type": "string",
+                                                        "example": "https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"
+                                                    },
+                                                    "artist_name": {
+                                                        "type": "string",
+                                                        "example": "Blessd"
+                                                    },
+                                                    "is_liked": {
+                                                        "type": "boolean",
+                                                        "example": true
                                                     }
                                                 },
                                                 "type": "object"
@@ -156,7 +161,7 @@
                                     "properties": {
                                         "error": {
                                             "type": "string",
-                                            "example": "No songs found for this artist"
+                                            "example": "No songs found for this user"
                                         }
                                     },
                                     "type": "object"
@@ -294,6 +299,105 @@
                 "summary": "Get top songs today",
                 "description": "Returns the top 10 songs played today",
                 "operationId": "top-songs-today",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Mírame"
+                                                    },
+                                                    "artist_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "album_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "time": {
+                                                        "type": "string",
+                                                        "example": "00:01:38"
+                                                    },
+                                                    "genre": {
+                                                        "type": "string",
+                                                        "example": "Reggaeton"
+                                                    },
+                                                    "url_song": {
+                                                        "type": "string",
+                                                        "example": "https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "play_count": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-11-18T00:20:29.000000Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-11-18T00:20:29.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "No songs found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/song/songs/top-today/by-my-country": {
+            "get": {
+                "tags": [
+                    "song"
+                ],
+                "summary": "Get top songs today by my country",
+                "description": "Returns the top 10 songs played today by my country",
+                "operationId": "top-songs-today-by-my-country",
                 "responses": {
                     "200": {
                         "description": "OK",
