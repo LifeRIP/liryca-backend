@@ -383,7 +383,9 @@ class PlaylistSongController extends Controller
     {
         try {
             //Obtener la playlist LikedSongs
-            $playlist = Playlist::where('name', 'LikedSongs')->first();
+            $playlist = Playlist::where('user_id', $request->user()->id)
+                ->where('name', 'LikedSongs')
+                ->first();
 
             //Comprobar si la playlist LikedSongs existe si no crearla
             if (!$playlist) {

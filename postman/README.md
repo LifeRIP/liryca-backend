@@ -6,7 +6,7 @@ El servidor predeterminado es `http://127.0.0.1:8000`.
 
 ## Primera prueba
 
-1. Iniciar Laravel, por ejemplo con `./scripts/serve.ps1` desde el repositorio.
+1. Iniciar Laravel con `composer run dev` desde el repositorio.
 2. Comprobar **00 - Estado y documentación**.
 3. Ejecutar **solo la carpeta 01 - Flujo básico** en orden, con Collection Runner
    o enviando sus solicitudes una a una.

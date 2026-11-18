@@ -110,3 +110,61 @@ it('generates a two factor QR code and stores the secret encrypted', function ()
     expect($user->fresh()->two_factor_secret)->toBe($secret);
     expect($user->fresh()->getRawOriginal('two_factor_secret'))->not->toBe($secret);
 });
+
+it('keeps liked playlists private to the authenticated user', function () {
+    $owner = User::factory()->create();
+    $viewer = User::factory()->create();
+    $artist = $owner->artist()->create(['verified' => true]);
+    $album = \App\Models\Album::create([
+        'title' => 'Favorites', 'artist_id' => $artist->id, 'release_date' => '2026-01-01',
+    ]);
+    $song = \App\Models\Song::create([
+        'title' => 'Favorite song', 'artist_id' => $artist->id, 'album_id' => $album->id,
+        'time' => '00:03:00', 'genre' => 'Pop', 'url_song' => 'https://example.com/song.mp3',
+    ]);
+    Sanctum::actingAs($owner);
+    $this->postJson('/api/v1/playlistsong/likeSong/'.$song->id)->assertOk();
+
+    Sanctum::actingAs($viewer);
+    $this->getJson('/api/v1/playlistsong/playlist/like')->assertOk()->assertJsonCount(0, 'data');
+    $this->assertDatabaseHas('playlists', ['user_id' => $viewer->id, 'name' => 'LikedSongs', 'privacy' => 'private']);
+    $this->getJson('/api/v1/playlistsong/playlist/like')->assertOk()->assertJsonCount(0, 'data');
+    expect($viewer->playlists()->where('name', 'LikedSongs')->count())->toBe(1);
+
+    Sanctum::actingAs($owner);
+    $this->getJson('/api/v1/playlistsong/playlist/like')->assertOk()
+        ->assertJsonCount(1, 'data')->assertJsonPath('data.0.song.title', $song->title)
+        ->assertJsonPath('data.0.song.is_liked', true)
+        ->assertJsonPath('data.0.artist.username', $owner->username);
+});
+
+it('lists only the requested users posts with viewer like status', function (string $type) {
+    $owner = User::factory()->create();
+    $viewer = User::factory()->create();
+    $artist = $owner->artist()->create(['verified' => true]);
+    $album = \App\Models\Album::create([
+        'title' => 'Shared album', 'artist_id' => $artist->id, 'release_date' => '2026-01-01',
+    ]);
+    $song = \App\Models\Song::create([
+        'title' => 'Shared song', 'artist_id' => $artist->id, 'album_id' => $album->id,
+        'time' => '00:03:00', 'genre' => 'Pop', 'url_song' => 'https://example.com/song.mp3',
+    ]);
+    $playlist = \App\Models\Playlist::create(['user_id' => $owner->id, 'name' => 'Shared playlist']);
+    $association = match ($type) {
+        'song' => ['song_id' => $song->id],
+        'album' => ['album_id' => $album->id],
+        'artist' => ['artist_id' => $artist->id],
+        'playlist' => ['playlist_id' => $playlist->id],
+        default => [],
+    };
+    $post = \App\Models\Post::create(['user_id' => $owner->id, 'content' => 'Owner post', ...$association]);
+    \App\Models\Post::create(['user_id' => $viewer->id, 'content' => 'Other post']);
+    \App\Models\PostLike::create(['user_id' => $viewer->id, 'post_id' => $post->id]);
+    Sanctum::actingAs($viewer);
+
+    $this->getJson('/api/v1/post/'.$owner->id)->assertOk()
+        ->assertJsonPath('success', true)->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $post->id)->assertJsonPath('data.0.type', $type)
+        ->assertJsonPath('data.0.is_liked', true)->assertJsonPath('data.0.like_count', 1);
+    $this->getJson('/api/v1/post/'.User::factory()->create()->id)->assertOk()->assertJsonCount(0, 'data');
+})->with(['text', 'song', 'album', 'artist', 'playlist']);

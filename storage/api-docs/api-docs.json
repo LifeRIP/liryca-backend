@@ -7,9 +7,6 @@
     "servers": [
         {
             "url": "http://localhost:8000"
-        },
-        {
-            "url": "https://liryca-api.vercel.app/api"
         }
     ],
     "paths": {
@@ -75,7 +72,11 @@
                         "name": "userId",
                         "in": "path",
                         "description": "ID of the user",
-                        "required": true
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
                     }
                 ],
                 "responses": {
@@ -338,6 +339,10 @@
                                                         "type": "string",
                                                         "example": "Blessd"
                                                     },
+                                                    "album_icon": {
+                                                        "type": "string",
+                                                        "example": "https://i.scdn.co/image/ab67616d0000b2732fb583ed96f8f35cbf2897ba"
+                                                    },
                                                     "is_liked": {
                                                         "type": "boolean",
                                                         "example": true
@@ -418,6 +423,10 @@
                                                     "artist_name": {
                                                         "type": "string",
                                                         "example": "Blessd"
+                                                    },
+                                                    "album_icon": {
+                                                        "type": "string",
+                                                        "example": "https://i.scdn.co/image/ab67616d0000b2732fb583ed96f8f35cbf2897ba"
                                                     },
                                                     "is_liked": {
                                                         "type": "boolean",

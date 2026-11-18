@@ -69,7 +69,7 @@ instalación y los temporales están en `.tools`; no forman parte de la aplicaci
   Se separó la interfaz `/docs` del JSON `/docs/api-docs.json`.
 - Vite 8, su integración Laravel 3 y Axios actualizados. Compilación correcta;
   auditoría Composer sin vulnerabilidades conocidas.
-- Servidor local en http://127.0.0.1:8000. Reinicio: `./scripts/serve.ps1`.
+- Servidor local en http://127.0.0.1:8000. Reinicio: `composer run dev`.
 
 No se ejecutó un despliegue remoto. La configuración de Vercel usa ahora PHP
 8.4; el proveedor OAuth y el envío real de correo requieren comprobación manual.

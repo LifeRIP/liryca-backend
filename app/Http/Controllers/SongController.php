@@ -680,7 +680,7 @@ class SongController extends Controller
                                         new OA\Property(
                                             type: 'boolean',
                                             example: true,
-                                            property: 'is_like1d'
+                                            property: 'is_liked'
                                         )
                                     ]
                                 ),
