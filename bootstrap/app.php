@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->validateCsrfTokens(except: [
+        $middleware->preventRequestForgery(except: [
             //'/*', // Evitar CSRF en todas las rutas
         ]);
         $middleware->alias([

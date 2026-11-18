@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
+
 
 use Illuminate\Http\Request;
 use App\Models\Album;
@@ -134,7 +136,7 @@ class SongController extends Controller
             $collaborators = SongCollaborator::where('song_id', $song->id)
                 ->join('artists', 'song_collaborators.artist_id', '=', 'artists.id')
                 ->join('users', 'artists.user_id', '=', 'users.id')
-                ->select('users.id', 'users.name')
+                ->select('users.id', 'users.username')
                 ->get();
             $song->collaborators = $collaborators;
 
@@ -208,7 +210,7 @@ class SongController extends Controller
             $song->collaborators = SongCollaborator::where('song_id', $song->id)
                 ->join('artists', 'song_collaborators.artist_id', '=', 'artists.id')
                 ->join('users', 'artists.user_id', '=', 'users.id')
-                ->select('users.id', 'users.name')
+                ->select('users.id', 'users.username')
                 ->get();
 
             return response()->json([
@@ -255,59 +257,130 @@ class SongController extends Controller
             ]);
         }
     }
-
-    /**
-     * @OA\Get(
-     *     path="/api/v1/song/top-by-user/{userId}",
-     *     summary="Get top songs by user",
-     *     description="Returns the top 10 songs by a user based on playback count",
-     *     operationId="top-by-user",
-     *     tags={"song"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Parameter(
-     *         name="userId",
-     *         in="path",
-     *         description="ID of the user",
-     *         required=true,
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="OK",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     @OA\Property(property="song_id", type="integer", example=1),
-     *                     @OA\Property(property="album_id", type="integer", example=1),
-     *                     @OA\Property(property="time", type="string", example="00:01:38"),
-     *                     @OA\Property(property="genre", type="string", example="Reggaeton"),
-     *                     @OA\Property(property="song_url", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
-     *                     @OA\Property(property="is_active", type="boolean", example=true),
-     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
-     *                     @OA\Property(property="song_name", type="string", example="Mírame"),
-     *                     @OA\Property(property="artist_id", type="integer", example="264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"),
-     *                     @OA\Property(property="album_image", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
-     *                     @OA\Property(property="artist_name", type="string", example="Blessd"),
-     *                     @OA\Property(property="is_liked", type="boolean", example=true)
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Error: Not Found",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="error",
-     *                 type="string",
-     *                 example="No songs found for this user"
-     *             )
-     *         )
-     *     )
-     * )
-     */
+    #[
+        OA\Get(
+            path: '/api/v1/song/top-by-user/{userId}',
+            tags: [
+                'song'
+            ],
+            summary: 'Get top songs by user',
+            description: 'Returns the top 10 songs by a user based on playback count',
+            operationId: 'top-by-user',
+            parameters: [
+                new OA\Parameter(
+                    name: 'userId',
+                    in: 'path',
+                    description: 'ID of the user',
+                    required: true,
+                    schema: new OA\Schema(type: 'string', format: 'uuid')
+                )
+            ],
+            responses: [
+                new OA\Response(
+                    response: 200,
+                    description: 'OK',
+                    content: new OA\JsonContent(
+                        properties: [
+                            new OA\Property(
+                                type: 'array',
+                                items: new OA\Items(
+                                    properties: [
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: 1,
+                                            property: 'song_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: 1,
+                                            property: 'album_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: '00:01:38',
+                                            property: 'time'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'Reggaeton',
+                                            property: 'genre'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144',
+                                            property: 'song_url'
+                                        ),
+                                        new OA\Property(
+                                            type: 'boolean',
+                                            example: true,
+                                            property: 'is_active'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            format: 'date-time',
+                                            example: '2024-11-18T00:20:29.000000Z',
+                                            property: 'created_at'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            format: 'date-time',
+                                            example: '2024-11-18T00:20:29.000000Z',
+                                            property: 'updated_at'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'Mírame',
+                                            property: 'song_name'
+                                        ),
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: '264e1f6c-52ec-48ea-bfb1-13100f8b5cf3',
+                                            property: 'artist_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144',
+                                            property: 'album_image'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'Blessd',
+                                            property: 'artist_name'
+                                        ),
+                                        new OA\Property(
+                                            type: 'boolean',
+                                            example: true,
+                                            property: 'is_liked'
+                                        )
+                                    ]
+                                ),
+                                property: 'data'
+                            )
+                        ]
+                    )
+                ),
+                new OA\Response(
+                    response: 404,
+                    description: 'Error: Not Found',
+                    content: new OA\JsonContent(
+                        properties: [
+                            new OA\Property(
+                                type: 'string',
+                                example: 'No songs found for this user',
+                                property: 'error'
+                            )
+                        ]
+                    )
+                )
+            ],
+            security: [
+                [
+                    'sanctum' => [
+                    ]
+                ]
+            ]
+        )
+    ]
     public function getTopSongsByUser(Request $request, $userId)
     {
         $topSongs = Song::whereHas('artist', function ($query) use ($userId) {
@@ -368,62 +441,132 @@ class SongController extends Controller
             }),
         ]);
     }
-
-    /**
-     * @OA\Get(
-     *     path="/api/v1/song/by-album-id/{albumId}",
-     *     summary="Get songs by album",
-     *     description="Returns all songs from a specific album",
-     *     operationId="by-album-id",
-     *     tags={"song"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Parameter(
-     *         name="albumId",
-     *         in="path",
-     *         description="ID of the album",
-     *         required=true,
-     *         @OA\Schema(
-     *             type="integer"
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="OK",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     @OA\Property(property="song_id", type="integer", example=1),
-     *                     @OA\Property(property="album_id", type="integer", example=1),
-     *                     @OA\Property(property="time", type="string", example="00:01:38"),
-     *                     @OA\Property(property="genre", type="string", example="Reggaeton"),
-     *                     @OA\Property(property="song_url", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
-     *                     @OA\Property(property="is_active", type="boolean", example=true),
-     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-11-18T00:20:29.000000Z"),
-     *                     @OA\Property(property="song_name", type="string", example="Mírame"),
-     *                     @OA\Property(property="artist_id", type="integer", example="264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"),
-     *                     @OA\Property(property="album_image", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
-     *                     @OA\Property(property="artist_name", type="string", example="Blessd"),
-     *                     @OA\Property(property="is_liked", type="boolean", example=true)
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Error: Not Found",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="error",
-     *                 type="string",
-     *                 example="No songs found for this album"
-     *             )
-     *         )
-     *     )
-     * )
-     */
+    #[
+        OA\Get(
+            path: '/api/v1/song/by-album-id/{albumId}',
+            tags: [
+                'song'
+            ],
+            summary: 'Get songs by album',
+            description: 'Returns all songs from a specific album',
+            operationId: 'by-album-id',
+            parameters: [
+                new OA\Parameter(
+                    name: 'albumId',
+                    in: 'path',
+                    description: 'ID of the album',
+                    required: true,
+                    schema: new OA\Schema(
+                        type: 'integer'
+                    )
+                )
+            ],
+            responses: [
+                new OA\Response(
+                    response: 200,
+                    description: 'OK',
+                    content: new OA\JsonContent(
+                        properties: [
+                            new OA\Property(
+                                type: 'array',
+                                items: new OA\Items(
+                                    properties: [
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: 1,
+                                            property: 'song_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: 1,
+                                            property: 'album_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: '00:01:38',
+                                            property: 'time'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'Reggaeton',
+                                            property: 'genre'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144',
+                                            property: 'song_url'
+                                        ),
+                                        new OA\Property(
+                                            type: 'boolean',
+                                            example: true,
+                                            property: 'is_active'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            format: 'date-time',
+                                            example: '2024-11-18T00:20:29.000000Z',
+                                            property: 'created_at'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            format: 'date-time',
+                                            example: '2024-11-18T00:20:29.000000Z',
+                                            property: 'updated_at'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'Mírame',
+                                            property: 'song_name'
+                                        ),
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: '264e1f6c-52ec-48ea-bfb1-13100f8b5cf3',
+                                            property: 'artist_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144',
+                                            property: 'album_image'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'Blessd',
+                                            property: 'artist_name'
+                                        ),
+                                        new OA\Property(
+                                            type: 'boolean',
+                                            example: true,
+                                            property: 'is_liked'
+                                        )
+                                    ]
+                                ),
+                                property: 'data'
+                            )
+                        ]
+                    )
+                ),
+                new OA\Response(
+                    response: 404,
+                    description: 'Error: Not Found',
+                    content: new OA\JsonContent(
+                        properties: [
+                            new OA\Property(
+                                type: 'string',
+                                example: 'No songs found for this album',
+                                property: 'error'
+                            )
+                        ]
+                    )
+                )
+            ],
+            security: [
+                [
+                    'sanctum' => [
+                    ]
+                ]
+            ]
+        )
+    ]
     public function getSongsByAlbumId(Request $request, $albumId)
     {
         $songs = Song::where('album_id', $albumId)
@@ -480,48 +623,94 @@ class SongController extends Controller
             'data' => $songs,
         ]);
     }
-
-    /**
-     * @OA\Get(
-     *     path="/api/v1/song/songs/top-today",
-     *     summary="Get top songs today",
-     *     description="Returns the top 10 songs played today",
-     *     operationId="top-songs-today",
-     *     tags={"song"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="OK",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     @OA\Property(property="song_id", type="integer", example=1),
-     *                     @OA\Property(property="album_id", type="integer", example=1),
-     *                     @OA\Property(property="song_url", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
-     *                     @OA\Property(property="song_name", type="string", example="Mírame"),
-     *                     @OA\Property(property="artist_id", type="integer", example="264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"),
-     *                     @OA\Property(property="artist_name", type="string", example="Blessd"),
-     *                     @OA\Property(property="album_icon", type="string", example="https://i.scdn.co/image/ab67616d0000b2732fb583ed96f8f35cbf2897ba"),
-     *                     @OA\Property(property="is_like1d", type="boolean", example=true)
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Error: Not Found",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="error",
-     *                 type="string",
-     *                 example="No songs found for today"
-     *             )
-     *         )
-     *     )
-     * )
-     */
+    #[
+        OA\Get(
+            path: '/api/v1/song/songs/top-today',
+            tags: [
+                'song'
+            ],
+            summary: 'Get top songs today',
+            description: 'Returns the top 10 songs played today',
+            operationId: 'top-songs-today',
+            responses: [
+                new OA\Response(
+                    response: 200,
+                    description: 'OK',
+                    content: new OA\JsonContent(
+                        properties: [
+                            new OA\Property(
+                                type: 'array',
+                                items: new OA\Items(
+                                    properties: [
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: 1,
+                                            property: 'song_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: 1,
+                                            property: 'album_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144',
+                                            property: 'song_url'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'Mírame',
+                                            property: 'song_name'
+                                        ),
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: '264e1f6c-52ec-48ea-bfb1-13100f8b5cf3',
+                                            property: 'artist_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'Blessd',
+                                            property: 'artist_name'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'https://i.scdn.co/image/ab67616d0000b2732fb583ed96f8f35cbf2897ba',
+                                            property: 'album_icon'
+                                        ),
+                                        new OA\Property(
+                                            type: 'boolean',
+                                            example: true,
+                                            property: 'is_liked'
+                                        )
+                                    ]
+                                ),
+                                property: 'data'
+                            )
+                        ]
+                    )
+                ),
+                new OA\Response(
+                    response: 404,
+                    description: 'Error: Not Found',
+                    content: new OA\JsonContent(
+                        properties: [
+                            new OA\Property(
+                                type: 'string',
+                                example: 'No songs found for today',
+                                property: 'error'
+                            )
+                        ]
+                    )
+                )
+            ],
+            security: [
+                [
+                    'sanctum' => [
+                    ]
+                ]
+            ]
+        )
+    ]
     public function getTopSongsToday(Request $request)
     {
         $topSongs = Song::where('songs.is_active', true)
@@ -587,48 +776,94 @@ class SongController extends Controller
             }),
         ]);
     }
-
-    /**
-     * @OA\Get(
-     *     path="/api/v1/song/songs/top-today-by-my-country",
-     *     summary="Get top songs today by my country",
-     *     description="Returns the top 10 songs played today by my country",
-     *     operationId="top-songs-today-by-my-country",
-     *     tags={"song"},
-     *     security={{"sanctum": {}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="OK",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     @OA\Property(property="song_id", type="integer", example=1),
-     *                     @OA\Property(property="album_id", type="integer", example=1),
-     *                     @OA\Property(property="song_url", type="string", example="https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144"),
-     *                     @OA\Property(property="song_name", type="string", example="Mírame"),
-     *                     @OA\Property(property="artist_id", type="integer", example="264e1f6c-52ec-48ea-bfb1-13100f8b5cf3"),
-     *                     @OA\Property(property="artist_name", type="string", example="Blessd"),
-     *                     @OA\Property(property="album_icon", type="string", example="https://i.scdn.co/image/ab67616d0000b2732fb583ed96f8f35cbf2897ba"),
-     *                     @OA\Property(property="is_liked", type="boolean", example=true)
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Error: Not Found",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="error",
-     *                 type="string",
-     *                 example="No songs found for today in my country"
-     *             )
-     *         )
-     *     )
-     * )
-     */
+    #[
+        OA\Get(
+            path: '/api/v1/song/songs/top-today-by-my-country',
+            tags: [
+                'song'
+            ],
+            summary: 'Get top songs today by my country',
+            description: 'Returns the top 10 songs played today by my country',
+            operationId: 'top-songs-today-by-my-country',
+            responses: [
+                new OA\Response(
+                    response: 200,
+                    description: 'OK',
+                    content: new OA\JsonContent(
+                        properties: [
+                            new OA\Property(
+                                type: 'array',
+                                items: new OA\Items(
+                                    properties: [
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: 1,
+                                            property: 'song_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: 1,
+                                            property: 'album_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'https://i.scdn.co/image/ab67616d0000b273b62a2ec2d61d48f34a368144',
+                                            property: 'song_url'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'Mírame',
+                                            property: 'song_name'
+                                        ),
+                                        new OA\Property(
+                                            type: 'integer',
+                                            example: '264e1f6c-52ec-48ea-bfb1-13100f8b5cf3',
+                                            property: 'artist_id'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'Blessd',
+                                            property: 'artist_name'
+                                        ),
+                                        new OA\Property(
+                                            type: 'string',
+                                            example: 'https://i.scdn.co/image/ab67616d0000b2732fb583ed96f8f35cbf2897ba',
+                                            property: 'album_icon'
+                                        ),
+                                        new OA\Property(
+                                            type: 'boolean',
+                                            example: true,
+                                            property: 'is_liked'
+                                        )
+                                    ]
+                                ),
+                                property: 'data'
+                            )
+                        ]
+                    )
+                ),
+                new OA\Response(
+                    response: 404,
+                    description: 'Error: Not Found',
+                    content: new OA\JsonContent(
+                        properties: [
+                            new OA\Property(
+                                type: 'string',
+                                example: 'No songs found for today in my country',
+                                property: 'error'
+                            )
+                        ]
+                    )
+                )
+            ],
+            security: [
+                [
+                    'sanctum' => [
+                    ]
+                ]
+            ]
+        )
+    ]
     public function getTopSongsTodayByMyCountry(Request $request)
     {
         // Obtener el país del usuario autenticado desde el token

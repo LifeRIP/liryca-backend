@@ -34,7 +34,7 @@ class PlaylistController extends Controller
                     'id' => $playlist->id,
                     'name' => $playlist->name,
                     'image' => $playlist->image,
-                    'owner' => $user->nameusername
+                    'owner' => $user->username
                 ];
             }
 
@@ -48,7 +48,7 @@ class PlaylistController extends Controller
                     'id' => $playlist->id,
                     'name' => $playlist->name,
                     'image' => $playlist->image,
-                    'owner' => $user->nameusername
+                    'owner' => $user->username
                 ];
             }
 

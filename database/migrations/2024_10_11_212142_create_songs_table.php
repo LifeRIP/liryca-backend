@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('songs', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->collation('utf8_general_ci');
+            $table->string('title');
             $table->foreignId('artist_id')->constrained('artists')->onDelete('cascade');
             $table->foreignId('album_id')->constrained('albums')->onDelete('cascade');
             $table->time('time');
-            $table->string('genre')->collation('utf8_general_ci');
+            $table->string('genre');
             $table->string('url_song');
             $table->boolean('is_active')->default(true);
             $table->timestamps();

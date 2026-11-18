@@ -1,0 +1,3034 @@
+{
+  "info": {
+    "_postman_id": "8b89c932-f53d-454f-8e58-a1299021e577",
+    "name": "Liryca API v1 - Ejemplos",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección basada en las rutas y controladores del repositorio. Importar el environment Local opcional y ejecutar SOLO la carpeta 01 primero. Captura bearer e IDs automáticamente. Las demás carpetas son opcionales y sus requisitos están documentados. No usar Run sobre toda la colección: incluye correo, 2FA, OAuth y eliminación. Los Examples guardados son ilustrativos, no respuestas capturadas de Aiven. Ver postman/README.md."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "run_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_username",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "LirycaPostman!2026",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "playlist_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "post_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "comment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "artist_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "artist_username",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "artist_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "artist_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "artist_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "album_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "song_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "otp",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "two_factor_secret",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "provider",
+      "value": "google",
+      "type": "string"
+    },
+    {
+      "key": "oauth_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reset_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "verification_hash",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Estado y documentación",
+      "description": "Consultas públicas. No requieren token ni crean datos.",
+      "item": [
+        {
+          "name": "Salud del servidor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/up",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Documento OpenAPI",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/docs/api-docs.json",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 - Flujo básico (ejecutar esta carpeta primero)",
+      "description": "Ejecutar en orden con Collection Runner. Crea una cuenta, una playlist, un post y un comentario; captura el token y sus IDs. No necesita canciones ni artista verificado. El registro solicita el correo de verificación según MAIL_MAILER del servidor. Cada registro genera un correo y nombre únicos. No ejecutar todas las carpetas juntas.",
+      "item": [
+        {
+          "name": "01 - Registrar usuario de prueba",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/register",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{user_username}}\",\n  \"email\": \"{{user_email}}\",\n  \"country\": \"CO\",\n  \"birthday\": \"2000-01-01\",\n  \"password\": \"{{password}}\",\n  \"password_confirmation\": \"{{password}}\",\n  \"role\": \"user\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = Date.now().toString() + Math.random().toString(36).slice(2, 7);",
+                  "pm.collectionVariables.set('run_id', id);",
+                  "pm.collectionVariables.set('user_email', 'postman_' + id + '@example.com');",
+                  "pm.collectionVariables.set('user_username', 'postman_' + id);",
+                  "['token','user_id','playlist_id','post_id','comment_id'].forEach(k => pm.collectionVariables.unset(k));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const value_token = data.token;",
+                  "pm.test('Se recibe token', function () { pm.expect(value_token).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_token !== undefined && value_token !== null) pm.collectionVariables.set('token', String(value_token));",
+                  "const value_user_id = data.user && data.user.id;",
+                  "pm.test('Se recibe user_id', function () { pm.expect(value_user_id).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_user_id !== undefined && value_user_id !== null) pm.collectionVariables.set('user_id', String(value_user_id));",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo ilustrativo (no es una respuesta capturada)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/v1/auth/register",
+                "description": "",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"{{user_username}}\",\n  \"email\": \"{{user_email}}\",\n  \"country\": \"CO\",\n  \"birthday\": \"2000-01-01\",\n  \"password\": \"{{password}}\",\n  \"password_confirmation\": \"{{password}}\",\n  \"role\": \"user\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User registered\",\n  \"user\": {\n    \"id\": \"019a0000-0000-7000-8000-000000000001\",\n    \"username\": \"postman_ejemplo\",\n    \"email\": \"postman_ejemplo@example.com\",\n    \"role\": \"user\"\n  },\n  \"token\": \"1|TOKEN_ILUSTRATIVO\",\n  \"token_type\": \"Bearer\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "02 - Iniciar sesión y guardar token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/login",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{password}}\",\n  \"remember\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const value_token = data.token;",
+                  "pm.test('Se recibe token', function () { pm.expect(value_token).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_token !== undefined && value_token !== null) pm.collectionVariables.set('token', String(value_token));",
+                  "const value_user_id = data.user && data.user.id;",
+                  "pm.test('Se recibe user_id', function () { pm.expect(value_user_id).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_user_id !== undefined && value_user_id !== null) pm.collectionVariables.set('user_id', String(value_user_id));",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo ilustrativo (no es una respuesta capturada)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/v1/auth/login",
+                "description": "",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{password}}\",\n  \"remember\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User logged in\",\n  \"user\": {\n    \"id\": \"019a0000-0000-7000-8000-000000000001\",\n    \"role\": \"user\"\n  },\n  \"token\": \"2|TOKEN_ILUSTRATIVO\",\n  \"token_type\": \"Bearer\",\n  \"remember\": false\n}"
+            }
+          ]
+        },
+        {
+          "name": "03 - Consultar mi usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/user/{{user_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "04 - Crear playlist y guardar ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlist",
+            "description": "Este endpoint crea el nombre y la imagen por defecto. Se personalizan en el siguiente PUT; no necesita body."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const value_playlist_id = data.playlist && data.playlist.id;",
+                  "pm.test('Se recibe playlist_id', function () { pm.expect(value_playlist_id).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_playlist_id !== undefined && value_playlist_id !== null) pm.collectionVariables.set('playlist_id', String(value_playlist_id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo ilustrativo (no es una respuesta capturada)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/v1/playlist",
+                "description": "Este endpoint crea el nombre y la imagen por defecto. Se personalizan en el siguiente PUT; no necesita body."
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Playlist created successfully\",\n  \"playlist\": {\n    \"id\": 1,\n    \"name\": \"Playlist #1\",\n    \"user_id\": \"019a0000-0000-7000-8000-000000000001\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "05 - Personalizar playlist",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlist/{{playlist_id}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Playlist Postman {{run_id}}\",\n  \"description\": \"Creada para probar la API\",\n  \"privacy\": \"public\",\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "06 - Listar mis playlists",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlist",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "07 - Ver playlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlist/{{playlist_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "08 - Buscar en la API",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/search/Postman",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "09 - Crear post de texto y guardar ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/post",
+            "description": "",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "content",
+                  "value": "Post de prueba Postman {{run_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "post_type",
+                  "value": "text",
+                  "type": "text"
+                },
+                {
+                  "key": "action_type",
+                  "value": "shared",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const value_post_id = data.id;",
+                  "pm.test('Se recibe post_id', function () { pm.expect(value_post_id).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_post_id !== undefined && value_post_id !== null) pm.collectionVariables.set('post_id', String(value_post_id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo ilustrativo (no es una respuesta capturada)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/x-www-form-urlencoded"
+                  }
+                ],
+                "url": "{{base_url}}/api/v1/post",
+                "description": "",
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "content",
+                      "value": "Post de prueba Postman {{run_id}}",
+                      "type": "text"
+                    },
+                    {
+                      "key": "post_type",
+                      "value": "text",
+                      "type": "text"
+                    },
+                    {
+                      "key": "action_type",
+                      "value": "shared",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"content\": \"Post de prueba Postman\",\n  \"user_id\": \"019a0000-0000-7000-8000-000000000001\",\n  \"action_type\": \"shared\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "10 - Crear comentario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/comment",
+            "description": "La API devuelve un mensaje sin ID. El siguiente GET recupera el ID del comentario creado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"post_id\": {{post_id}},\n  \"content\": \"Comentario Postman {{run_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo ilustrativo (no es una respuesta capturada)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/v1/comment",
+                "description": "La API devuelve un mensaje sin ID. El siguiente GET recupera el ID del comentario creado.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"post_id\": {{post_id}},\n  \"content\": \"Comentario Postman {{run_id}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Comentario guardado\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "11 - Listar comentarios y guardar ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/comment/post/{{post_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const found = Array.isArray(data) ? data.find(c => c.content === pm.variables.replaceIn('Comentario Postman {{run_id}}')) : null;",
+                  "const value_comment_id = found && found.id;",
+                  "pm.test('Se recibe comment_id', function () { pm.expect(value_comment_id).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_comment_id !== undefined && value_comment_id !== null) pm.collectionVariables.set('comment_id', String(value_comment_id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "12 - Dar o quitar like al post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/postlike/{{post_id}}",
+            "description": "Toggle: la primera llamada agrega el like y la siguiente lo elimina."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 201)', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "13 - Dar o quitar like al comentario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/commentlike/{{comment_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 201)', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "14 - Editar comentario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/comment/{{comment_id}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Comentario actualizado desde Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "15 - Listar mis comentarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/comment",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "16 - Editar post",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/post/{{post_id}}",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Post actualizado desde Postman\",\n  \"action_type\": \"recommended\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "17 - Consultar canciones de la playlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlistsong/{{playlist_id}}",
+            "description": "El parámetro de este GET es el ID de la playlist; inicialmente estará vacía."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Validaciones y errores",
+      "description": "Casos negativos: la aserción espera el error indicado; un 400 o 401 aquí significa que la validación pasó.",
+      "item": [
+        {
+          "name": "API protegida sin token (401)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlist",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (401)', function () { pm.expect(pm.response.code).to.be.oneOf([401]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo ilustrativo (no es una respuesta capturada)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/v1/playlist",
+                "description": "",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Unauthenticated.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login con contraseña incorrecta (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/login",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"Incorrecta123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (401)', function () { pm.expect(pm.response.code).to.be.oneOf([401]); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Registro incompleto (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/register",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"correo-invalido\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (400)', function () { pm.expect(pm.response.code).to.be.oneOf([400]); });"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo ilustrativo (no es una respuesta capturada)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{base_url}}/api/v1/auth/register",
+                "description": "",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"correo-invalido\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"username\": [\n    \"The username field is required.\"\n  ],\n  \"email\": [\n    \"The email field must be a valid email address.\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Comentario sin contenido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/comment",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"post_id\": {{post_id}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (400)', function () { pm.expect(pm.response.code).to.be.oneOf([400]); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Cuenta de artista",
+      "description": "Opcional. Registrar artista conserva token y usuario normales; usa artist_token por separado. Crear álbumes requiere además artists.verified=true; registrarse NO verifica al artista. artist_user_id es UUID de users; artist_id es ID numérico de artists.",
+      "item": [
+        {
+          "name": "Registrar artista y guardar sus variables",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/register",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{artist_username}}\",\n  \"email\": \"{{artist_email}}\",\n  \"country\": \"CO\",\n  \"birthday\": \"1995-05-20\",\n  \"password\": \"{{password}}\",\n  \"password_confirmation\": \"{{password}}\",\n  \"role\": \"artist\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = Date.now().toString() + Math.random().toString(36).slice(2, 7);",
+                  "pm.collectionVariables.set('artist_email','artista_' + id + '@example.com');",
+                  "pm.collectionVariables.set('artist_username','artista_' + id);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const value_artist_token = data.token;",
+                  "pm.test('Se recibe artist_token', function () { pm.expect(value_artist_token).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_artist_token !== undefined && value_artist_token !== null) pm.collectionVariables.set('artist_token', String(value_artist_token));",
+                  "const value_artist_user_id = data.user && data.user.id;",
+                  "pm.test('Se recibe artist_user_id', function () { pm.expect(value_artist_user_id).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_artist_user_id !== undefined && value_artist_user_id !== null) pm.collectionVariables.set('artist_user_id', String(value_artist_user_id));",
+                  "if (data.user && data.user.artist) pm.collectionVariables.set('artist_id', String(data.user.artist.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Login del artista",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/login",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{artist_email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 201)', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const value_artist_token = data.token;",
+                  "pm.test('Se recibe artist_token', function () { pm.expect(value_artist_token).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_artist_token !== undefined && value_artist_token !== null) pm.collectionVariables.set('artist_token', String(value_artist_token));",
+                  "const value_artist_user_id = data.user && data.user.id;",
+                  "pm.test('Se recibe artist_user_id', function () { pm.expect(value_artist_user_id).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_artist_user_id !== undefined && value_artist_user_id !== null) pm.collectionVariables.set('artist_user_id', String(value_artist_user_id));",
+                  "if (data.user && data.user.artist) pm.collectionVariables.set('artist_id', String(data.user.artist.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Consultar mi perfil de artista",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/artist",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{artist_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "if (data && data.id) pm.collectionVariables.set('artist_id',String(data.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Consultar artista por UUID de usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/artist/{{artist_user_id}}",
+            "description": "Esta consulta recibe el UUID de users, no artist_id."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Artistas seguidos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/artist/artists/following",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Top artistas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/artist/artists/top",
+            "description": "Puede responder 404 si todavía no hay reproducciones."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 404)', function () { pm.expect(pm.response.code).to.be.oneOf([200,404]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Álbumes y canciones",
+      "description": "Opcional. Antes: crear la cuenta artista y verificarla en el backend (ver README). Ejecutar creación de álbum y canción antes de consultas por ID. Mutaciones usan artist_token; lecturas usan token.",
+      "item": [
+        {
+          "name": "Crear álbum (artista verificado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/album",
+            "description": "Si devuelve Artist not verified (400), falta verificar al artista en el backend. No se salta esa regla.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{artist_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Álbum Postman {{run_id}}\",\n  \"release_date\": \"2026-01-01\",\n  \"description\": \"Álbum de prueba\",\n  \"icon\": \"https://placehold.co/600x600.png\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const value_album_id = data.data && data.data.id;",
+                  "pm.test('Se recibe album_id', function () { pm.expect(value_album_id).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_album_id !== undefined && value_album_id !== null) pm.collectionVariables.set('album_id', String(value_album_id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Crear canción y guardar ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/song",
+            "description": "El artista se obtiene del token; album_id es necesario para el esquema actual. La URL es ilustrativa y no reproduce audio real.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{artist_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Canción Postman {{run_id}}\",\n  \"album_id\": {{album_id}},\n  \"time\": \"00:03:25\",\n  \"genre\": \"Pop\",\n  \"url_song\": \"https://example.com/audio/demo.mp3\",\n  \"collaborators\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const value_song_id = data.data && data.data.id;",
+                  "pm.test('Se recibe song_id', function () { pm.expect(value_song_id).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_song_id !== undefined && value_song_id !== null) pm.collectionVariables.set('song_id', String(value_song_id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Mis álbumes como artista",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/album",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{artist_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 404)', function () { pm.expect(pm.response.code).to.be.oneOf([200,404]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Ver álbum",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/album/{{album_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Álbumes por UUID del artista",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/album/by-user-id/{{artist_user_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 404)', function () { pm.expect(pm.response.code).to.be.oneOf([200,404]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Álbumes recientes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/album/albums/recents",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 404)', function () { pm.expect(pm.response.code).to.be.oneOf([200,404]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Álbumes de mi país",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/album/albums/by-my-country",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 404)', function () { pm.expect(pm.response.code).to.be.oneOf([200,404]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Editar álbum",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/album/{{album_id}}",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{artist_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Descripción actualizada desde Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Listar canciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/song",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Ver canción",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/song/{{song_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Canciones por álbum",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/song/by-album-id/{{album_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Editar canción",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/song/{{song_id}}",
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{artist_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"genre\": \"Indie Pop\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Registrar reproducción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playbackhistory",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"song_id\": {{song_id}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Mi historial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playbackhistory",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Mis canciones más escuchadas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/song/top-by-user/{{user_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 404)', function () { pm.expect(pm.response.code).to.be.oneOf([200,404]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Top canciones de hoy",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/song/songs/top-today",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 404)', function () { pm.expect(pm.response.code).to.be.oneOf([200,404]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Top canciones de hoy en mi país",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/song/songs/top-today-by-my-country",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 404)', function () { pm.expect(pm.response.code).to.be.oneOf([200,404]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Canciones en playlists",
+      "description": "Requiere playlist_id y song_id. DELETE utiliza el formato peculiar playlist_id&song_id que espera el controlador actual.",
+      "item": [
+        {
+          "name": "Añadir canción a mi playlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlistsong",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"playlist_id\": {{playlist_id}}, \"song_id\": {{song_id}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Canciones de mi playlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlistsong/{{playlist_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Playlists disponibles para esta canción",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlistsong/listOfPlaylist/{{song_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Dar o quitar me gusta a canción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlistsong/likeSong/{{song_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 201)', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Quitar canción de mi playlist",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlistsong/{{playlist_id}}&{{song_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 - Seguimientos y publicaciones",
+      "description": "Requiere flujo básico y cuenta artista; para seguir álbum/canción, completar también catálogo. Los toggles alternan entre seguir y dejar de seguir.",
+      "item": [
+        {
+          "name": "Seguir al artista como usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/follow",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"following_id\": \"{{artist_user_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Comprobar si sigo al artista",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/follow/followUnit/{{artist_user_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Conteos del artista",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/follow/followsCount/{{artist_user_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Información de seguidores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/follow/getFollowsInfo/{{artist_user_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Dar o quitar seguimiento al álbum",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/followalbum/{{album_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 201)', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Artista sigue o deja de seguir mi playlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/followedplaylist/{{playlist_id}}",
+            "description": "Se usa el otro usuario (artista) para seguir la playlist pública del usuario normal.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{artist_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 201)', function () { pm.expect(pm.response.code).to.be.oneOf([200,201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Compartir playlist en un post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/post",
+            "description": "No reemplaza post_id del flujo básico.",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "content",
+                  "value": "Recomiendo esta playlist",
+                  "type": "text"
+                },
+                {
+                  "key": "post_type",
+                  "value": "playlist",
+                  "type": "text"
+                },
+                {
+                  "key": "id",
+                  "value": "{{playlist_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "action_type",
+                  "value": "recommended",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Listar publicaciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/post",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Dejar de seguir al artista",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/follow/{{artist_user_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 - 2FA (manual, ejecutar paso a paso)",
+      "description": "Usa el usuario normal. El token bearer debe seguir activo. Registrar el QR/secreto en una app autenticadora y rellenar otp con un código vigente antes de habilitar/verificar/deshabilitar. No ejecutar esta carpeta completa con Runner.",
+      "item": [
+        {
+          "name": "Generar secreto y QR",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/generate-2fa-secret",
+            "description": "Devuelve un array: el secreto y QR están en el elemento 1. No compartir el secreto ni exportarlo rellenado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const value_two_factor_secret = data[1] && data[1].secret;",
+                  "pm.test('Se recibe two_factor_secret', function () { pm.expect(value_two_factor_secret).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_two_factor_secret !== undefined && value_two_factor_secret !== null) pm.collectionVariables.set('two_factor_secret', String(value_two_factor_secret));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Habilitar 2FA con código vigente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/enable2fa",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{otp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Verificar código y renovar bearer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/verify-secret",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{otp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "const value_token = data.token;",
+                  "pm.test('Se recibe token', function () { pm.expect(value_token).to.not.be.oneOf([undefined, null, '']); });",
+                  "if (value_token !== undefined && value_token !== null) pm.collectionVariables.set('token', String(value_token));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Deshabilitar 2FA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/disable-2fa",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{otp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 - Correo, perfil y OAuth (manual)",
+      "description": "Estos requests pueden enviar correos según la configuración del servidor. OAuth requiere el navegador/proveedor y un código real de un solo uso; no es un flujo automático de Collection Runner.",
+      "item": [
+        {
+          "name": "Actualizar mi perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/profile",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{user_username}}\",\n  \"email\": \"{{user_email}}\",\n  \"description\": \"Perfil de pruebas Postman\",\n  \"country\": \"CO\",\n  \"birthday\": \"2000-01-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Solicitar correo de verificación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/email/verification-notification",
+            "description": "400 puede significar que la cuenta ya está verificada."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 400)', function () { pm.expect(pm.response.code).to.be.oneOf([200,400]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Solicitar recuperación de contraseña",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/sendEmailRecovery",
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200, 400)', function () { pm.expect(pm.response.code).to.be.oneOf([200,400]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Restablecer contraseña con token del correo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/reset-password",
+            "description": "Pegar reset_token recibido por correo. Se usa la misma contraseña de prueba para mantener los ejemplos de login.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{reset_token}}\",\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{password}}\",\n  \"password_confirmation\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Iniciar OAuth (abrir redirección en navegador)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/{{provider}}",
+            "description": "provider: google, facebook, github o discord. Desactivar seguimiento automático de redirecciones para inspeccionar Location.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (302)', function () { pm.expect(pm.response.code).to.be.oneOf([302]); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Callback OAuth con código real",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/{{provider}}/callback?code={{oauth_code}}",
+            "description": "Requiere las cookies/state del inicio OAuth y un código real del proveedor; usar el navegador para el flujo completo. No se simula una autorización válida.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (201)', function () { pm.expect(pm.response.code).to.be.oneOf([201]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 - Limpieza de ejemplos (opcional)",
+      "description": "Elimina los objetos del flujo básico identificados por las variables actuales y revoca el token. Ejecutar al terminar, no antes de las carpetas opcionales. Conserva las cuentas de prueba y el catálogo opcional.",
+      "item": [
+        {
+          "name": "Eliminar comentario de prueba",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/comment/{{comment_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Eliminar post de prueba",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/post/{{post_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Eliminar playlist de prueba",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/playlist/{{playlist_id}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Cerrar sesión y borrar token guardado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/logout",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Estado HTTP esperado (200)', function () { pm.expect(pm.response.code).to.be.oneOf([200]); });",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const result = pm.response.json(); pm.test('La API no devuelve success=false', function () { pm.expect(result && result.success).to.not.eql(false); }); }",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) { const data = pm.response.json();",
+                  "pm.collectionVariables.unset('token');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}

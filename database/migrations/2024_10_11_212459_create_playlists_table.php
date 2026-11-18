@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('playlists', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->collation('utf8_general_ci');
+            $table->string('name');
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
-            $table->text('description')->nullable()->collation('utf8_general_ci');
+            $table->text('description')->nullable();
             $table->enum('privacy', ['public', 'private'])->default('public');
             $table->string('image')->nullable();
             $table->boolean('is_active')->default(true);
