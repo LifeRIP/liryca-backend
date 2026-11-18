@@ -5,6 +5,8 @@
 /public/storage
 /storage/*.key
 /vendor
+/.tools
+/.pest
 .env
 .env.backup
 .env.production

@@ -12,8 +12,8 @@ if (!function_exists('loadRoutesFromVersion')) {
         if (File::exists($path)) {
             foreach (File::allFiles($path) as $file) {
                 $filename = pathinfo($file->getFilename(), PATHINFO_FILENAME);
-                Route::prefix($filename)->group(function () use ($file) {
-                    require_once $file->getPathname();
+                Route::prefix($filename)->name($filename === 'auth' ? '' : $filename.'.')->group(function () use ($file) {
+                    require $file->getPathname();
                 });
             }
         }

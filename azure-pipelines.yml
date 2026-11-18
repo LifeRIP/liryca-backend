@@ -10,7 +10,7 @@ stages:
 - stage: Build
   displayName: Build stage
   variables:
-    phpVersion: '8.2'
+    phpVersion: '8.4'
   jobs:
   - job: BuildJob
     pool:
@@ -19,22 +19,22 @@ stages:
     - script: |
         sudo add-apt-repository ppa:ondrej/php -y
         sudo apt-get update
-        sudo apt-get install php$(phpVersion) php$(phpVersion)-cli php$(phpVersion)-mbstring php$(phpVersion)-xml php$(phpVersion)-curl -y
+        sudo apt-get install php$(phpVersion) php$(phpVersion)-cli php$(phpVersion)-mbstring php$(phpVersion)-xml php$(phpVersion)-curl php$(phpVersion)-pgsql php$(phpVersion)-sqlite3 php$(phpVersion)-gd php$(phpVersion)-intl php$(phpVersion)-zip -y
         sudo update-alternatives --set php /usr/bin/php$(phpVersion)
         php -v
-      displayName: 'Install PHP 8.2'
+      displayName: 'Install PHP 8.4'
 
     - script: composer install --no-interaction --prefer-dist
       displayName: 'composer install'
 
     - task: NodeTool@0
       inputs:
-        versionSpec: '18.x'
+        versionSpec: '24.x'
       displayName: 'Install Node.js'
 
     - task: Npm@1
       inputs:
-        command: 'install'
+        command: 'ci'
         workingDir: '$(Build.SourcesDirectory)'
       displayName: 'npm install'
 
@@ -53,6 +53,7 @@ stages:
           !**/node_modules/**
           !**/.git/**
           !**/storage/**
+          !**/.tools/**
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
         CleanTargetFolder: true
         OverWrite: true
@@ -67,8 +68,8 @@ stages:
 #        php artisan migrate --force
 #      displayName: 'Run database migrations'
 
-#    - script: vendor/bin/phpunit
-#      displayName: 'Run unit tests'
+    - script: vendor/bin/pest
+      displayName: 'Run tests'
 
     - task: PublishBuildArtifacts@1
       inputs:

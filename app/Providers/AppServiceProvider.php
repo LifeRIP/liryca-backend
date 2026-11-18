@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Force HTTPS in production
-        if (env('APP_ENV') !== 'local') {
+        if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
         // Implicitly grant "Super Admin" role all permissions

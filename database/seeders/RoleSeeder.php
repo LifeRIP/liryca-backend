@@ -14,8 +14,8 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => RoleEnum::ADMIN->value]);
-        Role::create(['name' => RoleEnum::USER->value]);
-        Role::create(['name' => RoleEnum::ARTIST->value]);
+        foreach (RoleEnum::cases() as $role) {
+            Role::findOrCreate($role->value, 'web');
+        }
     }
 }

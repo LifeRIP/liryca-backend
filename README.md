@@ -1,66 +1,65 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+﻿# Liryca backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API de Liryca con Laravel 13, Sanctum, Socialite, permisos y autenticacion de dos factores.
 
-## About Laravel
+## Requisitos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.4 o superior y Composer 2.
+- Extensiones de Laravel, `pdo_pgsql`, `pdo_sqlite` para pruebas, `mbstring`, `openssl`, `fileinfo`, `curl`, `intl`, `zip` y `gd` para QR.
+- Node.js 22.12 o superior (CI usa Node.js 24).
+- PostgreSQL. La conexion a Aiven requiere TLS.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Instalacion
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```sh
+composer install
+npm ci
+cp .env.example .env
+php artisan key:generate
+```
 
-## Learning Laravel
+Configurar `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD` en `.env`.
+Usar `DB_CONNECTION=pgsql` y `DB_SSLMODE=require`. Para verificar el certificado de
+Aiven, indicar `DB_SSLMODE=verify-full` y `DB_SSLROOTCERT` con la ruta a su CA.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```sh
+php artisan app:check-database-connection
+php artisan migrate
+php artisan db:seed --class=RoleSeeder
+npm run build
+composer run dev
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Para iniciar el proyecto en las siguientes sesiones, ejecutar `composer run dev`
+desde esta carpeta. El servidor escucha en `http://127.0.0.1:8000` y se detiene con
+`Ctrl+C`.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+El seeder de roles es idempotente. `DatabaseSeeder` carga datos de demostracion;
+no es necesario para iniciar una base vacia.
 
-## Laravel Sponsors
+La API esta bajo `/api/v1`; `/up` comprueba el arranque. La interfaz OpenAPI esta
+en `/docs`; el documento JSON esta en `/docs/api-docs.json`.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Verificacion
 
-### Premium Partners
+```sh
+vendor/bin/pest
+php artisan l5-swagger:generate
+php artisan optimize
+php artisan optimize:clear
+composer audit
+npm audit
+npm run build
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Las pruebas usan SQLite en memoria, sin conectarse a Aiven. Cubren registro de
+usuarios y artistas, UUID, roles, Sanctum, login/logout, playlists, catalogo,
+rankings y secretos 2FA cifrados. Los proveedores OAuth y el envio real de correo
+requieren sus propias credenciales y una comprobacion manual.
 
-## Contributing
+## Postman
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Importar [la coleccion](postman/Liryca.postman_collection.json) y, opcionalmente,
+[el entorno local](postman/Liryca.local.postman_environment.json). Ejecutar primero
+solo la carpeta `01 - Flujo básico`; captura el token y los IDs automaticamente.
+Los requisitos de catalogo, 2FA y OAuth estan en [postman/README.md](postman/README.md).

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
+
 use App\Enums\RoleEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -17,12 +19,12 @@ use Illuminate\Http\JsonResponse;
 use Laravel\Socialite\Facades\Socialite;
 use PragmaRX\Google2FALaravel\Facade as Google2FA;
 use Carbon\Carbon;
-
-/**
- * @OA\Info(title="API de autenticación", version="1.0")
- * @OA\Server(url=APP_URL)
- * @OA\Server(url=PROD_URL)
- */
+#[
+    OA\Info(
+        title: 'API de autenticación',
+        version: '1.0'
+    )
+]
 class AuthController extends Controller
 {
     public function register(Request $request): JsonResponse
@@ -199,43 +201,64 @@ class AuthController extends Controller
             'remember' => $remember
         ], 200);
     }
-
-    /**
-     * @OA\Get(
-     *    path="/api/v1/auth/logout",
-     *    summary="Logout the authenticated user",
-     *    description="Logout the authenticated user",
-     *    operationId="logout",
-     *    tags={"auth"},
-     *    security={{"sanctum": {}}},
-     *    @OA\Response(
-     *        response=200,
-     *        description="OK",
-     *        @OA\JsonContent(
-     *            @OA\Property(
-     *            property="message",
-     *            type="string",
-     *            example="Logged out successfully"
-     *            )
-     *        )
-     *    ),
-     *    @OA\Response(
-     *        response=401,
-     *        description="Error: Unauthorized",
-     *        @OA\JsonContent(
-     *            @OA\Property(
-     *            property="message",
-     *            type="string",
-     *            example="Unauthenticated"
-     *            )
-     *        )
-     *    )
-     * )
-     */
+    #[
+        OA\Get(
+            path: '/api/v1/auth/logout',
+            tags: [
+                'auth'
+            ],
+            summary: 'Logout the authenticated user',
+            description: 'Logout the authenticated user',
+            operationId: 'logout',
+            responses: [
+                new OA\Response(
+                    response: 200,
+                    description: 'OK',
+                    content: new OA\JsonContent(
+                        properties: [
+                            new OA\Property(
+                                type: 'string',
+                                example: 'Logged out successfully',
+                                property: 'message'
+                            )
+                        ]
+                    )
+                ),
+                new OA\Response(
+                    response: 401,
+                    description: 'Error: Unauthorized',
+                    content: new OA\JsonContent(
+                        properties: [
+                            new OA\Property(
+                                type: 'string',
+                                example: 'Unauthenticated',
+                                property: 'message'
+                            )
+                        ]
+                    )
+                )
+            ],
+            security: [
+                [
+                    'sanctum' => [
+                    ]
+                ]
+            ]
+        )
+    ]
     public function logout(Request $request)
     {
         // Revocar el token de acceso actual del usuario
-        $request->user()->currentAccessToken()->delete();
+        $token = $request->user()->currentAccessToken();
+        if ($token instanceof \Laravel\Sanctum\PersonalAccessToken) {
+            $token->delete();
+        }
+
+        if ($request->hasSession()) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         // Opcional: Revocar todos los tokens de acceso del usuario
         // $request->user()->tokens()->delete();

@@ -54,7 +54,7 @@ return [
             /*
              * Route for accessing parsed swagger annotations.
              */
-            'docs' => 'docs',
+            'docs' => 'docs/api-docs.json',
 
             /*
              * Route for Oauth2 authentication callback.
@@ -91,7 +91,7 @@ return [
             /*
              * Edit to set the api's base path
              */
-            'base' => env('L5_SWAGGER_BASE_PATH', null),
+            'base' => env('L5_SWAGGER_BASE_PATH', env('APP_URL', 'http://localhost:8000')),
 
             /*
              * Absolute path to directories that should be excluded from scanning
