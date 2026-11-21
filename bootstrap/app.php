@@ -12,6 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(
+            headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR
+                | \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO
+                | \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT,
+        );
+        $middleware->append(\App\Http\Middleware\ThrottleTraffic::class);
+        $middleware->throttleApi('api');
+
         $middleware->preventRequestForgery(except: [
             //'/*', // Evitar CSRF en todas las rutas
         ]);

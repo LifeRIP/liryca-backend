@@ -18,6 +18,9 @@ return [
 
     'default' => env('CACHE_STORE', 'database'),
 
+    // Keep rate-limit counters off PostgreSQL, independently of application caching.
+    'limiter' => env('RATE_LIMIT_STORE', 'rate_limits'),
+
     /*
     |--------------------------------------------------------------------------
     | Cache Stores
@@ -33,6 +36,12 @@ return [
     */
 
     'stores' => [
+
+        'rate_limits' => [
+            'driver' => 'file',
+            'path' => storage_path('framework/cache/rate-limits'),
+            'lock_path' => storage_path('framework/cache/rate-limits'),
+        ],
 
         'array' => [
             'driver' => 'array',

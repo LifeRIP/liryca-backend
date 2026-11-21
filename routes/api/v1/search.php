@@ -7,6 +7,6 @@ use App\Http\Controllers\SearchController;
 
 // Search con middleware//
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:search'])->group(function () {
     Route::get('/{search}', [SearchController::class, 'search_bar']);
 });
